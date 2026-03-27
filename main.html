@@ -2,219 +2,120 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Wash Remote Pro</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>M340i Wash Trigger</title>
     <style>
-        :root {
-            --accent: #0A84FF;
-            --bg-color: #050505;
-            --card-bg: #1C1C1E;
-            --text-main: #FFFFFF;
-            --text-sub: #8E8E93;
-            --success: #30D158;
-        }
-
         body { 
-            background-color: var(--bg-color); 
-            color: var(--text-main); 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
             display: flex; 
             flex-direction: column; 
             align-items: center; 
-            justify-content: flex-start; 
-            min-height: 100vh; 
-            margin: 0; 
-            padding: 40px 20px;
-            box-sizing: border-box;
-        }
-
-        /* Logo & Header */
-        .header { text-align: center; margin-bottom: 30px; }
-        .logo { width: 70px; height: 70px; margin-bottom: 10px; fill: var(--accent); filter: drop-shadow(0 0 8px rgba(10, 132, 255, 0.4)); }
-        h1 { font-size: 28px; margin: 0; font-weight: 800; letter-spacing: 0.5px; }
-        h3 { font-size: 12px; color: var(--text-sub); margin-top: 5px; font-weight: 600; text-transform: uppercase; letter-spacing: 2px; }
-
-        /* Wash Selector Grid */
-        .selector-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            width: 100%;
-            max-width: 340px;
-            margin-bottom: 25px;
-        }
-
-        .wash-card {
-            background-color: var(--card-bg);
-            border: 2px solid #2C2C2E;
-            border-radius: 16px;
-            padding: 18px 10px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .wash-card.active {
-            border-color: var(--accent);
-            background-color: rgba(10, 132, 255, 0.12);
-            box-shadow: 0 0 15px rgba(10, 132, 255, 0.2);
-        }
-
-        .wash-tier { font-size: 22px; font-weight: 800; margin-bottom: 4px; }
-        .wash-name { font-size: 11px; color: var(--text-sub); font-weight: 600; text-transform: uppercase; }
-        .wash-card.active .wash-name { color: var(--accent); }
-
-        /* Status Area */
-        .status-box { 
-            background-color: var(--card-bg); 
-            padding: 20px; 
-            border-radius: 16px; 
-            width: 100%; 
-            max-width: 340px;
-            text-align: center; 
-            min-height: 70px; 
-            display: flex; 
-            align-items: center; 
             justify-content: center; 
-            margin-bottom: 25px;
-            box-sizing: border-box;
-            border: 1px solid #2C2C2E;
+            height: 100vh; 
+            background-color: #121212; 
+            color: white; 
+            margin: 0; 
         }
-        
-        .status-text { color: #EBEBF5; font-size: 15px; line-height: 1.4; font-weight: 500;}
-
-        /* Buttons */
-        .btn { 
-            padding: 18px 0; 
-            border-radius: 14px; 
-            font-size: 18px; 
-            font-weight: 700; 
+        .container { 
+            text-align: center; 
+            padding: 30px 20px; 
+            background: #1e1e1e; 
+            border-radius: 20px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8); 
+            width: 85%; 
+            max-width: 350px; 
+        }
+        h2 { margin-top: 0; margin-bottom: 5px; }
+        p { color: #888; margin-bottom: 30px; font-size: 14px; }
+        button { 
+            background-color: #0a84ff; 
+            color: white; 
             border: none; 
-            width: 100%; 
-            max-width: 340px;
+            padding: 18px 30px; 
+            font-size: 18px; 
+            border-radius: 12px; 
             cursor: pointer; 
-            transition: all 0.2s ease;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            width: 100%; 
+            font-weight: bold; 
+            transition: background 0.2s, transform 0.1s; 
         }
-        .btn:active { transform: scale(0.96); opacity: 0.9; }
-        
-        #connectBtn { background-color: #3A3A3C; color: var(--text-main); }
-        #activateBtn { background-color: var(--success); color: white; box-shadow: 0 4px 15px rgba(48, 209, 88, 0.3); }
-        #activateBtn.success { background-color: var(--accent); box-shadow: 0 4px 15px rgba(10, 132, 255, 0.3); }
-        
-        .hidden { display: none !important; }
+        button:active { background-color: #006ee6; transform: scale(0.98); }
+        button:disabled { background-color: #333; color: #777; cursor: not-allowed; transform: none; }
+        #status { 
+            margin-top: 25px; 
+            font-size: 14px; 
+            color: #aaa; 
+            word-wrap: break-word; 
+            min-height: 20px;
+        }
     </style>
 </head>
 <body>
-
-    <div class="header">
-        <svg class="logo" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5H6.5c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.85 7h10.29l1.08 3.11H5.77L6.85 7zM19 17H5v-5h14v5z"/>
-            <circle cx="7.5" cy="14.5" r="1.5"/>
-            <circle cx="16.5" cy="14.5" r="1.5"/>
-            <path d="M12 2c1.1 0 2 .9 2 2s-2 4-2 4-2-2.5-2-4 .9-2 2-2z" fill="#00ffff"/>
-        </svg>
-        <h1>Wash Remote</h1>
-        <h3>Universal Terminal</h3>
+    <div class="container">
+        <h2>🧼 XpresWash</h2>
+        <p>Location 59 | Lane 113</p>
+        
+        <button id="washBtn" onclick="triggerWash()">Activate Wash</button>
+        
+        <div id="status">Ready for the M340i.</div>
     </div>
-
-    <div class="selector-container">
-        <div class="wash-card" data-tier="1"><div class="wash-tier">1</div><div class="wash-name">Basic</div></div>
-        <div class="wash-card" data-tier="2"><div class="wash-tier">2</div><div class="wash-name">Deluxe</div></div>
-        <div class="wash-card" data-tier="3"><div class="wash-tier">3</div><div class="wash-name">Premium</div></div>
-        <div class="wash-card active" data-tier="4"><div class="wash-tier">4</div><div class="wash-name">Ultimate</div></div>
-    </div>
-
-    <div class="status-box">
-        <div class="status-text" id="statusText">Ready to connect to bay receiver.</div>
-    </div>
-
-    <button class="btn" id="connectBtn">Connect to Bay</button>
-    <button class="btn hidden" id="activateBtn">Fire Wash Sequence</button>
 
     <script>
-        const connectBtn = document.getElementById('connectBtn');
-        const activateBtn = document.getElementById('activateBtn');
-        const status = document.getElementById('statusText');
-        const cards = document.querySelectorAll('.wash-card');
+        // Your specific token from the proxy capture
+        const myAuthToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3ODI0MDUyODcsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvdXNlcmRhdGEiOiJ7XCJDb21wYW55SURcIjoyLFwiQ3VzdG9tZXJJRFwiOlwiMTg0MTkxMFwiLFwiU3lzdGVtQWNjb3VudElEXCI6XCIxODMzOTEwXCIsXCJCeXBhc3NPbkp3dFRva2VuVmFsaWRhdGVkXCI6ZmFsc2UsXCJEZXZpY2VJRFwiOlwiREJGREVFQTUtNkE3NS00ODk5LTlDREEtRTIzN0QyNEM0QTQwXCJ9IiwiaWF0IjoxNzc0NjI5Mjg3LCJpc3MiOiJYWV8yMDQxMl8wIiwibmJmIjoxNzc0NjI5Mjg3fQ.Y1eDAwayCep7SAcJToJhs-tzJ5L1uffM9BkQnAiF5eI";
+        const targetUrl = "https://www.xpreswash.com/coreservice/api/system/pendingappwashv2";
 
-        let selectedTier = 4;
-        let bluetoothServer = null;
-        let washChar = null;
+        async function triggerWash() {
+            const btn = document.getElementById("washBtn");
+            const statusEl = document.getElementById("status");
+            
+            // UI Feedback during request
+            btn.disabled = true;
+            btn.innerText = "Sending Command...";
+            statusEl.style.color = "#aaa";
+            statusEl.innerText = "Connecting to servers...";
 
-        // Service & Characteristic UUIDs from image_6776e1.png
-        const SERVICE_UUID = '0000ffe0-0000-1000-8000-00805f9b34fb';
-        const CHAR_UUID = '0000ffe1-0000-1000-8000-00805f9b34fb';
-
-        cards.forEach(card => {
-            card.addEventListener('click', () => {
-                cards.forEach(c => c.classList.remove('active'));
-                card.classList.add('active');
-                selectedTier = parseInt(card.getAttribute('data-tier'));
-                status.innerText = `Wash Tier ${selectedTier} selected. Ready to fire.`;
-            });
-        });
-
-        // Step 1: Establish Handshake
-        connectBtn.addEventListener('click', async () => {
-            try {
-                status.innerText = "Scanning for car wash BLE signal...";
-                const device = await navigator.bluetooth.requestDevice({
-                    filters: [{ services: [SERVICE_UUID] }]
-                });
-
-                device.addEventListener('gattserverdisconnected', () => {
-                    status.innerText = "Connection lost. Please reconnect.";
-                    connectBtn.classList.remove('hidden');
-                    activateBtn.classList.add('hidden');
-                });
-
-                status.innerText = "Connecting to receiver...";
-                bluetoothServer = await device.gatt.connect();
-                
-                status.innerText = "Fetching wash service...";
-                const service = await bluetoothServer.getPrimaryService(SERVICE_UUID);
-                washChar = await service.getCharacteristic(CHAR_UUID);
-
-                status.innerText = `READY. Wash Tier ${selectedTier} primed.`;
-                connectBtn.classList.add('hidden');
-                activateBtn.classList.remove('hidden');
-
-            } catch (err) {
-                status.innerText = "Error: " + (err.message.includes('cancelled') ? "User cancelled scan" : err.message);
-            }
-        });
-
-        // Step 2: Fire Verified 7-Byte Payload (image_68012a.png)
-        activateBtn.addEventListener('click', async () => {
-            if (!washChar) return;
+            // The JSON Payload exactly as it appeared in your proxy
+            const payload = {
+                "EntryID": 0,
+                "SystemID": 113,
+                "LaneID": 1,
+                "CustomerTagID": 1999420,
+                "AddedDate": new Date().toISOString(),
+                "UsedDate": null,
+                "Status": 0,
+                "BillingEntityID": 4414,
+                "CustomerTransactionID": null
+            };
 
             try {
-                // Calculation: AA 55 04 01 [Tier] [~Tier] FF
-                const checksum = 255 - selectedTier;
-                const payload = new Uint8Array([170, 85, 4, 1, selectedTier, checksum, 255]);
+                const response = await fetch(targetUrl, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Accept-Language": "en-US,en;q=0.9",
+                        "Authorization": `Bearer ${myAuthToken}`
+                    },
+                    body: JSON.stringify(payload)
+                });
 
-                status.innerText = `Firing Tier ${selectedTier} sequence...`;
-                await washChar.writeValue(payload);
-
-                status.innerText = "💦 WASH TRIGGERED!\nDrive forward slowly.";
-                activateBtn.classList.add('success');
-                activateBtn.innerText = "TRANSMISSION OK";
-                
-                setTimeout(() => {
-                    if(bluetoothServer && bluetoothServer.connected) bluetoothServer.disconnect();
-                    status.innerText = "Cycle complete. Enjoy your wash!";
-                    activateBtn.classList.add('hidden');
-                    activateBtn.classList.remove('success');
-                    activateBtn.innerText = "Fire Wash Sequence";
-                    connectBtn.classList.remove('hidden');
-                }, 6000);
-
-            } catch (err) {
-                status.innerText = "Transmit error: " + err.message;
+                if (response.ok) {
+                    statusEl.style.color = "#32d74b"; // iOS Green
+                    statusEl.innerText = "Success! The bay should be active.";
+                    btn.innerText = "Wash Activated";
+                } else {
+                    statusEl.style.color = "#ff453a"; // iOS Red
+                    statusEl.innerText = `Server rejected request. Error Code: ${response.status}`;
+                    btn.disabled = false;
+                    btn.innerText = "Try Again";
+                }
+            } catch (error) {
+                statusEl.style.color = "#ff453a";
+                statusEl.innerText = `Network error: ${error.message}`;
+                btn.disabled = false;
+                btn.innerText = "Try Again";
             }
-        });
+        }
     </script>
 </body>
 </html>
