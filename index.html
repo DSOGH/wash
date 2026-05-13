@@ -3,468 +3,291 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dark Mode Blackjack</title>
+    <title>Huff N' Puff Slot</title>
     <style>
-        :root {
-            --bg-color: #121212;
-            --surface-color: #1e1e1e;
-            --primary: #bb86fc;
-            --primary-hover: #9965f4;
-            --text-main: #ffffff;
-            --text-muted: #a0a0a0;
-            --danger: #cf6679;
-            --success: #03dac6;
-        }
-
         body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 0;
+            background-color: #1a1a2e;
+            color: #ffffff;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-height: 100vh;
-            overflow-x: hidden;
+            height: 100vh;
+            margin: 0;
         }
 
-        /* Screens */
-        #deposit-screen, #game-screen {
-            text-align: center;
-            background-color: var(--surface-color);
-            padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
-            transition: all 0.3s ease;
+        h1 {
+            color: #e94560;
+            text-shadow: 2px 2px 4px #000;
+            margin-bottom: 10px;
         }
 
-        #game-screen {
-            display: none;
-            width: 90%;
-            max-width: 800px;
+        #slot-machine {
+            background-color: #16213e;
             padding: 20px;
+            border-radius: 15px;
+            border: 4px solid #0f3460;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.7);
         }
 
-        /* Typography & Inputs */
-        h1 { color: var(--primary); margin-bottom: 10px; }
-        h2 { font-weight: 400; color: var(--text-muted); }
-        
-        input[type="number"] {
-            padding: 12px;
-            font-size: 18px;
-            border: none;
-            border-radius: 6px;
-            background-color: #2c2c2c;
-            color: white;
-            outline: none;
-            margin: 10px 0;
-            width: 200px;
-            text-align: center;
-        }
-
-        /* Buttons */
-        button {
-            padding: 12px 24px;
-            font-size: 16px;
-            font-weight: bold;
-            color: #fff;
-            background-color: var(--primary);
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            margin: 5px;
-            transition: background-color 0.2s, transform 0.1s;
-        }
-        button:hover { background-color: var(--primary-hover); transform: translateY(-2px); }
-        button:active { transform: translateY(0); }
-        button:disabled { background-color: #444; color: #888; cursor: not-allowed; transform: none; }
-
-        .bet-btn { background-color: #333; }
-        .bet-btn:hover { background-color: #444; }
-
-        /* Game Board Area */
-        .board-section {
-            margin: 20px 0;
-            min-height: 160px;
-            border-radius: 8px;
-            padding: 15px;
-            transition: box-shadow 0.4s ease, background-color 0.4s ease;
-        }
-
-        .lose-highlight {
-            animation: pulseRed 1.5s infinite alternate;
-            background-color: rgba(207, 102, 121, 0.1);
-        }
-
-        @keyframes pulseRed {
-            0% { box-shadow: 0 0 0px transparent; }
-            100% { box-shadow: 0 0 25px var(--danger); }
-        }
-
-        .win-highlight {
-            box-shadow: 0 0 25px var(--success);
-            background-color: rgba(3, 218, 198, 0.1);
-        }
-
-        /* Cards */
-        .cards-container {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 10px;
-            flex-wrap: wrap;
-        }
-
-        .card {
-            width: 80px;
-            height: 120px;
-            background-color: white;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 28px;
-            font-weight: bold;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.4);
-            animation: slideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-            opacity: 0;
-            transform: translateY(-50px) scale(0.8);
-        }
-
-        @keyframes slideIn {
-            to { opacity: 1; transform: translateY(0) scale(1); }
-        }
-
-        .card.red { color: #d32f2f; }
-        .card.black { color: #212121; }
-        .card.hidden { background-image: repeating-linear-gradient(45deg, #2c2c2c 25%, transparent 25%, transparent 75%, #2c2c2c 75%, #2c2c2c), repeating-linear-gradient(45deg, #2c2c2c 25%, var(--surface-color) 25%, var(--surface-color) 75%, #2c2c2c 75%, #2c2c2c); background-position: 0 0, 10px 10px; background-size: 20px 20px; color: transparent; }
-
-        /* Status & UI info */
-        #status-message {
-            font-size: 24px;
-            font-weight: bold;
-            height: 30px;
-            margin: 15px 0;
-            color: var(--primary);
-        }
-        
-        .info-bar {
+        .stats-board {
             display: flex;
             justify-content: space-between;
-            background: #111;
-            padding: 15px;
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #0f3460;
             border-radius: 8px;
-            margin-bottom: 20px;
-            font-size: 18px;
         }
-        .controls { margin-top: 15px; }
-        .betting-controls { margin-top: 15px; border-top: 1px solid #333; padding-top: 15px; }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(5, 80px);
+            grid-template-rows: repeat(3, 80px);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .cell {
+            background: #000;
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 45px;
+            position: relative;
+            box-sizing: border-box;
+            border: 2px solid #333;
+            transition: border 0.3s;
+        }
+
+        /* The Frame Mechanics */
+        .frame-1 { border: 6px solid #ffd700; box-shadow: inset 0 0 15px #ffd700; } /* Straw */
+        .frame-2 { border: 6px solid #8b4513; box-shadow: inset 0 0 15px #8b4513; } /* Stick */
+        .frame-3 { border: 6px solid #b22222; box-shadow: inset 0 0 15px #b22222; background: rgba(178, 34, 34, 0.3); } /* Brick */
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        button {
+            background-color: #e94560;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 22px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(233, 69, 96, 0.4);
+            transition: transform 0.1s, background-color 0.2s;
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
+        button:disabled {
+            background-color: #555;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        #message-box {
+            margin-top: 20px;
+            font-size: 20px;
+            font-weight: bold;
+            color: #ffd700;
+            text-align: center;
+            height: 30px;
+        }
+
+        #free-spins-alert {
+            color: #00ffcc;
+        }
     </style>
 </head>
 <body>
 
-    <div id="deposit-screen">
-        <h1>Dark Mode Blackjack</h1>
-        <p>Enter your starting bankroll:</p>
-        <input type="number" id="deposit-amount" placeholder="e.g. 1000" min="10">
-        <br>
-        <button onclick="startGame()">Deposit & Play</button>
-    </div>
+    <h1>🐺 Huff N' Puff 🐷</h1>
 
-    <div id="game-screen">
-        <div class="info-bar">
-            <span>Bankroll: $<span id="bankroll-display">0</span></span>
-            <span>Current Bet: $<span id="bet-display">0</span></span>
+    <div id="slot-machine">
+        <div class="stats-board">
+            <div>Credits: $<span id="credits">1000</span></div>
+            <div>Bet: $10</div>
         </div>
 
-        <div id="dealer-area" class="board-section">
-            <h2>Dealer: <span id="dealer-score">?</span></h2>
-            <div id="dealer-cards" class="cards-container"></div>
-        </div>
-
-        <div id="status-message"></div>
-
-        <div id="player-area" class="board-section">
-            <h2>You: <span id="player-score">0</span></h2>
-            <div id="player-cards" class="cards-container"></div>
+        <div class="grid" id="grid">
+            <!-- JS will populate this -->
         </div>
 
         <div class="controls">
-            <button id="btn-hit" onclick="hit()" disabled>Hit</button>
-            <button id="btn-stand" onclick="stand()" disabled>Stand</button>
-            <button id="btn-double" onclick="doubleDown()" disabled>Double Down</button>
-        </div>
-
-        <div class="betting-controls">
-            <input type="number" id="bet-input" placeholder="Bet Amount" min="1" value="10">
-            <br>
-            <button class="bet-btn" id="btn-2x" onclick="multiplyBet()">2x Bet</button>
-            <button class="bet-btn" id="btn-max" onclick="maxBet()">Max Bet</button>
-            <button id="btn-deal" onclick="deal()">Deal</button>
+            <div id="free-spins-alert"></div>
+            <button id="spin-btn" onclick="spin()">SPIN</button>
         </div>
     </div>
 
+    <div id="message-box">Ready to play! Look out for Hard Hats.</div>
+
     <script>
-        // --- Game State Variables ---
-        let bankroll = 0;
-        let currentBet = 0;
-        let deck = [];
-        let playerHand = [];
-        let dealerHand = [];
-        let gameActive = false;
+        const symbols = ['🐷', '🧰', '📏', '🅰️', '🍒', '🐺', '👷', '👷']; // Doubled Hard Hats for better odds in this demo
+        const betAmount = 10;
+        let credits = 1000;
+        let isSpinning = false;
+        let freeSpinsLeft = 0;
+        
+        // 5 columns, 3 rows arrays
+        let grid = Array(5).fill().map(() => Array(3).fill('🐷'));
+        let frames = Array(5).fill().map(() => Array(3).fill(0)); // 0 = None, 1 = Straw, 2 = Stick, 3 = Brick
 
-        const suits = ['♠', '♥', '♦', '♣'];
-        const values = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
+        const gridEl = document.getElementById('grid');
+        const creditsEl = document.getElementById('credits');
+        const msgEl = document.getElementById('message-box');
+        const spinBtn = document.getElementById('spin-btn');
+        const fsAlert = document.getElementById('free-spins-alert');
 
-        // --- Initialization ---
-        function startGame() {
-            const deposit = parseInt(document.getElementById('deposit-amount').value);
-            if (isNaN(deposit) || deposit <= 0) {
-                alert("Please enter a valid deposit amount.");
-                return;
-            }
-            bankroll = deposit;
-            updateBankrollDisplay();
-            document.getElementById('deposit-screen').style.display = 'none';
-            document.getElementById('game-screen').style.display = 'block';
+        function logMessage(msg) {
+            msgEl.innerText = msg;
         }
 
-        // --- Deck Management ---
-        function buildDeck() {
-            deck = [];
-            for (let suit of suits) {
-                for (let value of values) {
-                    deck.push({ suit, value });
+        function renderGrid() {
+            gridEl.innerHTML = '';
+            for (let r = 0; r < 3; r++) {
+                for (let c = 0; c < 5; c++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    
+                    // Apply frame styling based on the level
+                    if (frames[c][r] === 1) cell.classList.add('frame-1'); // Straw
+                    if (frames[c][r] === 2) cell.classList.add('frame-2'); // Stick
+                    if (frames[c][r] === 3) cell.classList.add('frame-3'); // Brick
+                    
+                    cell.innerText = grid[c][r];
+                    gridEl.appendChild(cell);
                 }
             }
-            // Shuffle
-            for (let i = deck.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [deck[i], deck[j]] = [deck[j], deck[i]];
-            }
+            creditsEl.innerText = credits;
+            fsAlert.innerText = freeSpinsLeft > 0 ? `FREE SPINS: ${freeSpinsLeft}` : '';
         }
 
-        // --- Betting Mechanics ---
-        function multiplyBet() {
-            let input = document.getElementById('bet-input');
-            let val = parseInt(input.value) || 0;
-            input.value = Math.min(val * 2, bankroll);
-        }
+        function spin() {
+            if (isSpinning) return;
 
-        function maxBet() {
-            document.getElementById('bet-input').value = bankroll;
-        }
-
-        function updateBankrollDisplay() {
-            document.getElementById('bankroll-display').innerText = bankroll;
-            document.getElementById('bet-display').innerText = currentBet;
-        }
-
-        // --- Core Game Flow ---
-        function deal() {
-            let intendedBet = parseInt(document.getElementById('bet-input').value);
-            if (isNaN(intendedBet) || intendedBet <= 0) {
-                setMessage("Enter a valid bet.", "var(--danger)"); return;
-            }
-            if (intendedBet > bankroll) {
-                setMessage("Not enough funds!", "var(--danger)"); return;
+            if (freeSpinsLeft === 0) {
+                if (credits < betAmount) {
+                    logMessage("Not enough credits!");
+                    return;
+                }
+                credits -= betAmount;
             }
 
-            // Reset Board UI
-            document.getElementById('player-area').classList.remove('lose-highlight', 'win-highlight');
-            document.getElementById('dealer-area').classList.remove('lose-highlight', 'win-highlight');
-            setMessage("");
+            isSpinning = true;
+            spinBtn.disabled = true;
+            logMessage(freeSpinsLeft > 0 ? "Free Spin in progress..." : "Spinning...");
 
-            currentBet = intendedBet;
-            bankroll -= currentBet;
-            updateBankrollDisplay();
+            let spinsLeft = 15; // Quick rapid animation loop
             
-            buildDeck();
-            playerHand = [deck.pop(), deck.pop()];
-            dealerHand = [deck.pop(), deck.pop()];
-            gameActive = true;
+            let spinInterval = setInterval(() => {
+                for (let r = 0; r < 3; r++) {
+                    for (let c = 0; c < 5; c++) {
+                        grid[c][r] = symbols[Math.floor(Math.random() * symbols.length)];
+                    }
+                }
+                renderGrid();
+                spinsLeft--;
 
-            renderHands(false);
-            toggleButtons(true);
-
-            // Check for immediate Blackjack
-            let pScore = calculateScore(playerHand);
-            if (pScore === 21) {
-                endGame(true);
-            }
+                if (spinsLeft <= 0) {
+                    clearInterval(spinInterval);
+                    finalizeSpin();
+                }
+            }, 60);
         }
 
-        function hit() {
-            if (!gameActive) return;
-            playerHand.push(deck.pop());
-            renderHands(false);
-            document.getElementById('btn-double').disabled = true; // Can only double on first 2 cards
+        function finalizeSpin() {
+            let hatCount = 0;
+            let winAmount = 0;
 
-            if (calculateScore(playerHand) > 21) {
-                endGame();
+            // Step 1: Lock in Hard Hats and upgrade frames
+            for (let r = 0; r < 3; r++) {
+                for (let c = 0; c < 5; c++) {
+                    if (grid[c][r] === '👷') {
+                        hatCount++;
+                        if (frames[c][r] < 3) {
+                            frames[c][r]++; // Upgrade Frame: None -> Straw -> Stick -> Brick
+                        }
+                    }
+                }
             }
-        }
-
-        function doubleDown() {
-            if (!gameActive || playerHand.length !== 2) return;
-            if (bankroll < currentBet) {
-                setMessage("Not enough funds to double!", "var(--danger)");
-                return;
-            }
-
-            // Take extra bet
-            bankroll -= currentBet;
-            currentBet *= 2;
-            updateBankrollDisplay();
-
-            // Deal exactly one card, then stand
-            playerHand.push(deck.pop());
-            renderHands(false);
             
-            if (calculateScore(playerHand) > 21) {
-                endGame();
-            } else {
-                stand();
-            }
-        }
-
-        function stand() {
-            if (!gameActive) return;
-            endGame();
-        }
-
-        function endGame(playerBlackjack = false) {
-            gameActive = false;
-            toggleButtons(false);
-            
-            let pScore = calculateScore(playerHand);
-            let dScore = calculateScore(dealerHand);
-
-            // Dealer draws if player hasn't busted and doesn't have a natural blackjack
-            if (pScore <= 21 && !playerBlackjack) {
-                while (dScore < 17) {
-                    dealerHand.push(deck.pop());
-                    dScore = calculateScore(dealerHand);
+            // Basic matching win logic for base game (3 in a row horizontally)
+            for (let r = 0; r < 3; r++) {
+                if (grid[0][r] === grid[1][r] && grid[1][r] === grid[2][r] && grid[0][r] !== '👷') {
+                    winAmount += betAmount * 2;
                 }
             }
 
-            renderHands(true); // Reveal dealer card
+            renderGrid();
 
-            const playerArea = document.getElementById('player-area');
-            
-            if (pScore > 21) {
-                setMessage("You Busted! Dealer Wins.", "var(--danger)");
-                playerArea.classList.add('lose-highlight');
-            } else if (dScore > 21) {
-                setMessage("Dealer Busted! You Win!", "var(--success)");
-                playerArea.classList.add('win-highlight');
-                bankroll += currentBet * 2;
-            } else if (playerBlackjack && dScore !== 21) {
-                setMessage("BLACKJACK! You Win 3:2!", "var(--success)");
-                playerArea.classList.add('win-highlight');
-                bankroll += currentBet + (currentBet * 1.5);
-            } else if (pScore > dScore) {
-                setMessage("You Win!", "var(--success)");
-                playerArea.classList.add('win-highlight');
-                bankroll += currentBet * 2;
-            } else if (pScore < dScore) {
-                setMessage("Dealer Wins.", "var(--danger)");
-                playerArea.classList.add('lose-highlight');
+            if (winAmount > 0 && freeSpinsLeft === 0) {
+                credits += winAmount;
+                logMessage(`Matched a line! Won $${winAmount}`);
             } else {
-                setMessage("Push! It's a tie.", "var(--text-muted)");
-                bankroll += currentBet; // Refund bet
+                logMessage("");
             }
 
-            currentBet = 0;
-            updateBankrollDisplay();
-
-            if (bankroll <= 0) {
-                setTimeout(() => {
-                    alert("You're out of money! Refresh to deposit again.");
-                }, 1000);
+            // Step 2: Check for Bonus Trigger
+            if (hatCount >= 6 && freeSpinsLeft === 0) {
+                logMessage("🚨 6+ HATS! 6 FREE SPINS TRIGGERED! 🚨");
+                freeSpinsLeft = 6;
+                setTimeout(() => { isSpinning = false; spinBtn.disabled = false; }, 1500);
+                return; // Stop standard flow
             }
-        }
 
-        // --- Utility Functions ---
-        function calculateScore(hand) {
-            let score = 0;
-            let aces = 0;
-            for (let card of hand) {
-                if (['J', 'Q', 'K'].includes(card.value)) {
-                    score += 10;
-                } else if (card.value === 'A') {
-                    aces += 1;
-                    score += 11;
+            // Step 3: Handle Free Spin Progression
+            if (freeSpinsLeft > 0) {
+                freeSpinsLeft--;
+                if (freeSpinsLeft === 0) {
+                    renderGrid();
+                    setTimeout(wolfBlowDownPhase, 1500); // Trigger the grand finale
                 } else {
-                    score += parseInt(card.value);
+                    isSpinning = false;
+                    spinBtn.disabled = false;
                 }
-            }
-            while (score > 21 && aces > 0) {
-                score -= 10;
-                aces -= 1;
-            }
-            return score;
-        }
-
-        function renderHands(revealDealer) {
-            // Render Player
-            const pContainer = document.getElementById('player-cards');
-            pContainer.innerHTML = '';
-            playerHand.forEach((card, index) => {
-                pContainer.appendChild(createCardElement(card, index));
-            });
-            document.getElementById('player-score').innerText = calculateScore(playerHand);
-
-            // Render Dealer
-            const dContainer = document.getElementById('dealer-cards');
-            dContainer.innerHTML = '';
-            dealerHand.forEach((card, index) => {
-                if (index === 1 && !revealDealer) {
-                    // Hide the second card
-                    let hiddenCard = document.createElement('div');
-                    hiddenCard.className = 'card hidden';
-                    hiddenCard.style.animationDelay = `${index * 0.1}s`;
-                    dContainer.appendChild(hiddenCard);
-                } else {
-                    dContainer.appendChild(createCardElement(card, index));
-                }
-            });
-
-            if (revealDealer) {
-                document.getElementById('dealer-score').innerText = calculateScore(dealerHand);
             } else {
-                // Show value of only the first card
-                let firstCardVal = calculateScore([dealerHand[0]]);
-                document.getElementById('dealer-score').innerText = firstCardVal + " + ?";
+                isSpinning = false;
+                spinBtn.disabled = false;
             }
         }
 
-        function createCardElement(card, index) {
-            const div = document.createElement('div');
-            const colorClass = (card.suit === '♥' || card.suit === '♦') ? 'red' : 'black';
-            div.className = `card ${colorClass}`;
-            div.innerText = `${card.value}${card.suit}`;
-            div.style.animationDelay = `${index * 0.1}s`; // Staggered smooth animation
-            return div;
+        function wolfBlowDownPhase() {
+            logMessage("🐺 THE BIG BAD WOLF HUFFS AND PUFFS! 🐺");
+            let totalBonus = 0;
+
+            // Calculate payout based on the strength of the frames built
+            for (let r = 0; r < 3; r++) {
+                for (let c = 0; c < 5; c++) {
+                    if (frames[c][r] === 1) totalBonus += betAmount * 2;   // Straw House = 2x Bet
+                    if (frames[c][r] === 2) totalBonus += betAmount * 10;  // Stick House = 10x Bet
+                    if (frames[c][r] === 3) totalBonus += betAmount * 50;  // Brick House = 50x Bet
+                    
+                    frames[c][r] = 0; // Clear the frames as they are blown down
+                }
+            }
+
+            credits += totalBonus;
+            renderGrid();
+            logMessage(`🐺 The Wolf blew down the houses! You won $${totalBonus}! 💸`);
+            
+            isSpinning = false;
+            spinBtn.disabled = false;
         }
 
-        function toggleButtons(playing) {
-            document.getElementById('btn-hit').disabled = !playing;
-            document.getElementById('btn-stand').disabled = !playing;
-            document.getElementById('btn-double').disabled = !playing;
-            document.getElementById('btn-deal').disabled = playing;
-            document.getElementById('bet-input').disabled = playing;
-            document.getElementById('btn-2x').disabled = playing;
-            document.getElementById('btn-max').disabled = playing;
-        }
-
-        function setMessage(msg, color) {
-            const el = document.getElementById('status-message');
-            el.innerText = msg;
-            el.style.color = color || "var(--primary)";
-        }
+        // Initialize board
+        renderGrid();
     </script>
 </body>
 </html>
