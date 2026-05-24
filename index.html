@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Blackjack Pro - Practice Mode</title>
+    <title>Stakeish Blackjack</title>
     <style>
         /* Modern Casino Dark Theme */
         body {
@@ -15,19 +15,19 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            min-height: 100vh;
+            height: 100dvh;
+            overflow: hidden;
             user-select: none;
         }
 
         #game-container {
             width: 100%;
             max-width: 500px;
-            padding: 20px;
+            padding: 10px;
             box-sizing: border-box;
             display: flex;
             flex-direction: column;
-            flex-grow: 1;
-            position: relative;
+            height: 100%;
         }
 
         /* Header & Balance */
@@ -36,49 +36,75 @@
             justify-content: space-between;
             align-items: center;
             background: #1a2c38;
-            padding: 15px;
+            padding: 10px 15px;
             border-radius: 8px;
-            margin-bottom: 20px;
-            font-weight: 600;
-            color: white;
+            margin-bottom: 10px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            flex-shrink: 0;
         }
 
-        .balance-container {
+        .brand {
+            font-size: 18px;
+            font-weight: 800;
+            color: #ffffff;
+            letter-spacing: 0.5px;
+        }
+
+        .header-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-vault {
+            background: #2f4553;
+            color: white;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 12px;
+            cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 5px;
         }
-
-        .balance { color: #00e701; font-size: 18px; }
 
         .btn-deposit {
             background: #1475e1;
             color: white;
             border: none;
-            padding: 8px 15px;
+            padding: 6px 12px;
             border-radius: 4px;
             font-weight: bold;
+            font-size: 12px;
             cursor: pointer;
-            transition: background 0.2s;
         }
 
-        .btn-deposit:hover { background: #1a88ff; }
+        .balance-display-main {
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: #00e701;
+            margin-bottom: 10px;
+            flex-shrink: 0;
+        }
 
         /* Playing Areas */
         .hand-area {
             background: #1a2c38;
             border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 15px;
-            min-height: 140px;
+            padding: 10px;
+            margin-bottom: 10px;
+            min-height: 100px;
             position: relative;
             transition: box-shadow 0.3s ease;
+            display: flex;
+            flex-direction: column;
         }
 
         .hand-title {
-            font-size: 14px;
-            margin-bottom: 10px;
+            font-size: 12px;
+            margin-bottom: 5px;
             display: flex;
             justify-content: space-between;
             color: #879097;
@@ -86,63 +112,74 @@
 
         .score-badge {
             background: #2f4553;
-            padding: 2px 8px;
+            padding: 2px 6px;
             border-radius: 12px;
             color: white;
         }
 
         .cards-container {
             display: flex;
-            gap: -20px;
+            gap: -25px;
             flex-wrap: wrap;
+            align-items: center;
+            flex-grow: 1;
         }
 
         .card {
-            width: 60px;
-            height: 90px;
+            width: 50px;
+            height: 75px;
             background: white;
-            border-radius: 6px;
+            border-radius: 5px;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 24px;
+            font-size: 20px;
             font-weight: bold;
             box-shadow: -2px 2px 5px rgba(0,0,0,0.2);
             margin-right: 5px;
-            margin-bottom: 5px;
             animation: slideIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
         @keyframes slideIn {
-            from { transform: translate(50px, -50px) rotate(15deg); opacity: 0; }
+            from { transform: translate(30px, -30px) rotate(15deg); opacity: 0; }
             to { transform: translate(0, 0) rotate(0deg); opacity: 1; }
         }
 
         .card.red { color: #e9113c; }
         .card.black { color: #0f212e; }
         .card.hidden { 
-            background: repeating-linear-gradient(45deg, #2f4553, #2f4553 10px, #1a2c38 10px, #1a2c38 20px); 
+            background: repeating-linear-gradient(45deg, #2f4553, #2f4553 8px, #1a2c38 8px, #1a2c38 16px); 
             color: transparent; 
             border: 2px solid #557086; 
         }
 
         /* Controls */
+        .controls, .betting-area {
+            margin-top: auto;
+            padding-bottom: 25px;
+            flex-shrink: 0;
+        }
+
         .controls {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-top: auto;
-            padding-bottom: 40px;
+            gap: 8px;
+        }
+
+        .betting-area {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
         }
 
         button {
-            padding: 15px;
+            padding: 12px;
             border: none;
             border-radius: 6px;
-            font-size: 16px;
+            font-size: 14px;
             font-weight: bold;
             cursor: pointer;
-            transition: transform 0.1s, opacity 0.2s;
+            transition: transform 0.1s;
         }
 
         button:active { transform: scale(0.97); }
@@ -150,28 +187,20 @@
 
         .btn-primary { background: #00e701; color: #0f212e; }
         .btn-secondary { background: #2f4553; color: white; }
-        .btn-secondary:hover:not(:disabled) { background: #3c5666; }
-
-        .betting-area {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
 
         .bet-input-group {
             display: flex;
-            gap: 10px;
+            gap: 8px;
         }
 
         input[type="number"] {
             flex: 1;
-            padding: 15px;
+            padding: 10px;
             background: #0f212e;
             border: 1px solid #2f4553;
             border-radius: 6px;
             color: white;
-            font-size: 16px;
+            font-size: 14px;
             font-weight: bold;
             text-align: center;
         }
@@ -179,16 +208,14 @@
         /* Messages */
         .message {
             text-align: center;
-            padding: 15px;
+            padding: 10px;
             border-radius: 6px;
             font-weight: bold;
-            margin-bottom: 15px;
-            font-size: 18px;
+            margin-bottom: 10px;
+            font-size: 14px;
             display: none;
-            animation: fadeIn 0.3s;
+            flex-shrink: 0;
         }
-
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
         .msg-win { background: rgba(0, 231, 1, 0.1); color: #00e701; border: 1px solid #00e701; display: block; }
         .msg-lose { background: rgba(233, 17, 60, 0.1); color: #e9113c; border: 1px solid #e9113c; display: block; }
@@ -198,8 +225,8 @@
         .hand-lose { box-shadow: inset 0 0 0 2px #e9113c; }
         .hand-draw { box-shadow: inset 0 0 0 2px #b1b8be; }
 
-        /* Cashier Modal */
-        #cashier-modal {
+        /* Modals */
+        .modal-overlay {
             display: none;
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -209,59 +236,84 @@
             align-items: center;
         }
 
-        .cashier-content {
+        .modal-content {
             background: #1a2c38;
-            padding: 25px;
+            padding: 20px;
             border-radius: 12px;
-            width: 90%;
-            max-width: 350px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            width: 85%;
+            max-width: 320px;
             text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
         }
 
-        .cashier-title {
-            color: white;
-            font-size: 20px;
-            font-weight: bold;
-            margin-bottom: 20px;
+        .modal-title { color: white; margin-top: 0; margin-bottom: 15px; font-size: 18px; }
+        
+        .modal-input {
+            width: 100%;
+            box-sizing: border-box;
+            margin-bottom: 15px;
+            padding: 12px;
+            font-size: 16px;
         }
 
-        .deposit-option {
+        .deposit-methods {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+        }
+
+        .method-btn {
             background: #2f4553;
-            border: 1px solid #3c5666;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 10px;
             color: white;
+            border: 1px solid #3c5666;
+            padding: 12px;
+            border-radius: 6px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             cursor: pointer;
-            transition: background 0.2s;
         }
 
-        .deposit-option:hover { background: #3c5666; }
-        .deposit-option span.amount { color: #00e701; font-weight: bold; }
+        .vault-stats {
+            background: #0f212e;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+        }
+
+        .vault-stats div { display: flex; flex-direction: column; }
+        .vault-stats span:first-child { color: #879097; font-size: 12px; }
+        .vault-stats span:last-child { color: white; font-weight: bold; }
+
+        .vault-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .vault-actions button { flex: 1; padding: 10px; }
 
         .btn-close-modal {
+            width: 100%;
             margin-top: 15px;
             background: transparent;
             color: #879097;
             text-decoration: underline;
             padding: 10px;
-            width: 100%;
         }
 
         .watermark {
-            position: fixed;
-            bottom: 10px;
+            position: absolute;
+            bottom: 5px;
             width: 100%;
             text-align: center;
-            font-size: 11px;
+            font-size: 10px;
             color: rgba(255, 255, 255, 0.15);
             pointer-events: none;
-            text-transform: uppercase;
             letter-spacing: 1px;
+            text-transform: uppercase;
         }
     </style>
 </head>
@@ -269,11 +321,15 @@
 
 <div id="game-container">
     <div class="header">
-        <div>Practice Mode</div>
-        <div class="balance-container">
-            <div class="balance">$<span id="balance-display">1000.00</span></div>
+        <div class="brand">Stakeish</div>
+        <div class="header-buttons">
+            <button class="btn-vault" onclick="openVault()">🏦 $<span id="vault-display-header">0.00</span></button>
             <button class="btn-deposit" onclick="openCashier()">Wallet</button>
         </div>
+    </div>
+
+    <div class="balance-display-main">
+        $<span id="balance-display">1000.00</span>
     </div>
 
     <div id="result-message" class="message"></div>
@@ -308,34 +364,54 @@
         <button class="btn-secondary" id="btn-double" onclick="doubleDown()">Double</button>
         <button class="btn-secondary" id="btn-split" onclick="splitHand()">Split</button>
     </div>
+    
+    <div class="watermark">18+ | Play Responsibly</div>
 </div>
 
-<!-- Virtual Cashier Modal -->
-<div id="cashier-modal">
-    <div class="cashier-content">
-        <div class="cashier-title">Add Virtual Funds</div>
+<div id="cashier-modal" class="modal-overlay">
+    <div class="modal-content">
+        <h3 class="modal-title">Deposit Funds</h3>
+        <input type="number" id="custom-deposit-amount" class="modal-input" placeholder="Enter amount to deposit" value="100">
         
-        <div class="deposit-option" onclick="addFunds(100)">
-            <span>💳 Mock Credit Card</span>
-            <span class="amount">+$100</span>
+        <div class="deposit-methods">
+            <button class="method-btn" onclick="processDeposit('Card')">
+                <span>💳 Card</span> <span>Deposit →</span>
+            </button>
+            <button class="method-btn" onclick="processDeposit('PayPal')">
+                <span>📱 PayPal</span> <span>Deposit →</span>
+            </button>
+            <button class="method-btn" onclick="processDeposit('Bitcoin')">
+                <span>₿ Bitcoin</span> <span>Deposit →</span>
+            </button>
         </div>
-        <div class="deposit-option" onclick="addFunds(500)">
-            <span>📱 Mock Pay App</span>
-            <span class="amount">+$500</span>
-        </div>
-        <div class="deposit-option" onclick="addFunds(1000)">
-            <span>₿ Mock Crypto Transfer</span>
-            <span class="amount">+$1,000</span>
-        </div>
-
+        
         <button class="btn-close-modal" onclick="closeCashier()">Back to Game</button>
     </div>
 </div>
 
-<div class="watermark">18+ | Play Responsibly</div>
+<div id="vault-modal" class="modal-overlay">
+    <div class="modal-content">
+        <h3 class="modal-title">The Vault</h3>
+        
+        <div class="vault-stats">
+            <div><span>Wallet Balance</span>$<span id="vault-modal-balance">1000.00</span></div>
+            <div style="text-align:right;"><span>Vault Balance</span><span style="color:#00e701;">$<span id="vault-modal-stored">0.00</span></span></div>
+        </div>
+
+        <input type="number" id="vault-action-amount" class="modal-input" placeholder="Amount to transfer">
+        
+        <div class="vault-actions">
+            <button class="btn-secondary" onclick="withdrawFromVault()">Withdraw</button>
+            <button class="btn-primary" onclick="depositToVault()">Deposit</button>
+        </div>
+        
+        <button class="btn-close-modal" onclick="closeVault()">Back to Game</button>
+    </div>
+</div>
 
 <script>
     let balance = 1000;
+    let vaultBalance = 0;
     let currentBet = 0;
     let deck = [];
     let dealerHand = [];
@@ -346,36 +422,70 @@
     const suits = ['♥', '♦', '♣', '♠'];
     const values = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
 
-    // DOM Elements
     const elBalance = document.getElementById('balance-display');
-    const elBetAmount = document.getElementById('bet-amount');
-    const elDealerCards = document.getElementById('dealer-cards');
-    const elPlayerCards = document.getElementById('player-cards');
-    const elSplitArea = document.getElementById('split-area');
-    const elSplitCards = document.getElementById('split-cards');
-    const elDealerScore = document.getElementById('dealer-score');
-    const elPlayerScore = document.getElementById('player-score');
-    const elSplitScore = document.getElementById('split-score');
-    const elResultMessage = document.getElementById('result-message');
-    const elBettingControls = document.getElementById('betting-controls');
-    const elGameControls = document.getElementById('game-controls');
-    const btnDouble = document.getElementById('btn-double');
-    const btnSplit = document.getElementById('btn-split');
-    const modalCashier = document.getElementById('cashier-modal');
-
-    function openCashier() { modalCashier.style.display = 'flex'; }
-    function closeCashier() { modalCashier.style.display = 'none'; }
-    function addFunds(amount) {
-        balance += amount;
-        elBalance.innerText = balance.toFixed(2);
+    const elVaultHeader = document.getElementById('vault-display-header');
+    
+    // Cashier logic
+    function openCashier() { 
+        document.getElementById('custom-deposit-amount').value = '';
+        document.getElementById('cashier-modal').style.display = 'flex'; 
+    }
+    function closeCashier() { document.getElementById('cashier-modal').style.display = 'none'; }
+    
+    function processDeposit(method) {
+        let amt = parseFloat(document.getElementById('custom-deposit-amount').value);
+        if(isNaN(amt) || amt <= 0) {
+            alert("Please enter a valid amount.");
+            return;
+        }
+        balance += amt;
+        updateUIBalances();
         closeCashier();
-        showMessage(`Successfully added $${amount} virtual funds.`, 'win');
-        setTimeout(() => { if(!gameActive) elResultMessage.style.display = 'none'; }, 2000);
+        showMessage(`+$${amt} via ${method} added.`, 'win');
+        setTimeout(() => { if(!gameActive) document.getElementById('result-message').style.display = 'none'; }, 2500);
     }
 
+    // Vault logic
+    function openVault() {
+        document.getElementById('vault-action-amount').value = '';
+        updateUIBalances();
+        document.getElementById('vault-modal').style.display = 'flex';
+    }
+    function closeVault() { document.getElementById('vault-modal').style.display = 'none'; }
+
+    function depositToVault() {
+        let amt = parseFloat(document.getElementById('vault-action-amount').value);
+        if(isNaN(amt) || amt <= 0) return;
+        if(amt > balance) { alert("Insufficient wallet balance."); return; }
+        
+        balance -= amt;
+        vaultBalance += amt;
+        updateUIBalances();
+        document.getElementById('vault-action-amount').value = '';
+    }
+
+    function withdrawFromVault() {
+        let amt = parseFloat(document.getElementById('vault-action-amount').value);
+        if(isNaN(amt) || amt <= 0) return;
+        if(amt > vaultBalance) { alert("Insufficient vault balance."); return; }
+        
+        vaultBalance -= amt;
+        balance += amt;
+        updateUIBalances();
+        document.getElementById('vault-action-amount').value = '';
+    }
+
+    function updateUIBalances() {
+        elBalance.innerText = balance.toFixed(2);
+        elVaultHeader.innerText = vaultBalance.toFixed(2);
+        document.getElementById('vault-modal-balance').innerText = balance.toFixed(2);
+        document.getElementById('vault-modal-stored').innerText = vaultBalance.toFixed(2);
+    }
+
+    // Game logic
     function createDeck() {
         deck = [];
-        for(let i=0; i<4; i++) { // Use 4 decks to mimic shoe
+        for(let i=0; i<4; i++) { 
             for (let suit of suits) {
                 for (let value of values) {
                     deck.push({ suit, value });
@@ -415,21 +525,25 @@
     }
 
     function updateUI() {
-        elBalance.innerText = balance.toFixed(2);
+        updateUIBalances();
+        
+        const elDealerCards = document.getElementById('dealer-cards');
+        const elPlayerCards = document.getElementById('player-cards');
+        const elSplitArea = document.getElementById('split-area');
         
         elDealerCards.innerHTML = '';
         dealerHand.forEach((card, index) => {
             elDealerCards.innerHTML += renderCard(card, index === 1 && gameActive);
         });
-        elDealerScore.innerText = gameActive ? getCardValue(dealerHand[0]) : calculateScore(dealerHand);
+        document.getElementById('dealer-score').innerText = gameActive ? getCardValue(dealerHand[0]) : calculateScore(dealerHand);
 
         elPlayerCards.innerHTML = playerHands[0].map(c => renderCard(c)).join('');
-        elPlayerScore.innerText = calculateScore(playerHands[0]);
+        document.getElementById('player-score').innerText = calculateScore(playerHands[0]);
 
         if (playerHands.length > 1) {
-            elSplitArea.style.display = 'block';
-            elSplitCards.innerHTML = playerHands[1].map(c => renderCard(c)).join('');
-            elSplitScore.innerText = calculateScore(playerHands[1]);
+            elSplitArea.style.display = 'flex';
+            document.getElementById('split-cards').innerHTML = playerHands[1].map(c => renderCard(c)).join('');
+            document.getElementById('split-score').innerText = calculateScore(playerHands[1]);
         } else {
             elSplitArea.style.display = 'none';
         }
@@ -440,34 +554,33 @@
         }
 
         if (gameActive) {
-            btnDouble.disabled = playerHands[activeHandIndex].length !== 2 || balance < currentBet;
+            document.getElementById('btn-double').disabled = playerHands[activeHandIndex].length !== 2 || balance < currentBet;
             const canSplit = playerHands.length === 1 && 
                              playerHands[0].length === 2 && 
                              getCardValue(playerHands[0][0]) === getCardValue(playerHands[0][1]) &&
                              balance >= currentBet;
-            btnSplit.disabled = !canSplit;
+            document.getElementById('btn-split').disabled = !canSplit;
         }
     }
 
     function showMessage(text, type) {
-        elResultMessage.innerText = text;
-        elResultMessage.className = `message msg-${type}`;
+        const msg = document.getElementById('result-message');
+        msg.innerText = text;
+        msg.className = `message msg-${type}`;
     }
 
-    function clearClasses() {
-        document.getElementById('player-area').className = 'hand-area';
-        document.getElementById('split-area').className = 'hand-area';
+    function halfBet() { 
+        const betInput = document.getElementById('bet-amount');
+        betInput.value = Math.max(1, Math.floor(betInput.value / 2)); 
     }
-
-    function halfBet() { elBetAmount.value = Math.max(1, Math.floor(elBetAmount.value / 2)); }
-    function doubleBet() { elBetAmount.value = elBetAmount.value * 2; }
+    function doubleBet() { 
+        const betInput = document.getElementById('bet-amount');
+        betInput.value = betInput.value * 2; 
+    }
 
     function startGame() {
-        const bet = parseFloat(elBetAmount.value);
-        if (bet > balance) {
-            showMessage("Insufficient balance. Open wallet to add funds.", "lose");
-            return;
-        }
+        const bet = parseFloat(document.getElementById('bet-amount').value);
+        if (bet > balance) { showMessage("Not enough funds. Open wallet.", "lose"); return; }
         if (bet <= 0 || isNaN(bet)) return;
 
         currentBet = bet;
@@ -476,8 +589,10 @@
         activeHandIndex = 0;
         playerHands = [[]];
         dealerHand = [];
-        elResultMessage.style.display = 'none';
-        clearClasses();
+        document.getElementById('result-message').style.display = 'none';
+        
+        document.getElementById('player-area').className = 'hand-area';
+        document.getElementById('split-area').className = 'hand-area';
 
         createDeck();
         
@@ -486,14 +601,11 @@
         playerHands[0].push(deck.pop());
         dealerHand.push(deck.pop());
 
-        elBettingControls.style.display = 'none';
-        elGameControls.style.display = 'grid';
+        document.getElementById('betting-controls').style.display = 'none';
+        document.getElementById('game-controls').style.display = 'grid';
 
         updateUI();
-
-        if (calculateScore(playerHands[0]) === 21) {
-            endGame();
-        }
+        if (calculateScore(playerHands[0]) === 21) endGame();
     }
 
     function hit() {
@@ -541,7 +653,7 @@
         }
         
         updateUI();
-        setTimeout(evaluateHands, 500); // Slight delay for dramatic effect
+        setTimeout(evaluateHands, 400); 
     }
 
     function evaluateHands() {
@@ -554,23 +666,19 @@
             const handArea = document.getElementById(index === 0 ? 'player-area' : 'split-area');
             let status = '';
             
-            if (playerScore > 21) {
-                status = 'lose';
-            } else if (dealerScore > 21) {
+            if (playerScore > 21) status = 'lose';
+            else if (dealerScore > 21 || playerScore > dealerScore) {
                 status = 'win';
                 totalWinnings += currentBet * 2;
-            } else if (playerScore > dealerScore) {
-                status = 'win';
-                totalWinnings += currentBet * 2;
-            } else if (playerScore < dealerScore) {
-                status = 'lose';
-            } else {
+            } 
+            else if (playerScore < dealerScore) status = 'lose';
+            else {
                 status = 'draw';
                 totalWinnings += currentBet; 
             }
 
             if (status === 'win' && playerScore === 21 && hand.length === 2 && playerHands.length === 1) {
-                totalWinnings += currentBet * 0.5; // Blackjack 3:2
+                totalWinnings += currentBet * 0.5; 
             }
 
             results.push(status);
@@ -578,30 +686,33 @@
         });
 
         balance += totalWinnings;
-        elBalance.innerText = balance.toFixed(2);
+        updateUIBalances();
 
         if (results.includes('win')) {
-            const profit = totalWinnings - (currentBet * playerHands.length);
-            showMessage(`Won $${profit.toFixed(2)}`, 'win');
+            showMessage(`Won $${(totalWinnings - (currentBet * playerHands.length)).toFixed(2)}`, 'win');
         } else if (results.every(r => r === 'lose')) {
             showMessage("Dealer Wins", 'lose');
         } else {
             showMessage("Push", 'draw');
         }
 
-        elBettingControls.style.display = 'flex';
-        elGameControls.style.display = 'none';
+        document.getElementById('betting-controls').style.display = 'flex';
+        document.getElementById('game-controls').style.display = 'none';
         
-        if (currentBet > parseFloat(elBetAmount.value) && playerHands.length === 1) {
-             currentBet = parseFloat(elBetAmount.value);
+        const betInput = document.getElementById('bet-amount');
+        if (currentBet > parseFloat(betInput.value) && playerHands.length === 1) {
+             currentBet = parseFloat(betInput.value);
         }
     }
 
     function endGame() {
         gameActive = false;
         updateUI();
-        setTimeout(evaluateHands, 500);
+        setTimeout(evaluateHands, 400);
     }
+    
+    // Initialize UI on load
+    updateUIBalances();
 </script>
 </body>
 </html>
