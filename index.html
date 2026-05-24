@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Blackjack Pro</title>
+    <title>Blackjack Pro - Practice Mode</title>
     <style>
         /* Modern Casino Dark Theme */
         body {
@@ -27,8 +27,10 @@
             display: flex;
             flex-direction: column;
             flex-grow: 1;
+            position: relative;
         }
 
+        /* Header & Balance */
         .header {
             display: flex;
             justify-content: space-between;
@@ -42,8 +44,28 @@
             box-shadow: 0 4px 6px rgba(0,0,0,0.3);
         }
 
-        .balance { color: #00e701; }
+        .balance-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
 
+        .balance { color: #00e701; font-size: 18px; }
+
+        .btn-deposit {
+            background: #1475e1;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-deposit:hover { background: #1a88ff; }
+
+        /* Playing Areas */
         .hand-area {
             background: #1a2c38;
             border-radius: 8px;
@@ -51,6 +73,7 @@
             margin-bottom: 15px;
             min-height: 140px;
             position: relative;
+            transition: box-shadow 0.3s ease;
         }
 
         .hand-title {
@@ -58,11 +81,19 @@
             margin-bottom: 10px;
             display: flex;
             justify-content: space-between;
+            color: #879097;
+        }
+
+        .score-badge {
+            background: #2f4553;
+            padding: 2px 8px;
+            border-radius: 12px;
+            color: white;
         }
 
         .cards-container {
             display: flex;
-            gap: -20px; /* Overlap cards slightly */
+            gap: -20px;
             flex-wrap: wrap;
         }
 
@@ -79,18 +110,23 @@
             box-shadow: -2px 2px 5px rgba(0,0,0,0.2);
             margin-right: 5px;
             margin-bottom: 5px;
-            animation: slideIn 0.3s ease-out;
+            animation: slideIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
         @keyframes slideIn {
-            from { transform: translateY(-20px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
+            from { transform: translate(50px, -50px) rotate(15deg); opacity: 0; }
+            to { transform: translate(0, 0) rotate(0deg); opacity: 1; }
         }
 
         .card.red { color: #e9113c; }
         .card.black { color: #0f212e; }
-        .card.hidden { background: #2f4553; color: transparent; border: 2px solid #557086; }
+        .card.hidden { 
+            background: repeating-linear-gradient(45deg, #2f4553, #2f4553 10px, #1a2c38 10px, #1a2c38 20px); 
+            color: transparent; 
+            border: 2px solid #557086; 
+        }
 
+        /* Controls */
         .controls {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -114,7 +150,7 @@
 
         .btn-primary { background: #00e701; color: #0f212e; }
         .btn-secondary { background: #2f4553; color: white; }
-        .btn-danger { background: #e9113c; color: white; }
+        .btn-secondary:hover:not(:disabled) { background: #3c5666; }
 
         .betting-area {
             display: flex;
@@ -137,8 +173,10 @@
             color: white;
             font-size: 16px;
             font-weight: bold;
+            text-align: center;
         }
 
+        /* Messages */
         .message {
             text-align: center;
             padding: 15px;
@@ -147,11 +185,72 @@
             margin-bottom: 15px;
             font-size: 18px;
             display: none;
+            animation: fadeIn 0.3s;
         }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
         .msg-win { background: rgba(0, 231, 1, 0.1); color: #00e701; border: 1px solid #00e701; display: block; }
         .msg-lose { background: rgba(233, 17, 60, 0.1); color: #e9113c; border: 1px solid #e9113c; display: block; }
         .msg-draw { background: rgba(177, 184, 190, 0.1); color: #b1b8be; border: 1px solid #b1b8be; display: block; }
+
+        .hand-win { box-shadow: inset 0 0 0 2px #00e701; }
+        .hand-lose { box-shadow: inset 0 0 0 2px #e9113c; }
+        .hand-draw { box-shadow: inset 0 0 0 2px #b1b8be; }
+
+        /* Cashier Modal */
+        #cashier-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(15, 33, 46, 0.95);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .cashier-content {
+            background: #1a2c38;
+            padding: 25px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 350px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            text-align: center;
+        }
+
+        .cashier-title {
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .deposit-option {
+            background: #2f4553;
+            border: 1px solid #3c5666;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .deposit-option:hover { background: #3c5666; }
+        .deposit-option span.amount { color: #00e701; font-weight: bold; }
+
+        .btn-close-modal {
+            margin-top: 15px;
+            background: transparent;
+            color: #879097;
+            text-decoration: underline;
+            padding: 10px;
+            width: 100%;
+        }
 
         .watermark {
             position: fixed;
@@ -164,35 +263,33 @@
             text-transform: uppercase;
             letter-spacing: 1px;
         }
-
-        /* Highlight classes for hands */
-        .hand-win { box-shadow: inset 0 0 0 2px #00e701; }
-        .hand-lose { box-shadow: inset 0 0 0 2px #e9113c; }
-        .hand-draw { box-shadow: inset 0 0 0 2px #b1b8be; }
     </style>
 </head>
 <body>
 
 <div id="game-container">
     <div class="header">
-        <div>VIRTUAL FUNDS</div>
-        <div class="balance">$<span id="balance-display">1000.00</span></div>
+        <div>Practice Mode</div>
+        <div class="balance-container">
+            <div class="balance">$<span id="balance-display">1000.00</span></div>
+            <button class="btn-deposit" onclick="openCashier()">Wallet</button>
+        </div>
     </div>
 
     <div id="result-message" class="message"></div>
 
     <div class="hand-area" id="dealer-area">
-        <div class="hand-title">Dealer <span id="dealer-score"></span></div>
+        <div class="hand-title">Dealer <span class="score-badge" id="dealer-score">0</span></div>
         <div class="cards-container" id="dealer-cards"></div>
     </div>
 
     <div class="hand-area" id="player-area">
-        <div class="hand-title">Player <span id="player-score"></span></div>
+        <div class="hand-title">Your Hand <span class="score-badge" id="player-score">0</span></div>
         <div class="cards-container" id="player-cards"></div>
     </div>
 
     <div class="hand-area" id="split-area" style="display: none;">
-        <div class="hand-title">Split Hand <span id="split-score"></span></div>
+        <div class="hand-title">Split Hand <span class="score-badge" id="split-score">0</span></div>
         <div class="cards-container" id="split-cards"></div>
     </div>
 
@@ -202,7 +299,7 @@
             <button class="btn-secondary" onclick="halfBet()">1/2</button>
             <button class="btn-secondary" onclick="doubleBet()">2x</button>
         </div>
-        <button class="btn-primary" id="btn-deal" onclick="startGame()">Deal</button>
+        <button class="btn-primary" id="btn-deal" onclick="startGame()">Place Bet & Deal</button>
     </div>
 
     <div class="controls" id="game-controls" style="display: none;">
@@ -213,6 +310,28 @@
     </div>
 </div>
 
+<!-- Virtual Cashier Modal -->
+<div id="cashier-modal">
+    <div class="cashier-content">
+        <div class="cashier-title">Add Virtual Funds</div>
+        
+        <div class="deposit-option" onclick="addFunds(100)">
+            <span>💳 Mock Credit Card</span>
+            <span class="amount">+$100</span>
+        </div>
+        <div class="deposit-option" onclick="addFunds(500)">
+            <span>📱 Mock Pay App</span>
+            <span class="amount">+$500</span>
+        </div>
+        <div class="deposit-option" onclick="addFunds(1000)">
+            <span>₿ Mock Crypto Transfer</span>
+            <span class="amount">+$1,000</span>
+        </div>
+
+        <button class="btn-close-modal" onclick="closeCashier()">Back to Game</button>
+    </div>
+</div>
+
 <div class="watermark">18+ | Play Responsibly</div>
 
 <script>
@@ -220,7 +339,7 @@
     let currentBet = 0;
     let deck = [];
     let dealerHand = [];
-    let playerHands = [[]]; // Array of hands to support splitting
+    let playerHands = [[]]; 
     let activeHandIndex = 0;
     let gameActive = false;
 
@@ -242,15 +361,27 @@
     const elGameControls = document.getElementById('game-controls');
     const btnDouble = document.getElementById('btn-double');
     const btnSplit = document.getElementById('btn-split');
+    const modalCashier = document.getElementById('cashier-modal');
+
+    function openCashier() { modalCashier.style.display = 'flex'; }
+    function closeCashier() { modalCashier.style.display = 'none'; }
+    function addFunds(amount) {
+        balance += amount;
+        elBalance.innerText = balance.toFixed(2);
+        closeCashier();
+        showMessage(`Successfully added $${amount} virtual funds.`, 'win');
+        setTimeout(() => { if(!gameActive) elResultMessage.style.display = 'none'; }, 2000);
+    }
 
     function createDeck() {
         deck = [];
-        for (let suit of suits) {
-            for (let value of values) {
-                deck.push({ suit, value });
+        for(let i=0; i<4; i++) { // Use 4 decks to mimic shoe
+            for (let suit of suits) {
+                for (let value of values) {
+                    deck.push({ suit, value });
+                }
             }
         }
-        // Shuffle
         for (let i = deck.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [deck[i], deck[j]] = [deck[j], deck[i]];
@@ -278,7 +409,7 @@
     }
 
     function renderCard(card, isHidden = false) {
-        if (isHidden) return `<div class="card hidden">?</div>`;
+        if (isHidden) return `<div class="card hidden"></div>`;
         const colorClass = (card.suit === '♥' || card.suit === '♦') ? 'red' : 'black';
         return `<div class="card ${colorClass}">${card.value}${card.suit}</div>`;
     }
@@ -286,18 +417,15 @@
     function updateUI() {
         elBalance.innerText = balance.toFixed(2);
         
-        // Render Dealer
         elDealerCards.innerHTML = '';
         dealerHand.forEach((card, index) => {
             elDealerCards.innerHTML += renderCard(card, index === 1 && gameActive);
         });
         elDealerScore.innerText = gameActive ? getCardValue(dealerHand[0]) : calculateScore(dealerHand);
 
-        // Render Player Main Hand
         elPlayerCards.innerHTML = playerHands[0].map(c => renderCard(c)).join('');
         elPlayerScore.innerText = calculateScore(playerHands[0]);
 
-        // Render Split Hand if exists
         if (playerHands.length > 1) {
             elSplitArea.style.display = 'block';
             elSplitCards.innerHTML = playerHands[1].map(c => renderCard(c)).join('');
@@ -306,20 +434,16 @@
             elSplitArea.style.display = 'none';
         }
 
-        // Active hand highlighting
         document.getElementById('player-area').style.opacity = (activeHandIndex === 0 || !gameActive) ? '1' : '0.5';
         if (playerHands.length > 1) {
             elSplitArea.style.opacity = (activeHandIndex === 1 || !gameActive) ? '1' : '0.5';
         }
 
-        // Button states
         if (gameActive) {
             btnDouble.disabled = playerHands[activeHandIndex].length !== 2 || balance < currentBet;
-            
-            // Check split condition (2 cards, same face value)
             const canSplit = playerHands.length === 1 && 
                              playerHands[0].length === 2 && 
-                             playerHands[0][0].value === playerHands[0][1].value &&
+                             getCardValue(playerHands[0][0]) === getCardValue(playerHands[0][1]) &&
                              balance >= currentBet;
             btnSplit.disabled = !canSplit;
         }
@@ -340,10 +464,11 @@
 
     function startGame() {
         const bet = parseFloat(elBetAmount.value);
-        if (bet > balance || bet <= 0 || isNaN(bet)) {
-            alert("Invalid bet amount.");
+        if (bet > balance) {
+            showMessage("Insufficient balance. Open wallet to add funds.", "lose");
             return;
         }
+        if (bet <= 0 || isNaN(bet)) return;
 
         currentBet = bet;
         balance -= currentBet;
@@ -356,7 +481,6 @@
 
         createDeck();
         
-        // Initial Deal
         playerHands[0].push(deck.pop());
         dealerHand.push(deck.pop());
         playerHands[0].push(deck.pop());
@@ -375,27 +499,22 @@
     function hit() {
         playerHands[activeHandIndex].push(deck.pop());
         updateUI();
-        if (calculateScore(playerHands[activeHandIndex]) >= 21) {
-            stand();
-        }
+        if (calculateScore(playerHands[activeHandIndex]) >= 21) stand();
     }
 
     function doubleDown() {
         balance -= currentBet;
-        currentBet *= 2; // Bet is doubled for this specific hand (simplified for single hand logic)
+        currentBet *= 2; 
         playerHands[activeHandIndex].push(deck.pop());
         updateUI();
         stand();
     }
 
     function splitHand() {
-        balance -= currentBet; // Deduct for second hand
-        playerHands.push([playerHands[0].pop()]); // Move 2nd card to new hand
-        
-        // Deal one new card to each hand
+        balance -= currentBet; 
+        playerHands.push([playerHands[0].pop()]); 
         playerHands[0].push(deck.pop());
         playerHands[1].push(deck.pop());
-        
         updateUI();
     }
 
@@ -410,7 +529,6 @@
     }
 
     function playDealerTurn() {
-        // Only dealer plays if at least one hand hasn't busted
         let allBusted = true;
         for (let hand of playerHands) {
             if (calculateScore(hand) <= 21) allBusted = false;
@@ -423,7 +541,7 @@
         }
         
         updateUI();
-        evaluateHands();
+        setTimeout(evaluateHands, 500); // Slight delay for dramatic effect
     }
 
     function evaluateHands() {
@@ -431,12 +549,9 @@
         let totalWinnings = 0;
         let results = [];
 
-        // Evaluate each hand
         playerHands.forEach((hand, index) => {
             const playerScore = calculateScore(hand);
-            const handAreaId = index === 0 ? 'player-area' : 'split-area';
-            const handArea = document.getElementById(handAreaId);
-            
+            const handArea = document.getElementById(index === 0 ? 'player-area' : 'split-area');
             let status = '';
             
             if (playerScore > 21) {
@@ -451,12 +566,11 @@
                 status = 'lose';
             } else {
                 status = 'draw';
-                totalWinnings += currentBet; // Return original bet
+                totalWinnings += currentBet; 
             }
 
-            // Blackjack pays 3:2 (Only applies to first hand without splits conceptually here)
             if (status === 'win' && playerScore === 21 && hand.length === 2 && playerHands.length === 1) {
-                totalWinnings += currentBet * 0.5; 
+                totalWinnings += currentBet * 0.5; // Blackjack 3:2
             }
 
             results.push(status);
@@ -464,24 +578,29 @@
         });
 
         balance += totalWinnings;
+        elBalance.innerText = balance.toFixed(2);
 
-        // Display global message based on primary hand (or overall outcome)
         if (results.includes('win')) {
-            showMessage(`You Won $${(totalWinnings - (currentBet * playerHands.length)).toFixed(2)}!`, 'win');
+            const profit = totalWinnings - (currentBet * playerHands.length);
+            showMessage(`Won $${profit.toFixed(2)}`, 'win');
         } else if (results.every(r => r === 'lose')) {
             showMessage("Dealer Wins", 'lose');
         } else {
-            showMessage("Push (Tie)", 'draw');
+            showMessage("Push", 'draw');
         }
 
-        elBalance.innerText = balance.toFixed(2);
         elBettingControls.style.display = 'flex';
         elGameControls.style.display = 'none';
         
-        // Reset bet amount if it was doubled
         if (currentBet > parseFloat(elBetAmount.value) && playerHands.length === 1) {
              currentBet = parseFloat(elBetAmount.value);
         }
+    }
+
+    function endGame() {
+        gameActive = false;
+        updateUI();
+        setTimeout(evaluateHands, 500);
     }
 </script>
 </body>
