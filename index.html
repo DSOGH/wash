@@ -1,718 +1,241 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Stakeish Blackjack</title>
-    <style>
-        /* Modern Casino Dark Theme */
-        body {
-            background-color: #0f212e;
-            color: #b1b8be;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            height: 100dvh;
-            overflow: hidden;
-            user-select: none;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prop Ticket Interface</title>
+<style>
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #ffffff;
+    color: #333;
+  }
+  
+  /* Header */
+  .header {
+    background-color: #222;
+    color: white;
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .header h1 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+  }
+  .transfer-btn {
+    background-color: transparent;
+    border: 1px solid white;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 14px;
+  }
 
-        #game-container {
-            width: 100%;
-            max-width: 500px;
-            padding: 10px;
-            box-sizing: border-box;
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-        }
+  /* Main Content Area */
+  .container {
+    padding: 15px;
+  }
 
-        /* Header & Balance */
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: #1a2c38;
-            padding: 10px 15px;
-            border-radius: 8px;
-            margin-bottom: 10px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-            flex-shrink: 0;
-        }
+  /* Alert Banner */
+  .alert-banner {
+    background-color: #fcf0cd;
+    border-left: 4px solid #f2c94c;
+    padding: 12px;
+    border-radius: 4px;
+    margin-bottom: 15px;
+    font-size: 14px;
+  }
+  .alert-banner strong {
+    display: block;
+    margin-bottom: 4px;
+  }
 
-        .brand {
-            font-size: 18px;
-            font-weight: 800;
-            color: #ffffff;
-            letter-spacing: 0.5px;
-        }
+  /* Status Box */
+  .status-box {
+    border: 1px solid #ddd;
+    text-align: center;
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 15px;
+    font-weight: bold;
+  }
+  .status-badge {
+    background-color: #333;
+    color: white;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 5px;
+  }
 
-        .header-buttons {
-            display: flex;
-            gap: 8px;
-        }
+  /* Action Buttons */
+  .action-buttons {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  .btn-use {
+    background-color: #333;
+    color: white;
+    flex: 1;
+    border: none;
+    padding: 12px;
+    border-radius: 4px;
+    font-weight: bold;
+  }
+  .btn-select {
+    background-color: white;
+    color: #333;
+    flex: 1;
+    border: 1px solid #ddd;
+    padding: 12px;
+    border-radius: 4px;
+    font-weight: bold;
+  }
 
-        .btn-vault {
-            background: #2f4553;
-            color: white;
-            border: none;
-            padding: 6px 10px;
-            border-radius: 4px;
-            font-weight: bold;
-            font-size: 12px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
+  /* Ticket Card */
+  .ticket-card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    display: flex;
+    margin-bottom: 15px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  }
+  .ticket-stub {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    background-color: #f9f9f9;
+    padding: 10px;
+    text-align: center;
+    border-right: 2px dashed #ccc;
+    font-weight: bold;
+    font-size: 12px;
+    letter-spacing: 1px;
+  }
+  .ticket-details {
+    flex: 1;
+    padding: 10px;
+    background-color: #fff;
+  }
+  .event-type {
+    font-size: 14px;
+    color: #555;
+    margin-bottom: 5px;
+  }
+  .event-main {
+    background-color: #1a4b8c;
+    color: white;
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    position: relative;
+  }
+  .event-title {
+    font-weight: bold;
+    font-size: 16px;
+    margin-bottom: 5px;
+  }
+  .event-date {
+    font-size: 12px;
+  }
+  .ticket-name {
+    font-size: 14px;
+    color: #333;
+  }
+  .ticket-counter {
+    text-align: right;
+    font-size: 12px;
+    color: #777;
+    margin-top: 5px;
+  }
 
-        .btn-deposit {
-            background: #1475e1;
-            color: white;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 4px;
-            font-weight: bold;
-            font-size: 12px;
-            cursor: pointer;
-        }
-
-        .balance-display-main {
-            text-align: center;
-            font-size: 24px;
-            font-weight: bold;
-            color: #00e701;
-            margin-bottom: 10px;
-            flex-shrink: 0;
-        }
-
-        /* Playing Areas */
-        .hand-area {
-            background: #1a2c38;
-            border-radius: 8px;
-            padding: 10px;
-            margin-bottom: 10px;
-            min-height: 100px;
-            position: relative;
-            transition: box-shadow 0.3s ease;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .hand-title {
-            font-size: 12px;
-            margin-bottom: 5px;
-            display: flex;
-            justify-content: space-between;
-            color: #879097;
-        }
-
-        .score-badge {
-            background: #2f4553;
-            padding: 2px 6px;
-            border-radius: 12px;
-            color: white;
-        }
-
-        .cards-container {
-            display: flex;
-            gap: -25px;
-            flex-wrap: wrap;
-            align-items: center;
-            flex-grow: 1;
-        }
-
-        .card {
-            width: 50px;
-            height: 75px;
-            background: white;
-            border-radius: 5px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 20px;
-            font-weight: bold;
-            box-shadow: -2px 2px 5px rgba(0,0,0,0.2);
-            margin-right: 5px;
-            animation: slideIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
-        @keyframes slideIn {
-            from { transform: translate(30px, -30px) rotate(15deg); opacity: 0; }
-            to { transform: translate(0, 0) rotate(0deg); opacity: 1; }
-        }
-
-        .card.red { color: #e9113c; }
-        .card.black { color: #0f212e; }
-        .card.hidden { 
-            background: repeating-linear-gradient(45deg, #2f4553, #2f4553 8px, #1a2c38 8px, #1a2c38 16px); 
-            color: transparent; 
-            border: 2px solid #557086; 
-        }
-
-        /* Controls */
-        .controls, .betting-area {
-            margin-top: auto;
-            padding-bottom: 25px;
-            flex-shrink: 0;
-        }
-
-        .controls {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-        }
-
-        .betting-area {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        button {
-            padding: 12px;
-            border: none;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: transform 0.1s;
-        }
-
-        button:active { transform: scale(0.97); }
-        button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-
-        .btn-primary { background: #00e701; color: #0f212e; }
-        .btn-secondary { background: #2f4553; color: white; }
-
-        .bet-input-group {
-            display: flex;
-            gap: 8px;
-        }
-
-        input[type="number"] {
-            flex: 1;
-            padding: 10px;
-            background: #0f212e;
-            border: 1px solid #2f4553;
-            border-radius: 6px;
-            color: white;
-            font-size: 14px;
-            font-weight: bold;
-            text-align: center;
-        }
-
-        /* Messages */
-        .message {
-            text-align: center;
-            padding: 10px;
-            border-radius: 6px;
-            font-weight: bold;
-            margin-bottom: 10px;
-            font-size: 14px;
-            display: none;
-            flex-shrink: 0;
-        }
-
-        .msg-win { background: rgba(0, 231, 1, 0.1); color: #00e701; border: 1px solid #00e701; display: block; }
-        .msg-lose { background: rgba(233, 17, 60, 0.1); color: #e9113c; border: 1px solid #e9113c; display: block; }
-        .msg-draw { background: rgba(177, 184, 190, 0.1); color: #b1b8be; border: 1px solid #b1b8be; display: block; }
-
-        .hand-win { box-shadow: inset 0 0 0 2px #00e701; }
-        .hand-lose { box-shadow: inset 0 0 0 2px #e9113c; }
-        .hand-draw { box-shadow: inset 0 0 0 2px #b1b8be; }
-
-        /* Modals */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(15, 33, 46, 0.95);
-            z-index: 100;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .modal-content {
-            background: #1a2c38;
-            padding: 20px;
-            border-radius: 12px;
-            width: 85%;
-            max-width: 320px;
-            text-align: center;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-        }
-
-        .modal-title { color: white; margin-top: 0; margin-bottom: 15px; font-size: 18px; }
-        
-        .modal-input {
-            width: 100%;
-            box-sizing: border-box;
-            margin-bottom: 15px;
-            padding: 12px;
-            font-size: 16px;
-        }
-
-        .deposit-methods {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 8px;
-        }
-
-        .method-btn {
-            background: #2f4553;
-            color: white;
-            border: 1px solid #3c5666;
-            padding: 12px;
-            border-radius: 6px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: pointer;
-        }
-
-        .vault-stats {
-            background: #0f212e;
-            padding: 10px;
-            border-radius: 6px;
-            margin-bottom: 15px;
-            display: flex;
-            justify-content: space-between;
-            font-size: 14px;
-        }
-
-        .vault-stats div { display: flex; flex-direction: column; }
-        .vault-stats span:first-child { color: #879097; font-size: 12px; }
-        .vault-stats span:last-child { color: white; font-weight: bold; }
-
-        .vault-actions {
-            display: flex;
-            gap: 10px;
-        }
-
-        .vault-actions button { flex: 1; padding: 10px; }
-
-        .btn-close-modal {
-            width: 100%;
-            margin-top: 15px;
-            background: transparent;
-            color: #879097;
-            text-decoration: underline;
-            padding: 10px;
-        }
-
-        .watermark {
-            position: absolute;
-            bottom: 5px;
-            width: 100%;
-            text-align: center;
-            font-size: 10px;
-            color: rgba(255, 255, 255, 0.15);
-            pointer-events: none;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-        }
-    </style>
+  /* Footer */
+  .footer {
+    text-align: center;
+    padding: 20px 15px;
+    border-top: 1px solid #eee;
+    margin-top: 20px;
+  }
+  .footer h2 {
+    font-size: 16px;
+    margin-bottom: 15px;
+  }
+  .btn-bottom {
+    background-color: #ccc;
+    color: #888;
+    width: 100%;
+    border: none;
+    padding: 15px;
+    border-radius: 4px;
+    font-weight: bold;
+    font-size: 16px;
+  }
+</style>
 </head>
 <body>
 
-<div id="game-container">
-    <div class="header">
-        <div class="brand">Stakeish</div>
-        <div class="header-buttons">
-            <button class="btn-vault" onclick="openVault()">🏦 $<span id="vault-display-header">0.00</span></button>
-            <button class="btn-deposit" onclick="openCashier()">Wallet</button>
+  <div class="header">
+    <div style="width: 60px;">&lt;</div>
+    <h1>Tickets</h1>
+    <button class="transfer-btn">Transfer</button>
+  </div>
+
+  <div class="container">
+    <div class="alert-banner">
+      <strong>! Event alert</strong>
+      Your access code is your Student Number an...
+    </div>
+
+    <div class="status-box">
+      <div class="status-badge">2</div><br>
+      Available
+    </div>
+
+    <div class="action-buttons">
+      <button class="btn-use">Use all</button>
+      <button class="btn-select">Select all</button>
+    </div>
+
+    <div class="ticket-card">
+      <div class="ticket-stub">ADMIT ONE</div>
+      <div class="ticket-details">
+        <div class="event-type">Movie Prop Ticket</div>
+        <div class="event-main">
+          <div class="event-title">Fictional High School Graduation</div>
+          <div class="event-date">Wed. Jun 3, 2026 at 7:00 PM</div>
         </div>
+        <div class="ticket-name">Name: Jane Doe</div>
+        <div class="ticket-counter">1 of 2</div>
+      </div>
     </div>
 
-    <div class="balance-display-main">
-        $<span id="balance-display">1000.00</span>
-    </div>
-
-    <div id="result-message" class="message"></div>
-
-    <div class="hand-area" id="dealer-area">
-        <div class="hand-title">Dealer <span class="score-badge" id="dealer-score">0</span></div>
-        <div class="cards-container" id="dealer-cards"></div>
-    </div>
-
-    <div class="hand-area" id="player-area">
-        <div class="hand-title">Your Hand <span class="score-badge" id="player-score">0</span></div>
-        <div class="cards-container" id="player-cards"></div>
-    </div>
-
-    <div class="hand-area" id="split-area" style="display: none;">
-        <div class="hand-title">Split Hand <span class="score-badge" id="split-score">0</span></div>
-        <div class="cards-container" id="split-cards"></div>
-    </div>
-
-    <div class="betting-area" id="betting-controls">
-        <div class="bet-input-group">
-            <input type="number" id="bet-amount" value="10" min="1" step="1">
-            <button class="btn-secondary" onclick="halfBet()">1/2</button>
-            <button class="btn-secondary" onclick="doubleBet()">2x</button>
+    <div class="ticket-card">
+      <div class="ticket-stub">ADMIT ONE</div>
+      <div class="ticket-details">
+        <div class="event-type">Movie Prop Ticket</div>
+        <div class="event-main">
+          <div class="event-title">Fictional High School Graduation</div>
+          <div class="event-date">Wed. Jun 3, 2026 at 7:00 PM</div>
         </div>
-        <button class="btn-primary" id="btn-deal" onclick="startGame()">Place Bet & Deal</button>
+        <div class="ticket-name">Name: John Smith</div>
+        <div class="ticket-counter">2 of 2</div>
+      </div>
     </div>
+  </div>
 
-    <div class="controls" id="game-controls" style="display: none;">
-        <button class="btn-primary" id="btn-hit" onclick="hit()">Hit</button>
-        <button class="btn-secondary" id="btn-stand" onclick="stand()">Stand</button>
-        <button class="btn-secondary" id="btn-double" onclick="doubleDown()">Double</button>
-        <button class="btn-secondary" id="btn-split" onclick="splitHand()">Split</button>
-    </div>
-    
-    <div class="watermark">18+ | Play Responsibly</div>
-</div>
+  <div class="footer">
+    <h2>Use your tickets onsite for entry into venue</h2>
+    <button class="btn-bottom">Use tickets</button>
+  </div>
 
-<div id="cashier-modal" class="modal-overlay">
-    <div class="modal-content">
-        <h3 class="modal-title">Deposit Funds</h3>
-        <input type="number" id="custom-deposit-amount" class="modal-input" placeholder="Enter amount to deposit" value="100">
-        
-        <div class="deposit-methods">
-            <button class="method-btn" onclick="processDeposit('Card')">
-                <span>💳 Card</span> <span>Deposit →</span>
-            </button>
-            <button class="method-btn" onclick="processDeposit('PayPal')">
-                <span>📱 PayPal</span> <span>Deposit →</span>
-            </button>
-            <button class="method-btn" onclick="processDeposit('Bitcoin')">
-                <span>₿ Bitcoin</span> <span>Deposit →</span>
-            </button>
-        </div>
-        
-        <button class="btn-close-modal" onclick="closeCashier()">Back to Game</button>
-    </div>
-</div>
-
-<div id="vault-modal" class="modal-overlay">
-    <div class="modal-content">
-        <h3 class="modal-title">The Vault</h3>
-        
-        <div class="vault-stats">
-            <div><span>Wallet Balance</span>$<span id="vault-modal-balance">1000.00</span></div>
-            <div style="text-align:right;"><span>Vault Balance</span><span style="color:#00e701;">$<span id="vault-modal-stored">0.00</span></span></div>
-        </div>
-
-        <input type="number" id="vault-action-amount" class="modal-input" placeholder="Amount to transfer">
-        
-        <div class="vault-actions">
-            <button class="btn-secondary" onclick="withdrawFromVault()">Withdraw</button>
-            <button class="btn-primary" onclick="depositToVault()">Deposit</button>
-        </div>
-        
-        <button class="btn-close-modal" onclick="closeVault()">Back to Game</button>
-    </div>
-</div>
-
-<script>
-    let balance = 1000;
-    let vaultBalance = 0;
-    let currentBet = 0;
-    let deck = [];
-    let dealerHand = [];
-    let playerHands = [[]]; 
-    let activeHandIndex = 0;
-    let gameActive = false;
-
-    const suits = ['♥', '♦', '♣', '♠'];
-    const values = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
-
-    const elBalance = document.getElementById('balance-display');
-    const elVaultHeader = document.getElementById('vault-display-header');
-    
-    // Cashier logic
-    function openCashier() { 
-        document.getElementById('custom-deposit-amount').value = '';
-        document.getElementById('cashier-modal').style.display = 'flex'; 
-    }
-    function closeCashier() { document.getElementById('cashier-modal').style.display = 'none'; }
-    
-    function processDeposit(method) {
-        let amt = parseFloat(document.getElementById('custom-deposit-amount').value);
-        if(isNaN(amt) || amt <= 0) {
-            alert("Please enter a valid amount.");
-            return;
-        }
-        balance += amt;
-        updateUIBalances();
-        closeCashier();
-        showMessage(`+$${amt} via ${method} added.`, 'win');
-        setTimeout(() => { if(!gameActive) document.getElementById('result-message').style.display = 'none'; }, 2500);
-    }
-
-    // Vault logic
-    function openVault() {
-        document.getElementById('vault-action-amount').value = '';
-        updateUIBalances();
-        document.getElementById('vault-modal').style.display = 'flex';
-    }
-    function closeVault() { document.getElementById('vault-modal').style.display = 'none'; }
-
-    function depositToVault() {
-        let amt = parseFloat(document.getElementById('vault-action-amount').value);
-        if(isNaN(amt) || amt <= 0) return;
-        if(amt > balance) { alert("Insufficient wallet balance."); return; }
-        
-        balance -= amt;
-        vaultBalance += amt;
-        updateUIBalances();
-        document.getElementById('vault-action-amount').value = '';
-    }
-
-    function withdrawFromVault() {
-        let amt = parseFloat(document.getElementById('vault-action-amount').value);
-        if(isNaN(amt) || amt <= 0) return;
-        if(amt > vaultBalance) { alert("Insufficient vault balance."); return; }
-        
-        vaultBalance -= amt;
-        balance += amt;
-        updateUIBalances();
-        document.getElementById('vault-action-amount').value = '';
-    }
-
-    function updateUIBalances() {
-        elBalance.innerText = balance.toFixed(2);
-        elVaultHeader.innerText = vaultBalance.toFixed(2);
-        document.getElementById('vault-modal-balance').innerText = balance.toFixed(2);
-        document.getElementById('vault-modal-stored').innerText = vaultBalance.toFixed(2);
-    }
-
-    // Game logic
-    function createDeck() {
-        deck = [];
-        for(let i=0; i<4; i++) { 
-            for (let suit of suits) {
-                for (let value of values) {
-                    deck.push({ suit, value });
-                }
-            }
-        }
-        for (let i = deck.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [deck[i], deck[j]] = [deck[j], deck[i]];
-        }
-    }
-
-    function getCardValue(card) {
-        if (['J', 'Q', 'K'].includes(card.value)) return 10;
-        if (card.value === 'A') return 11;
-        return parseInt(card.value);
-    }
-
-    function calculateScore(hand) {
-        let score = 0;
-        let aces = 0;
-        for (let card of hand) {
-            score += getCardValue(card);
-            if (card.value === 'A') aces += 1;
-        }
-        while (score > 21 && aces > 0) {
-            score -= 10;
-            aces -= 1;
-        }
-        return score;
-    }
-
-    function renderCard(card, isHidden = false) {
-        if (isHidden) return `<div class="card hidden"></div>`;
-        const colorClass = (card.suit === '♥' || card.suit === '♦') ? 'red' : 'black';
-        return `<div class="card ${colorClass}">${card.value}${card.suit}</div>`;
-    }
-
-    function updateUI() {
-        updateUIBalances();
-        
-        const elDealerCards = document.getElementById('dealer-cards');
-        const elPlayerCards = document.getElementById('player-cards');
-        const elSplitArea = document.getElementById('split-area');
-        
-        elDealerCards.innerHTML = '';
-        dealerHand.forEach((card, index) => {
-            elDealerCards.innerHTML += renderCard(card, index === 1 && gameActive);
-        });
-        document.getElementById('dealer-score').innerText = gameActive ? getCardValue(dealerHand[0]) : calculateScore(dealerHand);
-
-        elPlayerCards.innerHTML = playerHands[0].map(c => renderCard(c)).join('');
-        document.getElementById('player-score').innerText = calculateScore(playerHands[0]);
-
-        if (playerHands.length > 1) {
-            elSplitArea.style.display = 'flex';
-            document.getElementById('split-cards').innerHTML = playerHands[1].map(c => renderCard(c)).join('');
-            document.getElementById('split-score').innerText = calculateScore(playerHands[1]);
-        } else {
-            elSplitArea.style.display = 'none';
-        }
-
-        document.getElementById('player-area').style.opacity = (activeHandIndex === 0 || !gameActive) ? '1' : '0.5';
-        if (playerHands.length > 1) {
-            elSplitArea.style.opacity = (activeHandIndex === 1 || !gameActive) ? '1' : '0.5';
-        }
-
-        if (gameActive) {
-            document.getElementById('btn-double').disabled = playerHands[activeHandIndex].length !== 2 || balance < currentBet;
-            const canSplit = playerHands.length === 1 && 
-                             playerHands[0].length === 2 && 
-                             getCardValue(playerHands[0][0]) === getCardValue(playerHands[0][1]) &&
-                             balance >= currentBet;
-            document.getElementById('btn-split').disabled = !canSplit;
-        }
-    }
-
-    function showMessage(text, type) {
-        const msg = document.getElementById('result-message');
-        msg.innerText = text;
-        msg.className = `message msg-${type}`;
-    }
-
-    function halfBet() { 
-        const betInput = document.getElementById('bet-amount');
-        betInput.value = Math.max(1, Math.floor(betInput.value / 2)); 
-    }
-    function doubleBet() { 
-        const betInput = document.getElementById('bet-amount');
-        betInput.value = betInput.value * 2; 
-    }
-
-    function startGame() {
-        const bet = parseFloat(document.getElementById('bet-amount').value);
-        if (bet > balance) { showMessage("Not enough funds. Open wallet.", "lose"); return; }
-        if (bet <= 0 || isNaN(bet)) return;
-
-        currentBet = bet;
-        balance -= currentBet;
-        gameActive = true;
-        activeHandIndex = 0;
-        playerHands = [[]];
-        dealerHand = [];
-        document.getElementById('result-message').style.display = 'none';
-        
-        document.getElementById('player-area').className = 'hand-area';
-        document.getElementById('split-area').className = 'hand-area';
-
-        createDeck();
-        
-        playerHands[0].push(deck.pop());
-        dealerHand.push(deck.pop());
-        playerHands[0].push(deck.pop());
-        dealerHand.push(deck.pop());
-
-        document.getElementById('betting-controls').style.display = 'none';
-        document.getElementById('game-controls').style.display = 'grid';
-
-        updateUI();
-        if (calculateScore(playerHands[0]) === 21) endGame();
-    }
-
-    function hit() {
-        playerHands[activeHandIndex].push(deck.pop());
-        updateUI();
-        if (calculateScore(playerHands[activeHandIndex]) >= 21) stand();
-    }
-
-    function doubleDown() {
-        balance -= currentBet;
-        currentBet *= 2; 
-        playerHands[activeHandIndex].push(deck.pop());
-        updateUI();
-        stand();
-    }
-
-    function splitHand() {
-        balance -= currentBet; 
-        playerHands.push([playerHands[0].pop()]); 
-        playerHands[0].push(deck.pop());
-        playerHands[1].push(deck.pop());
-        updateUI();
-    }
-
-    function stand() {
-        if (activeHandIndex < playerHands.length - 1) {
-            activeHandIndex++;
-            updateUI();
-        } else {
-            gameActive = false;
-            playDealerTurn();
-        }
-    }
-
-    function playDealerTurn() {
-        let allBusted = true;
-        for (let hand of playerHands) {
-            if (calculateScore(hand) <= 21) allBusted = false;
-        }
-
-        if (!allBusted) {
-            while (calculateScore(dealerHand) < 17) {
-                dealerHand.push(deck.pop());
-            }
-        }
-        
-        updateUI();
-        setTimeout(evaluateHands, 400); 
-    }
-
-    function evaluateHands() {
-        const dealerScore = calculateScore(dealerHand);
-        let totalWinnings = 0;
-        let results = [];
-
-        playerHands.forEach((hand, index) => {
-            const playerScore = calculateScore(hand);
-            const handArea = document.getElementById(index === 0 ? 'player-area' : 'split-area');
-            let status = '';
-            
-            if (playerScore > 21) status = 'lose';
-            else if (dealerScore > 21 || playerScore > dealerScore) {
-                status = 'win';
-                totalWinnings += currentBet * 2;
-            } 
-            else if (playerScore < dealerScore) status = 'lose';
-            else {
-                status = 'draw';
-                totalWinnings += currentBet; 
-            }
-
-            if (status === 'win' && playerScore === 21 && hand.length === 2 && playerHands.length === 1) {
-                totalWinnings += currentBet * 0.5; 
-            }
-
-            results.push(status);
-            handArea.classList.add(`hand-${status}`);
-        });
-
-        balance += totalWinnings;
-        updateUIBalances();
-
-        if (results.includes('win')) {
-            showMessage(`Won $${(totalWinnings - (currentBet * playerHands.length)).toFixed(2)}`, 'win');
-        } else if (results.every(r => r === 'lose')) {
-            showMessage("Dealer Wins", 'lose');
-        } else {
-            showMessage("Push", 'draw');
-        }
-
-        document.getElementById('betting-controls').style.display = 'flex';
-        document.getElementById('game-controls').style.display = 'none';
-        
-        const betInput = document.getElementById('bet-amount');
-        if (currentBet > parseFloat(betInput.value) && playerHands.length === 1) {
-             currentBet = parseFloat(betInput.value);
-        }
-    }
-
-    function endGame() {
-        gameActive = false;
-        updateUI();
-        setTimeout(evaluateHands, 400);
-    }
-    
-    // Initialize UI on load
-    updateUIBalances();
-</script>
 </body>
 </html>
