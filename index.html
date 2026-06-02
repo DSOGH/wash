@@ -31,9 +31,13 @@
     background-color: transparent;
     border: 1px solid white;
     color: white;
-    padding: 5px 10px;
+    padding: 6px 12px;
     border-radius: 4px;
     font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
   }
 
   /* Main Content Area */
@@ -131,13 +135,20 @@
     color: #555;
     margin-bottom: 5px;
   }
+  
+  /* Updated Event Main Section for Logo Integration */
   .event-main {
     background-color: #1a4b8c;
     color: white;
     padding: 10px;
     border-radius: 4px;
     margin-bottom: 10px;
-    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .event-text-container {
+    flex: 1;
   }
   .event-title {
     font-weight: bold;
@@ -147,6 +158,13 @@
   .event-date {
     font-size: 12px;
   }
+  .event-logo {
+    max-width: 45px;
+    max-height: 45px;
+    margin-left: 10px;
+    object-fit: contain;
+  }
+
   .ticket-name {
     font-size: 14px;
     color: #333;
@@ -186,7 +204,14 @@
   <div class="header">
     <div style="width: 60px;">&lt;</div>
     <h1>Tickets</h1>
-    <button class="transfer-btn">Transfer</button>
+    <button class="transfer-btn">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M15 5H4a2 2 0 0 0-2 2v3a2 2 0 0 1 0 4v3a2 2 0 0 0 2 2h11"></path>
+        <circle cx="17" cy="16" r="6" fill="#222"></circle>
+        <path d="M15 16h4m0 0l-2-2m2 2l-2 2"></path>
+      </svg>
+      Transfer
+    </button>
   </div>
 
   <div class="container">
@@ -210,8 +235,11 @@
       <div class="ticket-details">
         <div class="event-type">Movie Prop Ticket</div>
         <div class="event-main">
-          <div class="event-title">Fictional High School Graduation</div>
-          <div class="event-date">Wed. Jun 3, 2026 at 7:00 PM</div>
+          <div class="event-text-container">
+            <div class="event-title">Fictional Event Title</div>
+            <div class="event-date">Wed. Jun 3, 2026 at 7:00 PM</div>
+          </div>
+          <img src="IMG_8023.jpeg" alt="Event Logo" class="event-logo" onerror="this.style.display='none'">
         </div>
         <div class="ticket-name">Name: Jane Doe</div>
         <div class="ticket-counter">1 of 2</div>
@@ -223,8 +251,11 @@
       <div class="ticket-details">
         <div class="event-type">Movie Prop Ticket</div>
         <div class="event-main">
-          <div class="event-title">Fictional High School Graduation</div>
-          <div class="event-date">Wed. Jun 3, 2026 at 7:00 PM</div>
+          <div class="event-text-container">
+            <div class="event-title">Fictional Event Title</div>
+            <div class="event-date">Wed. Jun 3, 2026 at 7:00 PM</div>
+          </div>
+          <img src="IMG_8023.jpeg" alt="Event Logo" class="event-logo" onerror="this.style.display='none'">
         </div>
         <div class="ticket-name">Name: John Smith</div>
         <div class="ticket-counter">2 of 2</div>
