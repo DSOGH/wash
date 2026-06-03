@@ -10,215 +10,305 @@
     margin: 0;
     padding: 0;
     background-color: #ffffff;
-    color: #333;
+    color: #111;
   }
   
   /* Header */
   .header {
     background-color: #222;
     color: white;
-    padding: 15px;
+    padding: 12px 16px;
     display: flex;
     justify-content: space-between;
     align-items: center;
   }
   .header h1 {
     margin: 0;
-    font-size: 18px;
+    font-size: 17px;
     font-weight: 600;
+  }
+  .back-btn {
+    font-size: 20px;
+    color: white;
+    text-decoration: none;
+    width: 60px;
   }
   .transfer-btn {
     background-color: transparent;
-    border: 1px solid white;
+    border: 1px solid #ccc;
     color: white;
-    padding: 6px 12px;
+    padding: 6px 10px;
     border-radius: 4px;
-    font-size: 14px;
+    font-size: 13px;
     display: flex;
     align-items: center;
     gap: 6px;
-    cursor: pointer;
   }
   .transfer-icon {
-    width: 18px;
-    height: 18px;
+    width: 16px;
+    height: 16px;
     object-fit: contain;
   }
 
   /* Main Content Area */
   .container {
-    padding: 15px;
+    padding: 16px;
   }
 
   /* Alert Banner */
   .alert-banner {
-    background-color: #fcf0cd;
-    border-left: 4px solid #f2c94c;
-    padding: 12px;
-    border-radius: 4px;
-    margin-bottom: 15px;
+    background-color: #fdf3d0;
+    border-left: 4px solid #f4d03f;
+    padding: 12px 16px;
+    border-radius: 2px;
+    margin-bottom: 20px;
     font-size: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
   }
-  .alert-banner strong {
+  .alert-content {
+    display: flex;
+    gap: 10px;
+  }
+  .alert-icon {
+    background-color: #f4d03f;
+    color: #000;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    font-size: 12px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .alert-text strong {
     display: block;
     margin-bottom: 4px;
+    font-weight: 600;
+  }
+  .alert-text span {
+    color: #444;
+  }
+  .alert-plus {
+    font-size: 18px;
+    color: #333;
+    line-height: 1;
   }
 
   /* Status Box */
   .status-box {
-    border: 1px solid #ddd;
+    border: 1px solid #ccc;
     text-align: center;
-    padding: 10px;
+    padding: 12px;
     border-radius: 4px;
-    margin-bottom: 15px;
-    font-weight: bold;
+    margin-bottom: 16px;
+    font-weight: 600;
+    font-size: 14px;
   }
   .status-badge {
     background-color: #333;
     color: white;
     border-radius: 50%;
-    width: 24px;
-    height: 24px;
+    width: 26px;
+    height: 26px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 5px;
+    margin-bottom: 6px;
+    font-size: 14px;
   }
 
   /* Action Buttons */
   .action-buttons {
     display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
+    gap: 12px;
+    margin-bottom: 24px;
   }
   .btn-use {
-    background-color: #333;
+    background-color: #383838;
     color: white;
     flex: 1;
     border: none;
     padding: 12px;
     border-radius: 4px;
-    font-weight: bold;
+    font-weight: 600;
+    font-size: 14px;
   }
   .btn-select {
     background-color: white;
     color: #333;
     flex: 1;
-    border: 1px solid #ddd;
+    border: 1px solid #ccc;
     padding: 12px;
     border-radius: 4px;
-    font-weight: bold;
+    font-weight: 600;
+    font-size: 14px;
   }
 
   /* Ticket Card */
   .ticket-card {
-    border: 1px solid #ddd;
-    border-radius: 8px;
+    border: 1px solid #dcdcdc;
+    border-radius: 6px;
     display: flex;
-    margin-bottom: 15px;
-    overflow: hidden;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-  }
-  .ticket-stub {
-    writing-mode: vertical-rl;
-    transform: rotate(180deg);
-    background-color: #f9f9f9;
-    padding: 10px;
-    text-align: center;
-    border-right: 2px dashed #ccc;
-    font-weight: bold;
-    font-size: 12px;
-    letter-spacing: 1px;
-  }
-  .ticket-details {
-    flex: 1;
-    padding: 10px;
+    margin-bottom: 16px;
+    position: relative;
     background-color: #fff;
-  }
-  .event-type {
-    font-size: 14px;
-    color: #555;
-    margin-bottom: 5px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
   }
   
-  /* Updated Event Main Section for Logo Integration */
+  /* The Cutout Notch */
+  .ticket-card::before {
+    content: '';
+    position: absolute;
+    left: -7px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 14px;
+    height: 14px;
+    background-color: #ffffff;
+    border-right: 1px solid #dcdcdc;
+    border-radius: 50%;
+    z-index: 1;
+  }
+
+  .ticket-stub {
+    width: 45px;
+    background-color: #f4f4f4;
+    border-right: 2px dashed #ccc;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border-top-left-radius: 6px;
+    border-bottom-left-radius: 6px;
+  }
+  .stub-text-container {
+    transform: rotate(270deg);
+    white-space: nowrap;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+  .stub-bold {
+    font-weight: 800;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+  }
+  .stub-light {
+    font-weight: 400;
+    font-size: 13px;
+    color: #555;
+  }
+
+  .ticket-details {
+    flex: 1;
+    padding: 14px;
+  }
+  .event-type {
+    font-size: 15px;
+    color: #333;
+    margin-bottom: 6px;
+  }
+  
+  /* Blue Box */
   .event-main {
-    background-color: #1a4b8c;
+    background-color: #12408b;
     color: white;
-    padding: 10px;
-    border-radius: 4px;
-    margin-bottom: 10px;
+    padding: 12px;
+    border-radius: 2px;
+    margin-bottom: 8px;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    margin-right: 15px; /* Creates the inset look */
+    position: relative;
   }
   .event-text-container {
     flex: 1;
   }
   .event-title {
-    font-weight: bold;
-    font-size: 16px;
-    margin-bottom: 5px;
+    font-weight: 700;
+    font-size: 15px;
+    margin-bottom: 4px;
+    line-height: 1.2;
   }
   .event-date {
-    font-size: 12px;
+    font-size: 11px;
+    font-weight: 400;
   }
   .event-logo {
-    max-width: 45px;
-    max-height: 45px;
-    margin-left: 10px;
+    width: 40px;
+    height: 40px;
     object-fit: contain;
+    position: absolute;
+    right: -20px; /* Pushes logo out of the blue box */
   }
 
+  .ticket-bottom-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+  }
   .ticket-name {
-    font-size: 14px;
+    font-size: 13px;
     color: #333;
   }
   .ticket-counter {
-    text-align: right;
     font-size: 12px;
-    color: #777;
-    margin-top: 5px;
+    color: #666;
   }
 
   /* Footer */
   .footer {
     text-align: center;
-    padding: 20px 15px;
-    border-top: 1px solid #eee;
-    margin-top: 20px;
+    padding: 24px 16px;
+    border-top: 1px solid #eaeaea;
+    margin-top: 10px;
   }
   .footer h2 {
     font-size: 16px;
-    margin-bottom: 15px;
+    margin-bottom: 16px;
+    font-weight: 700;
+    color: #222;
   }
   .btn-bottom {
-    background-color: #ccc;
+    background-color: #d8d8d8;
     color: #888;
     width: 100%;
     border: none;
-    padding: 15px;
+    padding: 14px;
     border-radius: 4px;
-    font-weight: bold;
-    font-size: 16px;
+    font-weight: 600;
+    font-size: 15px;
   }
 </style>
 </head>
 <body>
 
   <div class="header">
-    <div style="width: 60px;">&lt;</div>
+    <a href="#" class="back-btn">&lt;</a>
     <h1>Tickets</h1>
-    <button class="transfer-btn">
+    <div class="transfer-btn">
       <img src="IMG_8024.jpeg" alt="Transfer Icon" class="transfer-icon" onerror="this.style.display='none'">
       Transfer
-    </button>
+    </div>
   </div>
 
   <div class="container">
     <div class="alert-banner">
-      <strong>! Event alert</strong>
-      Your access code is your Student Number an...
+      <div class="alert-content">
+        <div class="alert-icon">!</div>
+        <div class="alert-text">
+          <strong>Event alert</strong>
+          <span>Your access code is your Student Number a...</span>
+        </div>
+      </div>
+      <div class="alert-plus">+</div>
     </div>
 
     <div class="status-box">
@@ -233,7 +323,12 @@
 
     <!-- Ticket 1 -->
     <div class="ticket-card">
-      <div class="ticket-stub">ADMIT ONE</div>
+      <div class="ticket-stub">
+        <div class="stub-text-container">
+          <span class="stub-light">Prop Ticket</span>
+          <span class="stub-bold">ADMIT ONE</span>
+        </div>
+      </div>
       <div class="ticket-details">
         <div class="event-type">Movie Prop Ticket</div>
         <div class="event-main">
@@ -243,14 +338,21 @@
           </div>
           <img src="IMG_8027.jpeg" alt="Event Logo" class="event-logo" onerror="this.style.display='none'">
         </div>
-        <div class="ticket-name">Name: Jane Doe</div>
-        <div class="ticket-counter">1 of 2</div>
+        <div class="ticket-bottom-info">
+          <div class="ticket-name">Name: Jane Doe</div>
+          <div class="ticket-counter">1 of 2</div>
+        </div>
       </div>
     </div>
 
     <!-- Ticket 2 -->
     <div class="ticket-card">
-      <div class="ticket-stub">ADMIT ONE</div>
+      <div class="ticket-stub">
+        <div class="stub-text-container">
+          <span class="stub-light">Prop Ticket</span>
+          <span class="stub-bold">ADMIT ONE</span>
+        </div>
+      </div>
       <div class="ticket-details">
         <div class="event-type">Movie Prop Ticket</div>
         <div class="event-main">
@@ -258,10 +360,12 @@
             <div class="event-title">Fictional Event Title</div>
             <div class="event-date">Wed. Jun 3, 2026 at 7:00 PM</div>
           </div>
-          <img src="IMG_8027.jpeg" alt="Event Logo" class="event-logo" onerror="this.style.display='none'">
+          <img src="IMG_8027.png" alt="Event Logo" class="event-logo" onerror="this.style.display='none'">
         </div>
-        <div class="ticket-name">Name: John Smith</div>
-        <div class="ticket-counter">2 of 2</div>
+        <div class="ticket-bottom-info">
+          <div class="ticket-name">Name: John Smith</div>
+          <div class="ticket-counter">2 of 2</div>
+        </div>
       </div>
     </div>
   </div>
