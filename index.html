@@ -6,7 +6,7 @@
 <title>Prop Ticket Interface</title>
 <style>
   body {
-    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     margin: 0;
     padding: 0;
     background-color: #ffffff;
@@ -101,9 +101,10 @@
 
   /* Status Box */
   .status-box {
-    border: 1px solid #222; /* Darker border */
+    border: 1px solid #444;
+    background-color: #f6f6f6;
     text-align: center;
-    padding: 8px 12px; /* Smaller padding */
+    padding: 10px 12px;
     border-radius: 4px;
     margin-bottom: 16px;
     font-weight: 600;
@@ -142,7 +143,7 @@
     background-color: white;
     color: #333;
     flex: 1;
-    border: 1px solid #333;
+    border: 1px solid #ccc;
     padding: 10px;
     border-radius: 4px;
     font-weight: 600;
@@ -156,7 +157,7 @@
     display: flex;
     margin-bottom: 16px;
     position: relative;
-    background-color: #fff;
+    background-color: #f6f6f6;
     box-shadow: 0 1px 3px rgba(0,0,0,0.06);
   }
   
@@ -169,7 +170,7 @@
     transform: translateY(-50%);
     width: 14px;
     height: 14px;
-    background-color: #ffffff;
+    background-color: #ffffff; 
     border-right: 1px solid #dcdcdc;
     border-radius: 50%;
     z-index: 2;
@@ -177,36 +178,48 @@
 
   .ticket-stub {
     width: 50px;
-    background-color: #f7f7f7; /* Slightly grey */
-    border-right: 2px dashed #b3b3b3; /* Better dotted line */
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    border-top-left-radius: 6px;
-    border-bottom-left-radius: 6px;
     position: relative;
     z-index: 1;
   }
+
+  /* Custom Perforation Line */
+  .ticket-stub::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 8px;
+    bottom: 8px;
+    width: 2px;
+    /* Adjust percentages to change dash thickness, change 14px to space them out more */
+    background-image: linear-gradient(to bottom, #a0a0a0 45%, transparent 45%);
+    background-size: 100% 14px; 
+  }
   
   .stub-text-container {
-    writing-mode: vertical-rl;
-    transform: rotate(180deg);
+    transform: rotate(270deg);
     display: flex;
-    gap: 4px;
+    flex-direction: column;
     align-items: center;
+    justify-content: center;
+    width: 120px;
+    line-height: 1.1;
   }
   
+  .stub-light {
+    font-weight: 500;
+    font-size: 12px;
+    color: #555;
+    margin-bottom: 2px;
+  }
   .stub-bold {
     font-weight: 900;
-    font-size: 14px;
+    font-size: 15px;
     letter-spacing: 0.5px;
     color: #000;
-  }
-  .stub-light {
-    font-weight: 400;
-    font-size: 13px;
-    color: #666;
   }
 
   .ticket-details {
@@ -330,8 +343,8 @@
     <div class="ticket-card">
       <div class="ticket-stub">
         <div class="stub-text-container">
-          <span class="stub-bold">ADMIT ONE</span>
-          <span class="stub-light">Prop Ticket</span>
+          <div class="stub-light">Prop Ticket</div>
+          <div class="stub-bold">ADMIT ONE</div>
         </div>
       </div>
       <div class="ticket-details">
@@ -353,8 +366,8 @@
     <div class="ticket-card">
       <div class="ticket-stub">
         <div class="stub-text-container">
-          <span class="stub-bold">ADMIT ONE</span>
-          <span class="stub-light">Prop Ticket</span>
+          <div class="stub-light">Prop Ticket</div>
+          <div class="stub-bold">ADMIT ONE</div>
         </div>
       </div>
       <div class="ticket-details">
