@@ -6,7 +6,7 @@
 <title>Prop Ticket Interface</title>
 <style>
   body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     margin: 0;
     padding: 0;
     background-color: #ffffff;
@@ -57,8 +57,8 @@
 
   /* Alert Banner */
   .alert-banner {
-    background-color: #fdf3d0;
-    border-left: 4px solid #f4d03f;
+    background-color: #fcf1ce;
+    border-left: 4px solid #f2c94c;
     padding: 12px 16px;
     border-radius: 2px;
     margin-bottom: 20px;
@@ -72,7 +72,7 @@
     gap: 10px;
   }
   .alert-icon {
-    background-color: #f4d03f;
+    background-color: #f2c94c;
     color: #000;
     width: 18px;
     height: 18px;
@@ -101,25 +101,25 @@
 
   /* Status Box */
   .status-box {
-    border: 1px solid #ccc;
+    border: 1px solid #222; /* Darker border */
     text-align: center;
-    padding: 12px;
+    padding: 8px 12px; /* Smaller padding */
     border-radius: 4px;
     margin-bottom: 16px;
     font-weight: 600;
     font-size: 14px;
   }
   .status-badge {
-    background-color: #333;
+    background-color: #222;
     color: white;
     border-radius: 50%;
-    width: 26px;
-    height: 26px;
+    width: 24px;
+    height: 24px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 6px;
-    font-size: 14px;
+    margin-bottom: 4px;
+    font-size: 13px;
   }
 
   /* Action Buttons */
@@ -129,11 +129,11 @@
     margin-bottom: 24px;
   }
   .btn-use {
-    background-color: #383838;
+    background-color: #333;
     color: white;
     flex: 1;
     border: none;
-    padding: 12px;
+    padding: 10px;
     border-radius: 4px;
     font-weight: 600;
     font-size: 14px;
@@ -142,8 +142,8 @@
     background-color: white;
     color: #333;
     flex: 1;
-    border: 1px solid #ccc;
-    padding: 12px;
+    border: 1px solid #333;
+    padding: 10px;
     border-radius: 4px;
     font-weight: 600;
     font-size: 14px;
@@ -157,7 +157,7 @@
     margin-bottom: 16px;
     position: relative;
     background-color: #fff;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
   }
   
   /* The Cutout Notch */
@@ -172,51 +172,56 @@
     background-color: #ffffff;
     border-right: 1px solid #dcdcdc;
     border-radius: 50%;
-    z-index: 1;
+    z-index: 2;
   }
 
   .ticket-stub {
-    width: 45px;
-    background-color: #f4f4f4;
-    border-right: 2px dashed #ccc;
+    width: 50px;
+    background-color: #f7f7f7; /* Slightly grey */
+    border-right: 2px dashed #b3b3b3; /* Better dotted line */
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     border-top-left-radius: 6px;
     border-bottom-left-radius: 6px;
+    position: relative;
+    z-index: 1;
   }
+  
   .stub-text-container {
-    transform: rotate(270deg);
-    white-space: nowrap;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
     display: flex;
-    gap: 10px;
+    gap: 4px;
     align-items: center;
   }
+  
   .stub-bold {
-    font-weight: 800;
-    font-size: 13px;
+    font-weight: 900;
+    font-size: 14px;
     letter-spacing: 0.5px;
+    color: #000;
   }
   .stub-light {
     font-weight: 400;
     font-size: 13px;
-    color: #555;
+    color: #666;
   }
 
   .ticket-details {
     flex: 1;
-    padding: 14px;
+    padding: 12px;
   }
   .event-type {
-    font-size: 15px;
-    color: #333;
+    font-size: 14px;
+    color: #444;
     margin-bottom: 6px;
   }
   
   /* Blue Box */
   .event-main {
-    background-color: #12408b;
+    background-color: #1a3c87;
     color: white;
     padding: 12px;
     border-radius: 2px;
@@ -224,7 +229,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-right: 15px; /* Creates the inset look */
+    margin-right: 15px;
     position: relative;
   }
   .event-text-container {
@@ -233,19 +238,20 @@
   .event-title {
     font-weight: 700;
     font-size: 15px;
-    margin-bottom: 4px;
-    line-height: 1.2;
+    margin-bottom: 6px;
+    line-height: 1.3;
   }
   .event-date {
     font-size: 11px;
     font-weight: 400;
+    color: #eee;
   }
   .event-logo {
-    width: 40px;
-    height: 40px;
+    width: 42px;
+    height: 42px;
     object-fit: contain;
     position: absolute;
-    right: -20px; /* Pushes logo out of the blue box */
+    right: -20px;
   }
 
   .ticket-bottom-info {
@@ -271,7 +277,7 @@
     margin-top: 10px;
   }
   .footer h2 {
-    font-size: 16px;
+    font-size: 15px;
     margin-bottom: 16px;
     font-weight: 700;
     color: #222;
@@ -324,15 +330,15 @@
     <div class="ticket-card">
       <div class="ticket-stub">
         <div class="stub-text-container">
-          <span class="stub-light">Prop Ticket</span>
           <span class="stub-bold">ADMIT ONE</span>
+          <span class="stub-light">Prop Ticket</span>
         </div>
       </div>
       <div class="ticket-details">
-        <div class="event-type">Movie Prop Ticket</div>
+        <div class="event-type">Prop Ticket</div>
         <div class="event-main">
           <div class="event-text-container">
-            <div class="event-title">Fictional Event Title</div>
+            <div class="event-title">Fake Class of 2026<br>Graduation</div>
             <div class="event-date">Wed. Jun 3, 2026 at 7:00 PM</div>
           </div>
           <img src="IMG_8027.png" alt="Event Logo" class="event-logo" onerror="this.style.display='none'">
@@ -347,15 +353,15 @@
     <div class="ticket-card">
       <div class="ticket-stub">
         <div class="stub-text-container">
-          <span class="stub-light">Prop Ticket</span>
           <span class="stub-bold">ADMIT ONE</span>
+          <span class="stub-light">Prop Ticket</span>
         </div>
       </div>
       <div class="ticket-details">
-        <div class="event-type">Movie Prop Ticket</div>
+        <div class="event-type">Prop Ticket</div>
         <div class="event-main">
           <div class="event-text-container">
-            <div class="event-title">Fictional Event Title</div>
+            <div class="event-title">Fake Class of 2026<br>Graduation</div>
             <div class="event-date">Wed. Jun 3, 2026 at 7:00 PM</div>
           </div>
           <img src="IMG_8027.png" alt="Event Logo" class="event-logo" onerror="this.style.display='none'">
