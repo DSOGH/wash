@@ -3,496 +3,273 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tickets App Replica</title>
+<title>Prop Ticket Interface</title>
 <style>
-  :root {
-    --bg-color: #F2F2F6;
-    --header-bg: #1A1A1C;
-    --ticket-blue: #1C3372;
-    --ticket-green: #34C759;
-    --alert-bg: #FFF9D6;
-    --alert-icon-bg: #F4C430;
-    --text-main: #1C1C1E;
-    --text-muted: #8E8E93;
-    --font-main: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  }
-
-  * {
-    box-sizing: border-box;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
-
   body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #111; /* Dark backdrop for presentation */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    font-family: var(--font-main);
+    background-color: #ffffff;
+    color: #333;
   }
-
-  /* Mobile Device Frame */
-  .mobile-frame {
-    width: 390px;
-    height: 844px;
-    background-color: var(--bg-color);
-    position: relative;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.4);
-  }
-
-  /* --- HEADER --- */
+  
+  /* Header */
   .header {
-    background-color: var(--header-bg);
+    background-color: #222;
     color: white;
-    padding: 0 16px;
+    padding: 15px;
     display: flex;
-    align-items: center;
     justify-content: space-between;
-    height: 56px;
-    flex-shrink: 0;
-  }
-  .header-left {
-    display: flex;
     align-items: center;
-    gap: 8px;
-    cursor: pointer;
   }
-  .header-left svg {
-    margin-top: 1px;
-  }
-  .header-title {
-    font-size: 17px;
+  .header h1 {
+    margin: 0;
+    font-size: 18px;
     font-weight: 600;
-    letter-spacing: -0.4px;
   }
   .transfer-btn {
-    background: transparent;
-    border: 1px solid rgba(255,255,255,0.8);
+    background-color: transparent;
+    border: 1px solid white;
     color: white;
     padding: 6px 12px;
-    border-radius: 6px;
+    border-radius: 4px;
     font-size: 14px;
-    font-weight: 500;
     display: flex;
     align-items: center;
     gap: 6px;
-  }
-
-  /* --- MAIN SCROLLABLE CONTENT --- */
-  .content {
-    flex: 1;
-    overflow-y: auto;
-    padding: 16px;
-    padding-bottom: 140px; /* Space for the bottom bar */
-  }
-  /* Hide scrollbar */
-  .content::-webkit-scrollbar { display: none; }
-  .content { -ms-overflow-style: none; scrollbar-width: none; }
-
-  /* Event Alert */
-  .alert-box {
-    background-color: var(--alert-bg);
-    border-radius: 8px;
-    padding: 14px 16px;
-    display: flex;
-    align-items: center;
-    margin-bottom: 16px;
-  }
-  .alert-icon {
-    width: 20px;
-    height: 20px;
-    background-color: var(--alert-icon-bg);
-    color: black;
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-weight: 800;
-    font-size: 14px;
-    margin-right: 12px;
-    flex-shrink: 0;
-  }
-  .alert-text {
-    flex: 1;
-    font-size: 14px;
-    color: var(--text-main);
-    line-height: 1.3;
-    letter-spacing: -0.1px;
-  }
-  .alert-text strong {
-    font-weight: 600;
-    display: block;
-    margin-bottom: 2px;
-  }
-  .alert-plus {
-    font-size: 20px;
-    color: #666;
-    font-weight: 400;
-  }
-
-  /* Available Badge */
-  .available-box {
-    background-color: white;
-    border: 1px solid #E5E5EA;
-    border-radius: 8px;
-    padding: 12px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 16px;
-  }
-  .available-count {
-    background-color: var(--text-main);
-    color: white;
-    width: 26px;
-    height: 26px;
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-weight: 700;
-    font-size: 15px;
-    margin-bottom: 4px;
-  }
-  .available-text {
-    font-size: 15px;
-    font-weight: 700;
-    color: var(--text-main);
-    letter-spacing: -0.2px;
-  }
-
-  /* Action Buttons (Use all / Deselect all) */
-  .action-buttons {
-    display: flex;
-    gap: 12px;
-    margin-bottom: 24px;
-  }
-  .action-buttons button {
-    flex: 1;
-    padding: 12px;
-    border-radius: 8px;
-    font-size: 15px;
-    font-weight: 600;
-    letter-spacing: -0.2px;
-    border: none;
     cursor: pointer;
   }
-  .btn-use {
-    background-color: #2C2C2E;
+  .transfer-icon {
+    width: 18px;
+    height: 18px;
+    object-fit: contain;
+  }
+
+  /* Main Content Area */
+  .container {
+    padding: 15px;
+  }
+
+  /* Alert Banner */
+  .alert-banner {
+    background-color: #fcf0cd;
+    border-left: 4px solid #f2c94c;
+    padding: 12px;
+    border-radius: 4px;
+    margin-bottom: 15px;
+    font-size: 14px;
+  }
+  .alert-banner strong {
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  /* Status Box */
+  .status-box {
+    border: 1px solid #ddd;
+    text-align: center;
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 15px;
+    font-weight: bold;
+  }
+  .status-badge {
+    background-color: #333;
     color: white;
-  }
-  .btn-deselect {
-    background-color: white;
-    color: #48484A;
-    border: 1px solid #D1D1D6;
-  }
-
-  /* --- TICKETS --- */
-  .ticket {
-    background: white;
-    border: 2px solid var(--ticket-green);
-    border-radius: 12px;
-    margin-bottom: 16px;
-    display: flex;
-    position: relative;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-  }
-  
-  /* Green Check Icon */
-  .check-icon {
-    position: absolute;
-    top: -8px;
-    right: -8px;
-    width: 22px;
-    height: 22px;
-    background-color: var(--ticket-green);
     border-radius: 50%;
-    display: flex;
-    justify-content: center;
+    width: 24px;
+    height: 24px;
+    display: inline-flex;
     align-items: center;
-    z-index: 10;
-    border: 2px solid white;
-    box-sizing: content-box;
+    justify-content: center;
+    margin-bottom: 5px;
   }
 
-  /* Ticket Stub (Left) */
-  .ticket-stub {
-    width: 46px;
+  /* Action Buttons */
+  .action-buttons {
     display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 16px 0;
+    gap: 10px;
+    margin-bottom: 20px;
   }
-  .stub-text-container {
+  .btn-use {
+    background-color: #333;
+    color: white;
+    flex: 1;
+    border: none;
+    padding: 12px;
+    border-radius: 4px;
+    font-weight: bold;
+  }
+  .btn-select {
+    background-color: white;
+    color: #333;
+    flex: 1;
+    border: 1px solid #ddd;
+    padding: 12px;
+    border-radius: 4px;
+    font-weight: bold;
+  }
+
+  /* Ticket Card */
+  .ticket-card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    display: flex;
+    margin-bottom: 15px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  }
+  .ticket-stub {
     writing-mode: vertical-rl;
     transform: rotate(180deg);
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 4px;
-    color: var(--text-main);
+    background-color: #f9f9f9;
+    padding: 10px;
+    text-align: center;
+    border-right: 2px dashed #ccc;
+    font-weight: bold;
+    font-size: 12px;
+    letter-spacing: 1px;
   }
-  .stub-admit {
-    font-size: 13px;
-    font-weight: 800;
-    letter-spacing: 0.5px;
-  }
-  .stub-type {
-    font-size: 13px;
-    font-weight: 400;
-    color: #3A3A3C;
-  }
-
-  /* Divider */
-  .ticket-divider {
-    width: 1px;
-    border-left: 2px dashed #C7C7CC;
-    margin: 12px 0;
-  }
-
-  /* Ticket Main Body (Right) */
-  .ticket-main {
+  .ticket-details {
     flex: 1;
-    padding: 10px 10px 10px 12px;
-    display: flex;
-    flex-direction: column;
+    padding: 10px;
+    background-color: #fff;
+  }
+  .event-type {
+    font-size: 14px;
+    color: #555;
+    margin-bottom: 5px;
   }
   
-  .ticket-blue-card {
-    background-color: var(--ticket-blue);
-    border-radius: 6px;
-    padding: 12px;
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-  }
-  .ticket-blue-text {
+  /* Updated Event Main Section for Logo Integration */
+  .event-main {
+    background-color: #1a4b8c;
     color: white;
-  }
-  .ticket-blue-text .line1 {
-    font-size: 14px;
-    font-weight: 500;
-    margin-bottom: 2px;
-    letter-spacing: -0.2px;
-  }
-  .ticket-blue-text .line2 {
-    font-size: 17px;
-    font-weight: 700;
-    margin-bottom: 8px;
-    letter-spacing: -0.3px;
-  }
-  .ticket-blue-text .line3 {
-    font-size: 12px;
-    font-weight: 400;
-    color: rgba(255,255,255,0.85);
-  }
-
-  /* Mascot Graphic Placeholder (Replicating the Ram) */
-  .mascot {
-    width: 44px;
-    height: 44px;
-    flex-shrink: 0;
-  }
-
-  .ticket-footer {
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 10px;
     display: flex;
     justify-content: space-between;
-    align-items: flex-end;
-    padding: 10px 2px 2px 2px;
+    align-items: center;
   }
+  .event-text-container {
+    flex: 1;
+  }
+  .event-title {
+    font-weight: bold;
+    font-size: 16px;
+    margin-bottom: 5px;
+  }
+  .event-date {
+    font-size: 12px;
+  }
+  .event-logo {
+    max-width: 45px;
+    max-height: 45px;
+    margin-left: 10px;
+    object-fit: contain;
+  }
+
   .ticket-name {
     font-size: 14px;
-    font-weight: 500;
-    color: var(--text-main);
+    color: #333;
   }
-  .ticket-count {
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--text-muted);
+  .ticket-counter {
+    text-align: right;
+    font-size: 12px;
+    color: #777;
+    margin-top: 5px;
   }
 
-  /* --- BOTTOM BAR --- */
-  .bottom-bar {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background-color: white;
-    padding: 20px 20px 34px; /* extra padding for modern iOS home bar */
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    box-shadow: 0 -4px 12px rgba(0,0,0,0.04);
+  /* Footer */
+  .footer {
+    text-align: center;
+    padding: 20px 15px;
+    border-top: 1px solid #eee;
+    margin-top: 20px;
   }
-  .bottom-text {
+  .footer h2 {
     font-size: 16px;
-    font-weight: 700;
-    color: var(--text-main);
-    margin-bottom: 16px;
-    letter-spacing: -0.3px;
+    margin-bottom: 15px;
   }
-  .bottom-actions {
-    display: flex;
+  .btn-bottom {
+    background-color: #ccc;
+    color: #888;
     width: 100%;
-    gap: 12px;
-    align-items: center;
-  }
-  .btn-use-bottom {
-    flex: 1;
-    background-color: #48484A;
-    color: white;
     border: none;
-    padding: 16px;
-    border-radius: 8px;
+    padding: 15px;
+    border-radius: 4px;
+    font-weight: bold;
     font-size: 16px;
-    font-weight: 600;
-    letter-spacing: -0.2px;
-  }
-  .btn-settings {
-    background-color: white;
-    border: 1px solid #D1D1D6;
-    width: 52px;
-    height: 52px;
-    border-radius: 8px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: #666;
-    flex-shrink: 0;
   }
 </style>
 </head>
 <body>
 
-<div class="mobile-frame">
-  
-  <header class="header">
-    <div class="header-left">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-      <div class="header-title">Tickets</div>
-    </div>
+  <div class="header">
+    <div style="width: 60px;">&lt;</div>
+    <h1>Tickets</h1>
     <button class="transfer-btn">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M12 8v8"/><path d="M8 12h8"/></svg>
+      <img src="IMG_8024.jpeg" alt="Transfer Icon" class="transfer-icon" onerror="this.style.display='none'">
       Transfer
     </button>
-  </header>
+  </div>
 
-  <div class="content">
-    
-    <div class="alert-box">
-      <div class="alert-icon">!</div>
-      <div class="alert-text">
-        <strong>Event alert</strong>
-        Your access code is your Student Number a...
-      </div>
-      <div class="alert-plus">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-      </div>
+  <div class="container">
+    <div class="alert-banner">
+      <strong>! Event alert</strong>
+      Your access code is your Student Number an...
     </div>
 
-    <div class="available-box">
-      <div class="available-count">2</div>
-      <div class="available-text">Available</div>
+    <div class="status-box">
+      <div class="status-badge">2</div><br>
+      Available
     </div>
 
     <div class="action-buttons">
       <button class="btn-use">Use all</button>
-      <button class="btn-deselect">Deselect all</button>
+      <button class="btn-select">Select all</button>
     </div>
 
-    <div class="ticket">
-      <div class="check-icon">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
-      </div>
-      <div class="ticket-stub">
-        <div class="stub-text-container">
-          <span class="stub-admit">ADMIT ONE</span>
-          <span class="stub-type">Graduation</span>
-        </div>
-      </div>
-      <div class="ticket-divider"></div>
-      <div class="ticket-main">
-        <div class="ticket-blue-card">
-          <div class="ticket-blue-text">
-            <div class="line1">Rogers Class of 2026</div>
-            <div class="line2">Graduation</div>
-            <div class="line3">Wed. Jun 3, 2026 at 7:00 PM</div>
+    <!-- Ticket 1 -->
+    <div class="ticket-card">
+      <div class="ticket-stub">ADMIT ONE</div>
+      <div class="ticket-details">
+        <div class="event-type">Movie Prop Ticket</div>
+        <div class="event-main">
+          <div class="event-text-container">
+            <div class="event-title">Fictional Event Title</div>
+            <div class="event-date">Wed. Jun 3, 2026 at 7:00 PM</div>
           </div>
-          <div class="mascot">
-             <svg width="100%" height="100%" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect width="64" height="64" rx="8" fill="#E5E7EB"/>
-                <path d="M16 28C16 16 48 16 48 28C48 38 32 48 32 48C32 48 16 38 16 28Z" fill="#1C3372"/>
-                <path d="M22 24C24 20 28 18 32 18C36 18 40 20 42 24" stroke="white" stroke-width="3" stroke-linecap="round"/>
-                <circle cx="26" cy="30" r="3" fill="white"/>
-                <circle cx="38" cy="30" r="3" fill="white"/>
-             </svg>
-          </div>
+          <img src="IMG_8027.jpeg" alt="Event Logo" class="event-logo" onerror="this.style.display='none'">
         </div>
-        <div class="ticket-footer">
-          <div class="ticket-name">Name: Oxana Sozonov</div>
-          <div class="ticket-count">1 of 2</div>
-        </div>
+        <div class="ticket-name">Name: Jane Doe</div>
+        <div class="ticket-counter">1 of 2</div>
       </div>
     </div>
 
-    <div class="ticket">
-      <div class="check-icon">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
-      </div>
-      <div class="ticket-stub">
-        <div class="stub-text-container">
-          <span class="stub-admit">ADMIT ONE</span>
-          <span class="stub-type">Graduation</span>
-        </div>
-      </div>
-      <div class="ticket-divider"></div>
-      <div class="ticket-main">
-        <div class="ticket-blue-card">
-          <div class="ticket-blue-text">
-            <div class="line1">Rogers Class of 2026</div>
-            <div class="line2">Graduation</div>
-            <div class="line3">Wed. Jun 3, 2026 at 7:00 PM</div>
+    <!-- Ticket 2 -->
+    <div class="ticket-card">
+      <div class="ticket-stub">ADMIT ONE</div>
+      <div class="ticket-details">
+        <div class="event-type">Movie Prop Ticket</div>
+        <div class="event-main">
+          <div class="event-text-container">
+            <div class="event-title">Fictional Event Title</div>
+            <div class="event-date">Wed. Jun 3, 2026 at 7:00 PM</div>
           </div>
-          <div class="mascot">
-             <svg width="100%" height="100%" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect width="64" height="64" rx="8" fill="#E5E7EB"/>
-                <path d="M16 28C16 16 48 16 48 28C48 38 32 48 32 48C32 48 16 38 16 28Z" fill="#1C3372"/>
-                <path d="M22 24C24 20 28 18 32 18C36 18 40 20 42 24" stroke="white" stroke-width="3" stroke-linecap="round"/>
-                <circle cx="26" cy="30" r="3" fill="white"/>
-                <circle cx="38" cy="30" r="3" fill="white"/>
-             </svg>
-          </div>
+          <img src="IMG_8027.jpeg" alt="Event Logo" class="event-logo" onerror="this.style.display='none'">
         </div>
-        <div class="ticket-footer">
-          <div class="ticket-name">Name: Aleona Sozonov</div>
-          <div class="ticket-count">2 of 2</div>
-        </div>
+        <div class="ticket-name">Name: John Smith</div>
+        <div class="ticket-counter">2 of 2</div>
       </div>
-    </div>
-
-  </div>
-
-  <div class="bottom-bar">
-    <div class="bottom-text">Use your tickets onsite for entry into venue</div>
-    <div class="bottom-actions">
-      <button class="btn-use-bottom">Use 2 tickets</button>
-      <button class="btn-settings">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="3"></circle>
-          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-        </svg>
-      </button>
     </div>
   </div>
 
-</div>
+  <div class="footer">
+    <h2>Use your tickets onsite for entry into venue</h2>
+    <button class="btn-bottom">Use tickets</button>
+  </div>
 
 </body>
 </html>
