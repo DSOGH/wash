@@ -3,229 +3,428 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Better-Than-Buttermilk Pancakes</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
-    <!-- FontAwesome for Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+    <title>2021 BMW M340i xDrive Window Sticker</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Helvetica+Neue:wght@400;500;700&display=swap');
+
         body {
-            font-family: 'Lato', sans-serif;
-            background-color: #f3f4f6;
-            -webkit-print-color-adjust: exact;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background-color: #e0e0e0;
+            margin: 0;
+            padding: 40px;
+            display: flex;
+            justify-content: center;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
-        h1, h2, h3 {
-            font-family: 'Playfair Display', serif;
+
+        .sticker-container {
+            background-color: white;
+            width: 950px;
+            min-height: 600px;
+            padding: 50px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            position: relative;
+            border: 1px solid #dcdcdc;
+            overflow: hidden; /* Clips the watermark */
         }
-        .recipe-card {
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+
+        /* Watermark */
+        .watermark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 600px;
+            height: 600px;
+            opacity: 0.04;
+            pointer-events: none;
+            z-index: 0;
         }
-        
-        /* Print specific styles */
+
+        .content-layer {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header */
+        .header {
+            border-bottom: 3px solid #000;
+            padding-bottom: 25px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+
+        .brand-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .brand-text {
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .vin-box {
+            text-align: right;
+        }
+
+        .vin-label {
+            font-size: 11px;
+            color: #555;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .vin-number {
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            margin-top: 2px;
+        }
+
+        .vehicle-title {
+            font-size: 26px;
+            font-weight: 700;
+            margin-bottom: 5px;
+            color: #111;
+        }
+
+        .vehicle-subtitle {
+            font-size: 14px;
+            color: #444;
+            margin-bottom: 30px;
+            font-weight: 500;
+        }
+
+        /* Columns */
+        .main-content {
+            display: flex;
+            gap: 40px;
+        }
+
+        .left-col {
+            flex: 1;
+        }
+
+        .right-col {
+            flex: 1;
+            border-left: 2px solid #eee;
+            padding-left: 40px;
+        }
+
+        .section-title {
+            font-size: 13px;
+            font-weight: 800;
+            text-transform: uppercase;
+            border-bottom: 2px solid #000;
+            padding-bottom: 6px;
+            margin-bottom: 12px;
+            margin-top: 25px;
+            letter-spacing: 0.5px;
+        }
+
+        .section-title:first-child {
+            margin-top: 0;
+        }
+
+        .option-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            margin-bottom: 6px;
+            line-height: 1.4;
+            color: #111;
+        }
+
+        .option-code {
+            font-weight: 700;
+            width: 55px;
+            flex-shrink: 0;
+            color: #000;
+        }
+
+        .option-desc {
+            flex-grow: 1;
+            font-weight: 400;
+        }
+
+        .option-price {
+            text-align: right;
+            min-width: 90px;
+            font-weight: 500;
+        }
+
+        .sub-option {
+            margin-left: 55px;
+            font-size: 11px;
+            color: #555;
+            margin-bottom: 3px;
+        }
+
+        /* Price Box */
+        .total-section {
+            margin-top: 50px;
+            border: 4px solid #000;
+            padding: 15px;
+            background-color: #fff;
+        }
+
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .total-label {
+            font-size: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .total-price {
+            font-size: 22px;
+            font-weight: 800;
+        }
+
+        .dest-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 10px;
+        }
+
+        /* Disclaimer */
+        .disclaimer {
+            font-size: 10px;
+            color: #888;
+            margin-top: 60px;
+            text-align: center;
+            border-top: 1px solid #eee;
+            padding-top: 15px;
+        }
+
+        /* Print Button */
         @media print {
             body {
                 background-color: white;
+                padding: 0;
+                margin: 0;
+                -webkit-print-color-adjust: exact;
             }
-            .no-print {
-                display: none !important;
-            }
-            .recipe-card {
+            .sticker-container {
                 box-shadow: none;
                 border: none;
                 width: 100%;
-                max-width: 100%;
+                padding: 40px;
                 margin: 0;
-                padding: 0;
             }
-            /* Hide the top decoration bar on print to save ink/clean look */
-            .top-deco {
-                height: 2px;
+            .no-print {
+                display: none;
+            }
+            .total-section {
+                border: 4px solid #000 !important;
             }
         }
 
-        .check-box-wrapper input:checked + div {
-            text-decoration: line-through;
-            color: #9ca3af;
+        .btn-print {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 24px;
+            background-color: #1c69d3;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: background 0.2s;
+            z-index: 100;
+        }
+        .btn-print:hover {
+            background-color: #1555ab;
         }
     </style>
 </head>
-<body class="min-h-screen py-8 px-4 flex flex-col items-center justify-start">
+<body>
 
-    <!-- Controls -->
-    <div class="no-print mb-6 w-full max-w-3xl flex justify-end">
-        <button onclick="window.print()" class="bg-gray-800 hover:bg-black text-white text-sm font-bold py-2 px-4 rounded-lg shadow transition flex items-center gap-2">
-            <i class="fas fa-print"></i> Print
-        </button>
-    </div>
+    <button class="btn-print no-print" onclick="window.print()">Print Sticker</button>
 
-    <!-- Main Recipe Sheet -->
-    <main class="recipe-card bg-white w-full max-w-3xl rounded-3xl overflow-hidden relative">
-        <!-- Top Decoration -->
-        <div class="top-deco h-4 bg-amber-500 w-full"></div>
-        
-        <div class="p-6 md:p-12">
-            <!-- Header -->
-            <header class="text-center border-b-2 border-amber-100 pb-8 mb-8">
-                <div class="flex justify-center mb-2 text-amber-500 gap-1 text-sm">
-                    <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
-                </div>
-                <h1 class="text-3xl md:text-5xl font-bold text-gray-800 mb-4">"Better-Than-Buttermilk" Pancakes</h1>
-                <p class="text-gray-500 italic text-lg mb-6">The secret to fluffy, buttery pancakes without buttermilk.</p>
-                
-                <div class="flex justify-center gap-4 md:gap-12 text-gray-600 text-sm font-semibold uppercase tracking-wider">
-                    <div class="flex flex-col items-center">
-                        <i class="far fa-clock text-amber-600 text-xl mb-1"></i>
-                        <span>Prep: 10m</span>
-                    </div>
-                    <div class="flex flex-col items-center">
-                        <i class="fas fa-fire-burner text-amber-600 text-xl mb-1"></i>
-                        <span>Cook: 15m</span>
-                    </div>
-                    <div class="flex flex-col items-center">
-                        <i class="fas fa-utensils text-amber-600 text-xl mb-1"></i>
-                        <span>Yields: 8-10</span>
-                    </div>
-                </div>
-            </header>
-
-            <!-- Ingredients Section -->
-            <div class="grid md:grid-cols-2 gap-8 mb-10">
-                <!-- Column 1: The Basics -->
-                <div class="bg-amber-50 rounded-2xl p-6">
-                    <h2 class="text-2xl text-amber-800 mb-4 flex items-center gap-2">
-                        <i class="fas fa-blender text-lg"></i> The "Buttermilk" Hack
-                    </h2>
-                    <div class="space-y-3">
-                        <label class="check-box-wrapper flex items-start cursor-pointer">
-                            <input type="checkbox" class="mt-1 mr-3 accent-amber-600 h-4 w-4">
-                            <div class="text-gray-700"><strong>1 ½ cups</strong> Whole Milk (or 2%)</div>
-                        </label>
-                        <label class="check-box-wrapper flex items-start cursor-pointer">
-                            <input type="checkbox" class="mt-1 mr-3 accent-amber-600 h-4 w-4">
-                            <div class="text-gray-700"><strong>1 ½ tbsp</strong> White Vinegar <br><span class="text-xs text-amber-700 italic">Mix these first & let sit 5 mins</span></div>
-                        </label>
-                    </div>
-
-                    <h2 class="text-2xl text-amber-800 mt-6 mb-4 flex items-center gap-2">
-                        <i class="fas fa-tint text-lg"></i> Wet Ingredients
-                    </h2>
-                    <div class="space-y-3">
-                        <label class="check-box-wrapper flex items-start cursor-pointer">
-                            <input type="checkbox" class="mt-1 mr-3 accent-amber-600 h-4 w-4">
-                            <div class="text-gray-700"><strong>¼ cup</strong> Melted Butter <span class="text-xs text-gray-500">(slightly cooled)</span></div>
-                        </label>
-                        <label class="check-box-wrapper flex items-start cursor-pointer">
-                            <input type="checkbox" class="mt-1 mr-3 accent-amber-600 h-4 w-4">
-                            <div class="text-gray-700"><strong>2</strong> Large Eggs</div>
-                        </label>
-                        <label class="check-box-wrapper flex items-start cursor-pointer">
-                            <input type="checkbox" class="mt-1 mr-3 accent-amber-600 h-4 w-4">
-                            <div class="text-gray-700"><strong>1 tsp</strong> Vanilla Extract</div>
-                        </label>
-                    </div>
-                </div>
-
-                <!-- Column 2: Dry & Add-ins -->
-                <div>
-                    <h2 class="text-2xl text-gray-800 mb-4 flex items-center gap-2">
-                        <i class="fas fa-wheat text-lg text-gray-400"></i> Dry Ingredients
-                    </h2>
-                    <div class="space-y-3 mb-6">
-                        <label class="check-box-wrapper flex items-start cursor-pointer">
-                            <input type="checkbox" class="mt-1 mr-3 accent-amber-600 h-4 w-4">
-                            <div class="text-gray-700"><strong>2 cups</strong> All-Purpose Flour</div>
-                        </label>
-                        <label class="check-box-wrapper flex items-start cursor-pointer">
-                            <input type="checkbox" class="mt-1 mr-3 accent-amber-600 h-4 w-4">
-                            <div class="text-gray-700"><strong>¼ cup</strong> Granulated Sugar</div>
-                        </label>
-                        <label class="check-box-wrapper flex items-start cursor-pointer">
-                            <input type="checkbox" class="mt-1 mr-3 accent-amber-600 h-4 w-4">
-                            <div class="text-gray-700"><strong>4 tsp</strong> Baking Powder <span class="text-xs font-bold text-amber-600">CRITICAL</span></div>
-                        </label>
-                        <label class="check-box-wrapper flex items-start cursor-pointer">
-                            <input type="checkbox" class="mt-1 mr-3 accent-amber-600 h-4 w-4">
-                            <div class="text-gray-700"><strong>¼ tsp</strong> Baking Soda</div>
-                        </label>
-                        <label class="check-box-wrapper flex items-start cursor-pointer">
-                            <input type="checkbox" class="mt-1 mr-3 accent-amber-600 h-4 w-4">
-                            <div class="text-gray-700"><strong>½ tsp</strong> Salt</div>
-                        </label>
-                    </div>
-                    
-                    <div class="bg-amber-100 rounded-xl p-4 border border-amber-200">
-                        <h3 class="font-bold text-amber-900 mb-2">Optional</h3>
-                        <label class="check-box-wrapper flex items-start cursor-pointer">
-                            <input type="checkbox" class="mt-1 mr-3 accent-amber-600 h-4 w-4">
-                            <div class="text-gray-800"><strong>1 cup</strong> Chocolate Chips</div>
-                        </label>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Instructions -->
-            <div>
-                <h2 class="text-3xl font-bold text-gray-800 mb-6 border-b pb-2">Instructions</h2>
-                
-                <div class="space-y-6">
-                    <div class="flex gap-4">
-                        <div class="flex-shrink-0 w-8 h-8 rounded-full bg-amber-600 text-white flex items-center justify-center font-bold">1</div>
-                        <div>
-                            <h3 class="font-bold text-lg text-gray-800">Make the "Sour Milk"</h3>
-                            <p class="text-gray-600 leading-relaxed">Combine milk and vinegar in a cup. Let it sit for 5–10 minutes until it looks curdled. <span class="text-amber-600 italic">Do not skip this—the acid creates the fluff!</span></p>
-                        </div>
-                    </div>
-
-                    <div class="flex gap-4">
-                        <div class="flex-shrink-0 w-8 h-8 rounded-full bg-amber-600 text-white flex items-center justify-center font-bold">2</div>
-                        <div>
-                            <h3 class="font-bold text-lg text-gray-800">Whisk Dry Mix</h3>
-                            <p class="text-gray-600 leading-relaxed">In a large bowl, whisk flour, sugar, baking powder, baking soda, and salt. Ensure there are no lumps.</p>
-                        </div>
-                    </div>
-
-                    <div class="flex gap-4">
-                        <div class="flex-shrink-0 w-8 h-8 rounded-full bg-amber-600 text-white flex items-center justify-center font-bold">3</div>
-                        <div>
-                            <h3 class="font-bold text-lg text-gray-800">Combine Wet & Dry</h3>
-                            <p class="text-gray-600 leading-relaxed">Whisk eggs and vanilla in a separate bowl, then add the sour milk and melted butter. Pour this into the dry ingredients.</p>
-                        </div>
-                    </div>
-
-                    <div class="flex gap-4">
-                        <div class="flex-shrink-0 w-8 h-8 rounded-full bg-amber-600 text-white flex items-center justify-center font-bold">4</div>
-                        <div>
-                            <h3 class="font-bold text-lg text-gray-800">The Gentle Fold (Secret Step)</h3>
-                            <p class="text-gray-600 leading-relaxed">Use a spatula to gently fold just until combined. <strong class="text-red-500">STOP when you still see white flour streaks.</strong> Lumps are good! Over-mixing = rubbery pancakes.</p>
-                        </div>
-                    </div>
-
-                    <div class="flex gap-4">
-                        <div class="flex-shrink-0 w-8 h-8 rounded-full bg-amber-600 text-white flex items-center justify-center font-bold">5</div>
-                        <div>
-                            <h3 class="font-bold text-lg text-gray-800">Rest & Cook</h3>
-                            <p class="text-gray-600 leading-relaxed">Let batter sit for 5 minutes. Heat a buttered pan over medium heat. Pour batter, then <span class="bg-yellow-100 px-1 font-semibold">drop chocolate chips on top by hand</span>. Flip when bubbles appear (2-3 mins). Cook until golden.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Footer Notes -->
-            <div class="mt-10 bg-gray-50 rounded-xl p-6 border-l-4 border-amber-400">
-                <h3 class="font-bold text-gray-800 mb-2">💡 Chef's Note</h3>
-                <p class="text-gray-600 text-sm">
-                    If the pancakes are browning too fast before fluffing up, lower the heat slightly. Leftovers freeze perfectly—just pop them in the toaster!
-                </p>
-            </div>
-
+    <div class="sticker-container">
+        <!-- Background SVG Watermark -->
+        <div class="watermark">
+            <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="50" cy="50" r="48" stroke="black" stroke-width="1"/>
+                <circle cx="50" cy="50" r="32" stroke="black" stroke-width="25"/>
+                <path d="M50 50 L50 2 A48 48 0 0 1 98 50 Z" fill="black"/>
+                <path d="M50 50 L2 50 A48 48 0 0 1 50 2 Z" fill="white"/>
+                <path d="M50 50 L50 98 A48 48 0 0 1 2 50 Z" fill="black"/>
+                <path d="M50 50 L98 50 A48 48 0 0 1 50 98 Z" fill="white"/>
+            </svg>
         </div>
-        
-        <!-- Bottom Decoration -->
-        <div class="top-deco h-2 bg-amber-500 w-full mt-auto"></div>
-    </main>
+
+        <div class="content-layer">
+            <!-- Header -->
+            <div class="header">
+                <div class="brand-section">
+                    <!-- BMW Logo SVG -->
+                    <svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="50" cy="50" r="48" stroke="#000" stroke-width="1" fill="#fff"/>
+                        <circle cx="50" cy="50" r="32" stroke="#000" stroke-width="26" fill="none"/>
+                        <!-- Quarters -->
+                        <path d="M50 50 L50 16 A34 34 0 0 1 84 50 Z" fill="#2E86C1"/> <!-- Blue -->
+                        <path d="M50 50 L16 50 A34 34 0 0 1 50 16 Z" fill="#FFF"/> <!-- White -->
+                        <path d="M50 50 L50 84 A34 34 0 0 1 16 50 Z" fill="#2E86C1"/> <!-- Blue -->
+                        <path d="M50 50 L84 50 A34 34 0 0 1 50 84 Z" fill="#FFF"/> <!-- White -->
+                        <!-- Text Approximation -->
+                        <path id="curve" d="M 23 50 A 27 27 0 1 1 77 50" fill="transparent"/>
+                        <text font-family="Arial" font-weight="bold" font-size="12" fill="#fff" letter-spacing="4">
+                            <textPath href="#curve" startOffset="50%" text-anchor="middle">BMW</textPath>
+                        </text>
+                    </svg>
+                    <div class="brand-text">BMW of North America, LLC</div>
+                </div>
+                <div class="vin-box">
+                    <div class="vin-label">Vehicle Identification Number</div>
+                    <div class="vin-number">3MW5U9J09M8B59749</div>
+                </div>
+            </div>
+
+            <!-- Vehicle Info -->
+            <div class="vehicle-title">2021 BMW M340i xDrive Sedan</div>
+            <div class="vehicle-subtitle">3.0L BMW M TwinPower Turbo Inline 6-Cylinder Engine</div>
+
+            <div class="main-content">
+                <!-- Left Column -->
+                <div class="left-col">
+                    <div class="section-title">Exterior & Interior</div>
+                    <div class="option-row">
+                        <span class="option-code">475</span>
+                        <span class="option-desc">Black Sapphire Metallic</span>
+                        <span class="option-price">$550.00</span>
+                    </div>
+                    <div class="option-row">
+                        <span class="option-code">KCSW</span>
+                        <span class="option-desc">Black Sensatec</span>
+                        <span class="option-price">$0.00</span>
+                    </div>
+                    <div class="option-row">
+                        <span class="option-code">4KK</span>
+                        <span class="option-desc">Aluminum Tetragon Trim</span>
+                        <span class="option-price">Included</span>
+                    </div>
+
+                    <div class="section-title">Standard Features</div>
+                    <div class="option-row"><span class="option-desc">8-Speed Sport Automatic Transmission</span></div>
+                    <div class="option-row"><span class="option-desc">M Sport Brakes & M Sport Differential</span></div>
+                    <div class="option-row"><span class="option-desc">M Sport Suspension</span></div>
+                    <div class="option-row"><span class="option-desc">Variable Sport Steering</span></div>
+                    <div class="option-row"><span class="option-desc">Comfort Access Keyless Entry</span></div>
+                    <div class="option-row"><span class="option-desc">SensaTec Dashboard</span></div>
+                    <div class="option-row"><span class="option-desc">Ambient Interior Lighting</span></div>
+                    <div class="option-row"><span class="option-desc">Auto-Dimming Mirrors</span></div>
+                    <div class="option-row"><span class="option-desc">Power Front Seats with Lumbar Support</span></div>
+                    <div class="option-row"><span class="option-desc">LED Headlights with Cornering Lights</span></div>
+                    <div class="option-row"><span class="option-desc">Active Guard (Frontal Collision Warning)</span></div>
+                    <div class="option-row"><span class="option-desc">Live Cockpit Pro (Navi & Digital Cluster)</span></div>
+                    <div class="option-row"><span class="option-desc">Apple CarPlay & Android Auto Compatibility</span></div>
+                    <div class="option-row"><span class="option-desc">Anthracite Headliner</span></div>
+                    <div class="option-row"><span class="option-desc">Rear View Camera</span></div>
+                </div>
+
+                <!-- Right Column -->
+                <div class="right-col">
+                    <div class="section-title">Options & Pricing</div>
+                    
+                    <div class="option-row">
+                        <span class="option-code">BASE</span>
+                        <span class="option-desc">Manufacturer's Suggested Retail Price</span>
+                        <span class="option-price">$56,700.00</span>
+                    </div>
+
+                    <br>
+                    
+                    <div class="option-row">
+                        <span class="option-code">ZPP</span>
+                        <span class="option-desc">Premium Package</span>
+                        <span class="option-price">$1,400.00</span>
+                    </div>
+                    <div class="sub-option">Heated Steering Wheel</div>
+                    <div class="sub-option">Heated Front Seats</div>
+                    <div class="sub-option">Head-up Display</div>
+
+                    <br>
+
+                    <div class="option-row">
+                        <span class="option-code">ZDA</span>
+                        <span class="option-desc">Driving Assistance Package</span>
+                        <span class="option-price">$700.00</span>
+                    </div>
+                    <div class="sub-option">Active Driving Assistant</div>
+                    <div class="sub-option">Active Blind Spot Detection</div>
+                    <div class="sub-option">Lane Departure Warning</div>
+
+                    <br>
+
+                    <div class="option-row">
+                        <span class="option-code">1PL</span>
+                        <span class="option-desc">19" M Double-Spoke Jet Black Wheels (791M)</span>
+                        <span class="option-price">$600.00</span>
+                    </div>
+                    <div class="sub-option">with All-Season Runflat Tires</div>
+
+                    <br>
+
+                    <div class="option-row">
+                        <span class="option-code">688</span>
+                        <span class="option-desc">Harman Kardon Surround Sound System</span>
+                        <span class="option-price">$875.00</span>
+                    </div>
+
+                    <br>
+
+                    <div class="option-row">
+                        <span class="option-code">6NW</span>
+                        <span class="option-desc">Wireless Charging</span>
+                        <span class="option-price">$500.00</span>
+                    </div>
+                    <div class="sub-option">WiFi Hotspot</div>
+
+                    <br>
+
+                    <div class="option-row">
+                        <span class="option-code">316</span>
+                        <span class="option-desc">Power Tailgate</span>
+                        <span class="option-price">$250.00</span>
+                    </div>
+
+                    <div class="total-section">
+                        <div class="dest-row">
+                            <span class="option-desc">Destination Charge</span>
+                            <span class="option-price">$995.00</span>
+                        </div>
+                        <div class="total-row">
+                            <span class="total-label">Total Suggested Retail Price</span>
+                            <span class="total-price">$62,570.00</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="disclaimer">
+                 Manufacturer's Suggested Retail Price (MSRP) excludes tax, license, registration, and options installed by dealer. 
+                 Actual dealer price may vary.
+            </div>
+        </div>
+    </div>
 
 </body>
 </html>
