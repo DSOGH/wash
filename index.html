@@ -1,306 +1,426 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>BMW Group Technical Service Record</title>
-<style>
-    @page {
-        size: letter;
-        margin: 12mm;
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Blackjack Vision & True Count Tracker</title>
+  <style>
+    :root {
+      --bg-color: #0f172a;
+      --card-bg: #1e293b;
+      --accent: #10b981;
+      --accent-hover: #059669;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --danger: #ef4444;
+      --warning: #f59e0b;
     }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
     body {
-        font-family: 'Segoe UI', Arial, Helvetica, sans-serif;
-        color: #1c1e21;
-        line-height: 1.45;
-        font-size: 10pt;
-        background-color: #ffffff;
-        margin: 0;
-        padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 12px;
     }
-    .document-container {
-        padding: 20px;
-        border: 1px solid #dcdcdc;
-        max-width: 800px;
-        margin: 0 auto;
+
+    header {
+      width: 100%;
+      max-width: 500px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
     }
-    .header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        border-bottom: 4px solid #1c69d4;
-        padding-bottom: 12px;
-        margin-bottom: 20px;
+
+    h1 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
     }
-    .logo-badge {
-        display: flex;
-        align-items: center;
-        gap: 12px;
+
+    .status-badge {
+      font-size: 0.75rem;
+      padding: 4px 8px;
+      border-radius: 12px;
+      background: #334155;
+      color: var(--warning);
     }
-    .roundel-svg {
-        width: 52px;
-        height: 52px;
+
+    .status-badge.ready {
+      background: #064e3b;
+      color: #34d399;
     }
-    .bmw-text {
-        font-weight: 900;
-        font-size: 22pt;
-        letter-spacing: 2.5px;
-        color: #1c69d4;
-        line-height: 1;
+
+    .viewport-container {
+      position: relative;
+      width: 100%;
+      max-width: 500px;
+      aspect-ratio: 4 / 3;
+      background: #000;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
     }
-    .bmw-text span {
-        color: #1c1e21;
-        font-weight: 300;
+
+    video, canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
     }
-    .header-right {
-        text-align: right;
+
+    /* Floating target banner over camera */
+    .target-overlay {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
-    .doc-type {
-        font-size: 13pt;
-        font-weight: 700;
-        color: #1c69d4;
-        text-transform: uppercase;
-        letter-spacing: 1px;
+
+    .dashboard {
+      width: 100%;
+      max-width: 500px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin: 12px 0;
     }
-    .doc-subtitle {
-        font-size: 8.5pt;
-        color: #666;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        margin-top: 2px;
+
+    .stat-card {
+      background: var(--card-bg);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 10px 8px;
+      text-align: center;
     }
-    .vehicle-bar {
-        background-color: #f0f4f8;
-        border: 1px solid #d0dbe5;
-        border-radius: 4px;
-        padding: 10px 14px;
-        margin-bottom: 20px;
-        display: flex;
-        justify-content: space-between;
-        font-size: 9.5pt;
+
+    .stat-label {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
     }
-    .vehicle-bar div span {
-        font-weight: 700;
-        color: #1c69d4;
+
+    .stat-value {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--text-main);
     }
-    .section-header {
-        font-size: 10.5pt;
-        font-weight: 700;
-        color: #ffffff;
-        background-color: #1c1e21;
-        padding: 6px 12px;
-        margin-top: 20px;
-        margin-bottom: 10px;
-        text-transform: uppercase;
-        letter-spacing: 0.8px;
-        border-left: 4px solid #1c69d4;
+
+    .stat-value.highlight {
+      color: var(--accent);
     }
-    table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-bottom: 15px;
+
+    .controls-grid {
+      width: 100%;
+      max-width: 500px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
     }
-    th {
-        background-color: #f5f7fa;
-        color: #333;
-        font-weight: 700;
-        text-transform: uppercase;
-        font-size: 8.5pt;
-        letter-spacing: 0.5px;
-        padding: 8px 10px;
-        border-bottom: 2px solid #dcdcdc;
-        text-align: left;
+
+    .deck-selector {
+      display: flex;
+      background: var(--card-bg);
+      padding: 4px;
+      border-radius: 12px;
+      gap: 4px;
     }
-    td {
-        padding: 8px 10px;
-        border-bottom: 1px solid #e8e8e8;
-        font-size: 9.5pt;
-        vertical-align: middle;
+
+    .deck-btn {
+      flex: 1;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      padding: 8px 0;
+      font-size: 0.85rem;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
     }
-    .text-right { text-align: right; }
-    .text-center { text-align: center; }
-    .pn-code {
-        font-family: 'Courier New', Courier, monospace;
-        font-weight: 700;
-        color: #000;
-        background-color: #f0f0f0;
-        padding: 2px 5px;
-        border-radius: 3px;
+
+    .deck-btn.active {
+      background: #334155;
+      color: var(--text-main);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
     }
-    .total-row td {
-        font-weight: 700;
-        background-color: #f9fbfd;
-        border-top: 2px solid #1c69d4;
-        font-size: 10pt;
+
+    .hi-lo-inputs {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
     }
-    .badge-oem {
-        background-color: #e3f2fd;
-        color: #0d47a1;
-        font-weight: 700;
-        font-size: 7.5pt;
-        padding: 2px 6px;
-        border-radius: 10px;
-        text-transform: uppercase;
+
+    .btn {
+      border: none;
+      border-radius: 12px;
+      padding: 12px;
+      font-size: 1rem;
+      font-weight: 700;
+      color: #fff;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      transition: transform 0.1s ease, filter 0.2s ease;
     }
-    .spec-card {
-        background-color: #fff9e6;
-        border-left: 4px solid #ffb300;
-        padding: 10px 12px;
-        margin-bottom: 12px;
-        font-size: 9pt;
+
+    .btn:active {
+      transform: scale(0.96);
     }
-    .spec-card strong {
-        color: #b78103;
+
+    .btn-sub {
+      font-size: 0.7rem;
+      opacity: 0.8;
+      font-weight: 400;
     }
-    .workflow-list {
-        margin: 0;
-        padding-left: 18px;
+
+    .btn-low { background: #059669; }     /* +1 */
+    .btn-neutral { background: #475569; } /*  0 */
+    .btn-high { background: #dc2626; }    /* -1 */
+
+    .action-row {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 8px;
     }
-    .workflow-list li {
-        margin-bottom: 6px;
-        font-size: 9pt;
+
+    .btn-action {
+      background: #3b82f6;
+      border: none;
+      border-radius: 12px;
+      padding: 12px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: white;
     }
-    .footer {
-        margin-top: 30px;
-        border-top: 1px solid #dcdcdc;
-        padding-top: 10px;
-        font-size: 7.5pt;
-        color: #888;
-        display: flex;
-        justify-content: space-between;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
+
+    .btn-reset {
+      background: #ef4444;
     }
-</style>
+  </style>
+
+  <!-- OpenCV.js Library -->
+  <script async src="https://docs.opencv.org/4.x/opencv.js" onload="onOpenCvReady()"></script>
 </head>
 <body>
 
-<div class="document-container">
-    
-    <!-- HEADER WITH BMW EMBLEM -->
-    <div class="header">
-        <div class="logo-badge">
-            <svg class="roundel-svg" viewBox="0 0 100 100">
-                <circle cx="50" cy="50" r="48" fill="#1c1e21" stroke="#a6a6a6" stroke-width="2"/>
-                <circle cx="50" cy="50" r="38" fill="#ffffff" stroke="#a6a6a6" stroke-width="1"/>
-                <path d="M 50,12 A 38,38 0 0,1 88,50 L 50,50 Z" fill="#0066b1"/>
-                <path d="M 12,50 A 38,38 0 0,1 50,12 L 50,50 Z" fill="#ffffff"/>
-                <path d="M 50,88 A 38,38 0 0,1 12,50 L 50,50 Z" fill="#0066b1"/>
-                <path d="M 88,50 A 38,38 0 0,1 50,88 L 50,50 Z" fill="#ffffff"/>
-                <text x="50" y="8.5" font-family="Arial" font-size="7" font-weight="bold" fill="#ffffff" text-anchor="middle">B M W</text>
-            </svg>
-            <div>
-                <div class="bmw-text">BMW <span>SERVICE</span></div>
-                <div style="font-size: 7.5pt; color: #666; letter-spacing: 2px;">GENUINE PARTS &amp; WORKSHOP SPECS</div>
-            </div>
-        </div>
-        <div class="header-right">
-            <div class="doc-type">Service Reference Record</div>
-            <div class="doc-subtitle">Engine Mount Replacement Assembly</div>
-        </div>
+  <header>
+    <h1>Blackjack Counter</h1>
+    <span id="visionStatus" class="status-badge">Loading Vision System...</span>
+  </header>
+
+  <div class="viewport-container">
+    <video id="video" playsinline autoplay muted></video>
+    <canvas id="canvas"></canvas>
+    <div class="target-overlay">
+      Target: <span id="targetLabel" style="color: var(--accent);">PLAYER</span>
+    </div>
+  </div>
+
+  <div class="dashboard">
+    <div class="stat-card">
+      <div class="stat-label">Running</div>
+      <div id="runningCount" class="stat-value">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">True Count</div>
+      <div id="trueCount" class="stat-value highlight">0.0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Decks Left</div>
+      <div id="decksRemaining" class="stat-value">6.0</div>
+    </div>
+  </div>
+
+  <div class="controls-grid">
+    <!-- Deck Selector -->
+    <div class="deck-selector">
+      <button class="deck-btn" onclick="setDecks(1)">1 Deck</button>
+      <button class="deck-btn" onclick="setDecks(2)">2 Decks</button>
+      <button class="deck-btn" onclick="setDecks(4)">4 Decks</button>
+      <button class="deck-btn active" onclick="setDecks(6)">6 Decks</button>
+      <button class="deck-btn" onclick="setDecks(8)">8 Decks</button>
     </div>
 
-    <!-- VEHICLE IDENTIFICATION BAR -->
-    <div class="vehicle-bar">
-        <div><span>Model:</span> 2021 BMW M340i xDrive (G20)</div>
-        <div><span>Engine:</span> B58 3.0L Inline-6 Turbo</div>
-        <div><span>Drivetrain:</span> AWD</div>
+    <!-- Hi-Lo Quick Input Buttons -->
+    <div class="hi-lo-inputs">
+      <button class="btn btn-low" onclick="addCard(1)">
+        +1
+        <span class="btn-sub">2, 3, 4, 5, 6</span>
+      </button>
+      <button class="btn btn-neutral" onclick="addCard(0)">
+        0
+        <span class="btn-sub">7, 8, 9</span>
+      </button>
+      <button class="btn btn-high" onclick="addCard(-1)">
+        -1
+        <span class="btn-sub">10, J, Q, K, A</span>
+      </button>
     </div>
 
-    <!-- PARTS IDENTIFICATION TABLE -->
-    <div class="section-header">1. Verified Assembly Hardware</div>
-    <table>
-        <thead>
-            <tr>
-                <th>Component Description</th>
-                <th class="text-center">Type</th>
-                <th>Part Number</th>
-                <th class="text-center">Qty</th>
-                <th class="text-right">Unit Price</th>
-                <th class="text-right">Total</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td><strong>Engine Mount (Left / Driver Side)</strong></td>
-                <td class="text-center"><span class="badge-oem">Genuine</span></td>
-                <td><span class="pn-code">22-11-6-860-471</span></td>
-                <td class="text-center">1</td>
-                <td class="text-right">$138.72</td>
-                <td class="text-right">$138.72</td>
-            </tr>
-            <tr>
-                <td><strong>Engine Mount (Right / Passenger Side)</strong></td>
-                <td class="text-center"><span class="badge-oem">Genuine</span></td>
-                <td><span class="pn-code">22-11-6-860-472</span></td>
-                <td class="text-center">1</td>
-                <td class="text-right">$138.72</td>
-                <td class="text-right">$138.72</td>
-            </tr>
-            <tr>
-                <td><strong>Self-Locking Main Torx Anchor Bolt</strong></td>
-                <td class="text-center"><span class="badge-oem">Genuine</span></td>
-                <td><span class="pn-code">07-14-8-869-310</span></td>
-                <td class="text-center">2</td>
-                <td class="text-right">$9.30</td>
-                <td class="text-right">$18.60</td>
-            </tr>
-            <tr class="total-row">
-                <td colspan="5" class="text-right">Verified Parts Order Total:</td>
-                <td class="text-right">$296.04</td>
-            </tr>
-        </tbody>
-    </table>
-
-    <!-- CRITICAL CRITICAL TORQUE SPECIFICATIONS -->
-    <div class="section-header">2. Torque Specifications &amp; Fasteners</div>
-    <table>
-        <thead>
-            <tr>
-                <th>Fastener Target Location</th>
-                <th>Tool Type / Socket</th>
-                <th>Torque Requirement</th>
-                <th>Execution Constraint</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td><strong>Main Mount-to-Subframe Bolt</strong><br><span style="font-size:8pt; color:#666;">P/N: 07-14-8-869-310</span></td>
-                <td>External Torx / Standard Socket</td>
-                <td><strong>56 Nm</strong> (41 ft-lbs)</td>
-                <td><strong>CRITICAL:</strong> Torque <em>only</em> after full vehicle weight is lowered onto suspension.</td>
-            </tr>
-            <tr>
-                <td><strong>Bracket-to-Engine Block Bolts</strong><br><span style="font-size:8pt; color:#666;">Original Assembly Bolts (4x per side)</span></td>
-                <td>E12 / E14 E-Torx Socket</td>
-                <td><strong>28 Nm</strong> (21 ft-lbs)</td>
-                <td>Hand-start 4-5 turns into aluminum engine block to prevent thread strip damage.</td>
-            </tr>
-        </tbody>
-    </table>
-
-    <!-- WORKSHOP EXECUTION SUMMARY -->
-    <div class="section-header">3. Workshop Execution Protocol (Wheel-Well Method)</div>
-    
-    <div class="spec-card">
-        <strong>RIGGING SAFETY NOTICE:</strong> Engine support bar must be anchored over double-folded towels on fender channels. Lock front bar feet with C-clamps to prevent forward movement on sloped G20 chassis tracks.
+    <!-- Toggle Target & Reset Controls -->
+    <div class="action-row">
+      <button class="btn-action" onclick="toggleTarget()">Switch Target (Player / Dealer)</button>
+      <button class="btn-action btn-reset" onclick="resetShoe()">Reset Shoe</button>
     </div>
+  </div>
 
-    <ol class="workflow-list">
-        <li><strong>Topside Isolation:</strong> Remove engine plastics, position support bridge, lock feet with clamps, and tension chains to lifting eyes.</li>
-        <li><strong>Side Access:</strong> Jack front end, secure stands, remove front wheels and plastic inner fender liners.</li>
-        <li><strong>Main Release:</strong> Remove two lower center bolts (<span class="pn-code">07-14-8-869-310</span>) from underneath the subframe.</li>
-        <li><strong>Side Extraction:</strong> Use long extension with swivel joint to unbolt aluminum engine brackets from the block (E12/E14) and pull out as single assemblies.</li>
-        <li><strong>Bench Swap &amp; Torque:</strong> Swap rubber mounts on workbench, reinstall brackets to block (Torque: <strong>28 Nm</strong>), set engine weight down naturally, and torque bottom bolts (Torque: <strong>56 Nm</strong>).</li>
-    </ol>
+  <script>
+    let totalDecks = 6;
+    let cardsDealt = 0;
+    let runningCount = 0;
+    let currentTarget = "PLAYER"; // Player dealt first
+    let cvReady = false;
 
-    <!-- FOOTER -->
-    <div class="footer">
-        <div>BMW G20 Platform Service Documentation</div>
-        <div>Precision Workshop Standard</div>
-        <div>Page 1 of 1</div>
-    </div>
+    function onOpenCvReady() {
+      cvReady = true;
+      const statusEl = document.getElementById('visionStatus');
+      statusEl.innerText = 'Vision Active';
+      statusEl.classList.add('ready');
+      initCamera();
+    }
 
-</div>
+    function updateDashboard() {
+      const totalCards = totalDecks * 52;
+      const cardsRemaining = Math.max(0, totalCards - cardsDealt);
+      const decksLeft = Math.max(0.5, cardsRemaining / 52);
+      const trueCountVal = (runningCount / decksLeft).toFixed(1);
 
+      document.getElementById('runningCount').innerText = runningCount > 0 ? `+${runningCount}` : runningCount;
+      document.getElementById('trueCount').innerText = trueCountVal > 0 ? `+${trueCountVal}` : trueCountVal;
+      document.getElementById('decksRemaining').innerText = decksLeft.toFixed(1);
+    }
+
+    function setDecks(num) {
+      totalDecks = num;
+      document.querySelectorAll('.deck-btn').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+      resetShoe();
+    }
+
+    function addCard(value) {
+      runningCount += value;
+      cardsDealt++;
+      updateDashboard();
+    }
+
+    function toggleTarget() {
+      currentTarget = currentTarget === "PLAYER" ? "DEALER" : "PLAYER";
+      document.getElementById('targetLabel').innerText = currentTarget;
+      document.getElementById('targetLabel').style.color = currentTarget === "PLAYER" ? "var(--accent)" : "var(--warning)";
+    }
+
+    function resetShoe() {
+      runningCount = 0;
+      cardsDealt = 0;
+      currentTarget = "PLAYER";
+      document.getElementById('targetLabel').innerText = currentTarget;
+      document.getElementById('targetLabel').style.color = "var(--accent)";
+      updateDashboard();
+    }
+
+    async function initCamera() {
+      const video = document.getElementById('video');
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: { exact: "environment" }, width: { ideal: 640 }, height: { ideal: 480 } }
+        });
+        video.srcObject = stream;
+      } catch (err) {
+        // Fallback to default camera if exact rear camera request fails
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        video.srcObject = stream;
+      }
+
+      video.addEventListener('loadedmetadata', () => {
+        video.play();
+        startVisionLoop();
+      });
+    }
+
+    function startVisionLoop() {
+      const video = document.getElementById('video');
+      const canvas = document.getElementById('canvas');
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+
+      let src = new cv.Mat(video.videoHeight, video.videoWidth, cv.CV_8UC4);
+      let gray = new cv.Mat();
+      let blur = new cv.Mat();
+      let thresholdMat = new cv.Mat();
+      let contours = new cv.MatVector();
+      let hierarchy = new cv.Mat();
+      let cap = new cv.VideoCapture(video);
+
+      function processFrame() {
+        try {
+          cap.read(src);
+          cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY);
+          cv.GaussianBlur(gray, blur, new cv.Size(5, 5), 0);
+          cv.threshold(blur, thresholdMat, 160, 255, cv.THRESH_BINARY);
+          cv.findContours(thresholdMat, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
+
+          let ctx = canvas.getContext('2d');
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+          for (let i = 0; i < contours.size(); ++i) {
+            let cnt = contours.get(i);
+            let area = cv.contourArea(cnt);
+
+            // Filter for card sizes on screen
+            if (area > 4000 && area < 80000) {
+              let rect = cv.boundingRect(cnt);
+              let aspectRatio = rect.height / rect.width;
+
+              // Filter for card aspect ratio (~1.4)
+              if (aspectRatio > 1.1 && aspectRatio < 1.8) {
+                // Draw green outline around detected card
+                ctx.strokeStyle = '#10b981';
+                ctx.lineWidth = 3;
+                ctx.strokeRect(rect.x, rect.y, rect.width, rect.height);
+
+                // Label card with target owner
+                ctx.fillStyle = '#10b981';
+                ctx.font = 'bold 14px sans-serif';
+                ctx.fillText(currentTarget, rect.x + 4, rect.y + 18);
+              }
+            }
+          }
+        } catch (e) {
+          console.error(e);
+        }
+        requestAnimationFrame(processFrame);
+      }
+      requestAnimationFrame(processFrame);
+    }
+  </script>
 </body>
 </html>
