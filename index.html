@@ -3,424 +3,210 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Blackjack Vision & True Count Tracker</title>
+  <title>iPhone OCR Blackjack Counter</title>
+  <!-- Load Tesseract.js directly from CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
   <style>
     :root {
-      --bg-color: #0f172a;
-      --card-bg: #1e293b;
+      --bg: #0b0f19;
+      --card: #1e293b;
       --accent: #10b981;
-      --accent-hover: #059669;
-      --text-main: #f8fafc;
-      --text-muted: #94a3b8;
-      --danger: #ef4444;
-      --warning: #f59e0b;
+      --warn: #f59e0b;
+      --text: #f8fafc;
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      user-select: none;
-      -webkit-user-select: none;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+    body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); padding: 12px; display: flex; flex-direction: column; align-items: center; }
 
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background-color: var(--bg-color);
-      color: var(--text-main);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      min-height: 100vh;
-      padding: 12px;
-    }
+    .header { width: 100%; max-width: 480px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .status { font-size: 0.75rem; padding: 4px 8px; border-radius: 12px; background: #334155; }
+    .status.active { background: #064e3b; color: #34d399; }
 
-    header {
-      width: 100%;
-      max-width: 500px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-    }
-
-    h1 {
-      font-size: 1.2rem;
-      font-weight: 700;
-      letter-spacing: -0.5px;
-    }
-
-    .status-badge {
-      font-size: 0.75rem;
-      padding: 4px 8px;
-      border-radius: 12px;
-      background: #334155;
-      color: var(--warning);
-    }
-
-    .status-badge.ready {
-      background: #064e3b;
-      color: #34d399;
-    }
-
-    .viewport-container {
+    .camera-container {
       position: relative;
       width: 100%;
-      max-width: 500px;
+      max-width: 480px;
       aspect-ratio: 4 / 3;
       background: #000;
       border-radius: 16px;
       overflow: hidden;
-      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
     }
 
-    video, canvas {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
+    video { width: 100%; height: 100%; object-fit: cover; }
 
-    /* Floating target banner over camera */
-    .target-overlay {
+    /* Scanning Target Box */
+    .scan-zone {
       position: absolute;
-      top: 12px;
-      left: 12px;
-      background: rgba(15, 23, 42, 0.75);
-      backdrop-filter: blur(8px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      padding: 6px 12px;
-      border-radius: 20px;
-      font-size: 0.85rem;
-      font-weight: 600;
-      z-index: 10;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 140px;
+      height: 180px;
+      border: 3px dashed var(--accent);
+      border-radius: 12px;
+      box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.4);
       display: flex;
-      align-items: center;
-      gap: 6px;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 8px;
     }
+
+    .zone-label { font-size: 0.75rem; font-weight: 700; color: var(--accent); background: rgba(0,0,0,0.6); padding: 2px 6px; border-radius: 4px; align-self: center; }
 
     .dashboard {
-      width: 100%;
-      max-width: 500px;
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-      margin: 12px 0;
+      width: 100%; max-width: 480px;
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 12px 0;
     }
+    .stat-card { background: var(--card); border-radius: 12px; padding: 10px; text-align: center; }
+    .stat-label { font-size: 0.65rem; color: #94a3b8; text-transform: uppercase; }
+    .stat-val { font-size: 1.4rem; font-weight: 800; }
 
-    .stat-card {
-      background: var(--card-bg);
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      border-radius: 12px;
-      padding: 10px 8px;
-      text-align: center;
-    }
-
-    .stat-label {
-      font-size: 0.7rem;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 4px;
-    }
-
-    .stat-value {
-      font-size: 1.5rem;
-      font-weight: 800;
-      color: var(--text-main);
-    }
-
-    .stat-value.highlight {
-      color: var(--accent);
-    }
-
-    .controls-grid {
-      width: 100%;
-      max-width: 500px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .deck-selector {
-      display: flex;
-      background: var(--card-bg);
-      padding: 4px;
-      border-radius: 12px;
-      gap: 4px;
-    }
-
-    .deck-btn {
-      flex: 1;
-      border: none;
-      background: transparent;
-      color: var(--text-muted);
-      padding: 8px 0;
-      font-size: 0.85rem;
-      font-weight: 600;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    .deck-btn.active {
-      background: #334155;
-      color: var(--text-main);
-      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    }
-
-    .hi-lo-inputs {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-    }
-
-    .btn {
-      border: none;
-      border-radius: 12px;
-      padding: 12px;
-      font-size: 1rem;
-      font-weight: 700;
-      color: #fff;
-      cursor: pointer;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 2px;
-      transition: transform 0.1s ease, filter 0.2s ease;
-    }
-
-    .btn:active {
-      transform: scale(0.96);
-    }
-
-    .btn-sub {
-      font-size: 0.7rem;
-      opacity: 0.8;
-      font-weight: 400;
-    }
-
-    .btn-low { background: #059669; }     /* +1 */
-    .btn-neutral { background: #475569; } /*  0 */
-    .btn-high { background: #dc2626; }    /* -1 */
-
-    .action-row {
-      display: grid;
-      grid-template-columns: 2fr 1fr;
-      gap: 8px;
-    }
-
-    .btn-action {
-      background: #3b82f6;
-      border: none;
-      border-radius: 12px;
-      padding: 12px;
-      font-size: 0.9rem;
-      font-weight: 600;
-      color: white;
-    }
-
-    .btn-reset {
-      background: #ef4444;
-    }
+    .controls { width: 100%; max-width: 480px; display: flex; flex-direction: column; gap: 8px; }
+    .btn { border: none; border-radius: 12px; padding: 14px; font-weight: 700; color: white; cursor: pointer; }
+    .btn-scan { background: #3b82f6; font-size: 1rem; }
+    .btn-reset { background: #ef4444; }
+    
+    /* Hidden canvas for cropping scan area */
+    #cropCanvas { display: none; }
   </style>
-
-  <!-- OpenCV.js Library -->
-  <script async src="https://docs.opencv.org/4.x/opencv.js" onload="onOpenCvReady()"></script>
 </head>
 <body>
 
-  <header>
-    <h1>Blackjack Counter</h1>
-    <span id="visionStatus" class="status-badge">Loading Vision System...</span>
-  </header>
+  <div class="header">
+    <h3>Card Text OCR Tracker</h3>
+    <span id="ocrStatus" class="status">Loading Engine...</span>
+  </div>
 
-  <div class="viewport-container">
+  <div class="camera-container">
     <video id="video" playsinline autoplay muted></video>
-    <canvas id="canvas"></canvas>
-    <div class="target-overlay">
-      Target: <span id="targetLabel" style="color: var(--accent);">PLAYER</span>
+    <div class="scan-zone">
+      <span class="zone-label" id="targetLabel">ALIGN CARD HERE</span>
     </div>
   </div>
+
+  <canvas id="cropCanvas"></canvas>
 
   <div class="dashboard">
     <div class="stat-card">
       <div class="stat-label">Running</div>
-      <div id="runningCount" class="stat-value">0</div>
+      <div id="runningCount" class="stat-val">0</div>
     </div>
     <div class="stat-card">
       <div class="stat-label">True Count</div>
-      <div id="trueCount" class="stat-value highlight">0.0</div>
+      <div id="trueCount" class="stat-val" style="color:var(--accent);">0.0</div>
     </div>
     <div class="stat-card">
-      <div class="stat-label">Decks Left</div>
-      <div id="decksRemaining" class="stat-value">6.0</div>
+      <div class="stat-label">Last Detected</div>
+      <div id="lastCard" class="stat-val" style="color:var(--warn);">-</div>
     </div>
   </div>
 
-  <div class="controls-grid">
-    <!-- Deck Selector -->
-    <div class="deck-selector">
-      <button class="deck-btn" onclick="setDecks(1)">1 Deck</button>
-      <button class="deck-btn" onclick="setDecks(2)">2 Decks</button>
-      <button class="deck-btn" onclick="setDecks(4)">4 Decks</button>
-      <button class="deck-btn active" onclick="setDecks(6)">6 Decks</button>
-      <button class="deck-btn" onclick="setDecks(8)">8 Decks</button>
-    </div>
-
-    <!-- Hi-Lo Quick Input Buttons -->
-    <div class="hi-lo-inputs">
-      <button class="btn btn-low" onclick="addCard(1)">
-        +1
-        <span class="btn-sub">2, 3, 4, 5, 6</span>
-      </button>
-      <button class="btn btn-neutral" onclick="addCard(0)">
-        0
-        <span class="btn-sub">7, 8, 9</span>
-      </button>
-      <button class="btn btn-high" onclick="addCard(-1)">
-        -1
-        <span class="btn-sub">10, J, Q, K, A</span>
-      </button>
-    </div>
-
-    <!-- Toggle Target & Reset Controls -->
-    <div class="action-row">
-      <button class="btn-action" onclick="toggleTarget()">Switch Target (Player / Dealer)</button>
-      <button class="btn-action btn-reset" onclick="resetShoe()">Reset Shoe</button>
-    </div>
+  <div class="controls">
+    <button class="btn btn-scan" onclick="scanTargetZone()">SNAP & SCAN CARD</button>
+    <button class="btn btn-reset" onclick="resetCount()">RESET SHOE</button>
   </div>
 
   <script>
-    let totalDecks = 6;
-    let cardsDealt = 0;
+    let worker = null;
     let runningCount = 0;
-    let currentTarget = "PLAYER"; // Player dealt first
-    let cvReady = false;
+    let cardsDealt = 0;
 
-    function onOpenCvReady() {
-      cvReady = true;
-      const statusEl = document.getElementById('visionStatus');
-      statusEl.innerText = 'Vision Active';
-      statusEl.classList.add('ready');
-      initCamera();
+    // 1. Initialize Tesseract OCR Engine (Configured for digits/letters)
+    async function initOCR() {
+      const status = document.getElementById('ocrStatus');
+      worker = await Tesseract.createWorker('eng');
+      // Restrict OCR to only characters found on playing cards
+      await worker.setParameters({
+        tessedit_char_whitelist: '2345678910JQKA',
+      });
+      status.innerText = 'OCR Engine Ready';
+      status.classList.add('active');
+      startiPhoneCamera();
     }
 
-    function updateDashboard() {
-      const totalCards = totalDecks * 52;
-      const cardsRemaining = Math.max(0, totalCards - cardsDealt);
-      const decksLeft = Math.max(0.5, cardsRemaining / 52);
-      const trueCountVal = (runningCount / decksLeft).toFixed(1);
-
-      document.getElementById('runningCount').innerText = runningCount > 0 ? `+${runningCount}` : runningCount;
-      document.getElementById('trueCount').innerText = trueCountVal > 0 ? `+${trueCountVal}` : trueCountVal;
-      document.getElementById('decksRemaining').innerText = decksLeft.toFixed(1);
-    }
-
-    function setDecks(num) {
-      totalDecks = num;
-      document.querySelectorAll('.deck-btn').forEach(btn => btn.classList.remove('active'));
-      event.target.classList.add('active');
-      resetShoe();
-    }
-
-    function addCard(value) {
-      runningCount += value;
-      cardsDealt++;
-      updateDashboard();
-    }
-
-    function toggleTarget() {
-      currentTarget = currentTarget === "PLAYER" ? "DEALER" : "PLAYER";
-      document.getElementById('targetLabel').innerText = currentTarget;
-      document.getElementById('targetLabel').style.color = currentTarget === "PLAYER" ? "var(--accent)" : "var(--warning)";
-    }
-
-    function resetShoe() {
-      runningCount = 0;
-      cardsDealt = 0;
-      currentTarget = "PLAYER";
-      document.getElementById('targetLabel').innerText = currentTarget;
-      document.getElementById('targetLabel').style.color = "var(--accent)";
-      updateDashboard();
-    }
-
-    async function initCamera() {
+    // 2. Access iPhone Rear Camera
+    async function startiPhoneCamera() {
       const video = document.getElementById('video');
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: { exact: "environment" }, width: { ideal: 640 }, height: { ideal: 480 } }
+          video: { facingMode: { exact: "environment" } }
         });
         video.srcObject = stream;
-      } catch (err) {
-        // Fallback to default camera if exact rear camera request fails
+      } catch (e) {
+        // Fallback for desktop testing
         const stream = await navigator.mediaDevices.getUserMedia({ video: true });
         video.srcObject = stream;
       }
-
-      video.addEventListener('loadedmetadata', () => {
-        video.play();
-        startVisionLoop();
-      });
     }
 
-    function startVisionLoop() {
+    // 3. Crop Zone & Scan for Card Values
+    async function scanTargetZone() {
+      if (!worker) return;
       const video = document.getElementById('video');
-      const canvas = document.getElementById('canvas');
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
+      const canvas = document.getElementById('cropCanvas');
+      const ctx = canvas.getContext('2d');
 
-      let src = new cv.Mat(video.videoHeight, video.videoWidth, cv.CV_8UC4);
-      let gray = new cv.Mat();
-      let blur = new cv.Mat();
-      let thresholdMat = new cv.Mat();
-      let contours = new cv.MatVector();
-      let hierarchy = new cv.Mat();
-      let cap = new cv.VideoCapture(video);
+      // Set crop canvas size
+      canvas.width = 200;
+      canvas.height = 250;
 
-      function processFrame() {
-        try {
-          cap.read(src);
-          cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY);
-          cv.GaussianBlur(gray, blur, new cv.Size(5, 5), 0);
-          cv.threshold(blur, thresholdMat, 160, 255, cv.THRESH_BINARY);
-          cv.findContours(thresholdMat, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
+      // Draw middle section of video stream onto hidden canvas
+      const startX = (video.videoWidth - 200) / 2;
+      const startY = (video.videoHeight - 250) / 2;
+      ctx.drawImage(video, startX, startY, 200, 250, 0, 0, 200, 250);
 
-          let ctx = canvas.getContext('2d');
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
+      document.getElementById('ocrStatus').innerText = 'Scanning...';
 
-          for (let i = 0; i < contours.size(); ++i) {
-            let cnt = contours.get(i);
-            let area = cv.contourArea(cnt);
+      // Perform OCR on cropped canvas
+      const ret = await worker.recognize(canvas);
+      const text = ret.data.text.trim().toUpperCase();
 
-            // Filter for card sizes on screen
-            if (area > 4000 && area < 80000) {
-              let rect = cv.boundingRect(cnt);
-              let aspectRatio = rect.height / rect.width;
-
-              // Filter for card aspect ratio (~1.4)
-              if (aspectRatio > 1.1 && aspectRatio < 1.8) {
-                // Draw green outline around detected card
-                ctx.strokeStyle = '#10b981';
-                ctx.lineWidth = 3;
-                ctx.strokeRect(rect.x, rect.y, rect.width, rect.height);
-
-                // Label card with target owner
-                ctx.fillStyle = '#10b981';
-                ctx.font = 'bold 14px sans-serif';
-                ctx.fillText(currentTarget, rect.x + 4, rect.y + 18);
-              }
-            }
-          }
-        } catch (e) {
-          console.error(e);
-        }
-        requestAnimationFrame(processFrame);
-      }
-      requestAnimationFrame(processFrame);
+      document.getElementById('ocrStatus').innerText = 'OCR Engine Ready';
+      processRecognizedRank(text);
     }
+
+    // 4. Update Hi-Lo Card Count Math
+    function processRecognizedRank(text) {
+      if (!text) return;
+      
+      let val = 0;
+      let cardLabel = text;
+
+      if (['2','3','4','5','6'].some(c => text.includes(c))) {
+        val = 1; // +1 for 2-6
+      } else if (['7','8','9'].some(c => text.includes(c))) {
+        val = 0; // Neutral 0
+      } else if (['10','J','Q','K','A'].some(c => text.includes(c))) {
+        val = -1; // -1 for High Cards
+      } else {
+        return; // Ignore unrecognized symbols
+      }
+
+      // iPhone Haptic Feedback Trigger
+      if (navigator.vibrate) navigator.vibrate(50);
+
+      runningCount += val;
+      cardsDealt++;
+
+      // Standard 6-Deck True Count formula
+      const decksRemaining = Math.max(0.5, (6 * 52 - cardsDealt) / 52);
+      const trueCount = (runningCount / decksRemaining).toFixed(1);
+
+      document.getElementById('runningCount').innerText = runningCount > 0 ? `+${runningCount}` : runningCount;
+      document.getElementById('trueCount').innerText = trueCount > 0 ? `+${trueCount}` : trueCount;
+      document.getElementById('lastCard').innerText = cardLabel;
+    }
+
+    function resetCount() {
+      runningCount = 0;
+      cardsDealt = 0;
+      document.getElementById('runningCount').innerText = '0';
+      document.getElementById('trueCount').innerText = '0.0';
+      document.getElementById('lastCard').innerText = '-';
+    }
+
+    // Load OCR when window opens
+    window.onload = initOCR;
   </script>
 </body>
 </html>
