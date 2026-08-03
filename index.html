@@ -15,13 +15,9 @@
     * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
 
     body {
-      background: var(--bg);
-      color: #fff;
+      background: var(--bg); color: #fff;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-      overflow: hidden;
+      display: flex; flex-direction: column; height: 100vh; overflow: hidden;
     }
 
     /* Auth Overlay */
@@ -54,9 +50,7 @@
       border-radius: 8px; font-weight: bold; cursor: pointer;
     }
 
-    .results {
-      max-height: 120px; overflow-y: auto; margin-top: 10px; display: flex; flex-direction: column; gap: 5px;
-    }
+    .results { max-height: 120px; overflow-y: auto; margin-top: 10px; display: flex; flex-direction: column; gap: 5px; }
     .album-result {
       display: flex; align-items: center; gap: 10px; padding: 8px;
       background: #1a1a1a; border-radius: 6px; cursor: pointer;
@@ -85,7 +79,6 @@
       box-shadow: inset 0 0 15px rgba(0,0,0,1); display: flex; align-items: center; justify-content: center;
       transition: transform 0.5s ease-in-out;
     }
-
     .vinyl.spinning { animation: spin 1.8s linear infinite; }
     @keyframes spin { 100% { transform: rotate(360deg); } }
 
@@ -116,18 +109,17 @@
     .hud { padding: 20px; background: #0a0a0c; text-align: center; }
     .hud-title { font-size: 18px; font-weight: bold; margin-bottom: 5px; color: var(--accent); }
     .hud-artist { font-size: 14px; color: #aaa; }
+    .device-warning { color: #ff4b4b; font-size: 12px; margin-top: 5px; display: none; }
   </style>
 </head>
 <body>
 
-  <!-- Auth Screen -->
   <div id="authOverlay">
     <h2>Spotify Virtual Turntable</h2>
     <p style="color: #aaa; margin-top: 10px; font-size: 14px;">Requires Spotify Premium</p>
     <button class="btn-spotify" onclick="startSpotifyAuth()">Connect with Spotify</button>
   </div>
 
-  <!-- Main App -->
   <div class="header" id="header">
     <div class="search-bar">
       <input type="text" id="searchInput" placeholder="Search Spotify albums...">
@@ -141,15 +133,11 @@
       <div class="platter">
         <div class="vinyl" id="vinyl">
           <svg class="track-gaps" id="grooveSvg" viewBox="0 0 290 290"></svg>
-          <div class="center-label" id="centerLabel">
-            <div class="spindle"></div>
-          </div>
+          <div class="center-label" id="centerLabel"><div class="spindle"></div></div>
         </div>
       </div>
       <div class="tonearm-pivot">
-        <div class="tonearm" id="tonearm">
-          <div class="headshell"></div>
-        </div>
+        <div class="tonearm" id="tonearm"><div class="headshell"></div></div>
       </div>
     </div>
   </div>
@@ -157,114 +145,76 @@
   <div class="hud">
     <div class="hud-title" id="currentTrack">Awaiting Connection</div>
     <div class="hud-artist" id="currentArtist">...</div>
+    <div class="device-warning" id="deviceWarning">Open the Spotify app on your phone to hear audio!</div>
   </div>
 
-  <script src="https://sdk.scdn.co/spotify-player.js"></script>
-  
   <script>
     const CLIENT_ID = 'Fdf967e9e0294111a273b5469543c636';
-    
-    // Automatically gets the current URL without query strings
     const REDIRECT_URI = window.location.origin + window.location.pathname; 
     
     const VINYL_RADIUS = 145; const GROOVE_START = 140; const GROOVE_END = 55; const PLAYABLE_WIDTH = GROOVE_START - GROOVE_END;
     const PIVOT_REST_ANGLE = -25; const PIVOT_OUTER_GROOVE = 5; const PIVOT_INNER_GROOVE = 32;
 
-    let accessToken = null; let deviceId = null; let trackLayout = [];
+    let accessToken = null; let trackLayout = [];
     let currentAlbumUri = null; let isDragging = false; let currentAngle = PIVOT_REST_ANGLE;
 
     const vinyl = document.getElementById('vinyl'); const tonearm = document.getElementById('tonearm');
     const grooveSvg = document.getElementById('grooveSvg'); const currentTrackTxt = document.getElementById('currentTrack');
+    const warningTxt = document.getElementById('deviceWarning');
 
     // --- 1. PKCE AUTHENTICATION LOGIC ---
     const generateRandomString = (length) => {
       const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-      const values = crypto.getRandomValues(new Uint8Array(length));
-      return values.reduce((acc, x) => acc + possible[x % possible.length], "");
+      return crypto.getRandomValues(new Uint8Array(length)).reduce((acc, x) => acc + possible[x % possible.length], "");
     };
 
     const sha256 = async (plain) => {
-      const encoder = new TextEncoder();
-      const data = encoder.encode(plain);
+      const data = new TextEncoder().encode(plain);
       return window.crypto.subtle.digest('SHA-256', data);
     };
 
     const base64encode = (input) => {
-      return btoa(String.fromCharCode(...new Uint8Array(input)))
-        .replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
+      return btoa(String.fromCharCode(...new Uint8Array(input))).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
     };
 
     async function startSpotifyAuth() {
       const codeVerifier = generateRandomString(64);
       window.localStorage.setItem('code_verifier', codeVerifier);
-      const hashed = await sha256(codeVerifier);
-      const codeChallenge = base64encode(hashed);
+      const codeChallenge = base64encode(await sha256(codeVerifier));
 
-      const scopes = 'streaming user-read-email user-read-private user-modify-playback-state user-read-playback-state';
+      const scopes = 'user-read-email user-read-private user-modify-playback-state user-read-playback-state';
       const authUrl = new URL("https://accounts.spotify.com/authorize");
 
-      const params =  {
-        response_type: 'code',
-        client_id: CLIENT_ID,
-        scope: scopes,
-        code_challenge_method: 'S256',
-        code_challenge: codeChallenge,
-        redirect_uri: REDIRECT_URI,
-      }
-      authUrl.search = new URLSearchParams(params).toString();
+      authUrl.search = new URLSearchParams({
+        response_type: 'code', client_id: CLIENT_ID, scope: scopes,
+        code_challenge_method: 'S256', code_challenge: codeChallenge, redirect_uri: REDIRECT_URI,
+      }).toString();
       window.location.href = authUrl.toString();
     }
 
     async function checkAuth() {
-      const urlParams = new URLSearchParams(window.location.search);
-      const code = urlParams.get('code');
-
+      const code = new URLSearchParams(window.location.search).get('code');
       if (code) {
-        const codeVerifier = localStorage.getItem('code_verifier');
-        const payload = {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        const body = await fetch("https://accounts.spotify.com/api/token", {
+          method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
           body: new URLSearchParams({
-            client_id: CLIENT_ID,
-            grant_type: 'authorization_code',
-            code: code,
-            redirect_uri: REDIRECT_URI,
-            code_verifier: codeVerifier
+            client_id: CLIENT_ID, grant_type: 'authorization_code', code: code,
+            redirect_uri: REDIRECT_URI, code_verifier: localStorage.getItem('code_verifier')
           })
-        };
-
-        const body = await fetch("https://accounts.spotify.com/api/token", payload);
+        });
         const response = await body.json();
 
         if (response.access_token) {
           accessToken = response.access_token;
-          // Clear the URL so it looks clean
           window.history.replaceState({}, document.title, window.location.pathname);
           document.getElementById('authOverlay').style.display = 'none';
           document.getElementById('header').style.display = 'block';
           currentTrackTxt.innerText = "Search for an album above";
-          initSpotifyPlayer();
         }
       }
     }
 
-    // --- 2. SPOTIFY PLAYER ---
-    function initSpotifyPlayer() {
-      window.onSpotifyWebPlaybackSDKReady = () => {
-        const player = new Spotify.Player({ name: 'Virtual Turntable', getOAuthToken: cb => { cb(accessToken); }, volume: 0.8 });
-        player.addListener('ready', ({ device_id }) => {
-          deviceId = device_id;
-          fetch('https://api.spotify.com/v1/me/player', {
-            method: 'PUT',
-            headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ device_ids: [deviceId], play: false })
-          });
-        });
-        player.connect();
-      };
-    }
-
-    // --- 3. SPOTIFY API DATA ---
+    // --- 2. SPOTIFY API DATA ---
     async function searchAlbum() {
       const query = document.getElementById('searchInput').value;
       if(!query || !accessToken) return;
@@ -272,14 +222,11 @@
       const res = await fetch(`https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=album&limit=5`, { headers: { 'Authorization': `Bearer ${accessToken}` } });
       const data = await res.json();
       
-      const list = document.getElementById('resultsList');
-      list.innerHTML = '';
+      const list = document.getElementById('resultsList'); list.innerHTML = '';
       data.albums.items.forEach(album => {
-        const div = document.createElement('div');
-        div.className = 'album-result';
+        const div = document.createElement('div'); div.className = 'album-result';
         div.innerHTML = `<img src="${album.images[2].url}"><div>${album.name}<span>${album.artists[0].name}</span></div>`;
-        div.onclick = () => loadAlbum(album);
-        list.appendChild(div);
+        div.onclick = () => loadAlbum(album); list.appendChild(div);
       });
     }
 
@@ -301,9 +248,7 @@
       grooveSvg.innerHTML = ''; trackLayout = [];
 
       tracks.forEach((track, i) => {
-        const percentage = track.duration_ms / totalMs;
-        const trackInnerRadius = currentRadius - (percentage * PLAYABLE_WIDTH);
-
+        const trackInnerRadius = currentRadius - ((track.duration_ms / totalMs) * PLAYABLE_WIDTH);
         if (i < tracks.length - 1) {
           const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
           circle.setAttribute('cx', '145'); circle.setAttribute('cy', '145');
@@ -311,16 +256,16 @@
           circle.setAttribute('stroke', 'rgba(0,0,0,0.8)'); circle.setAttribute('stroke-width', '1.5');
           grooveSvg.appendChild(circle);
         }
-
-        const startAngle = PIVOT_OUTER_GROOVE + ((GROOVE_START - currentRadius) / PLAYABLE_WIDTH) * (PIVOT_INNER_GROOVE - PIVOT_OUTER_GROOVE);
-        const endAngle = PIVOT_OUTER_GROOVE + ((GROOVE_START - trackInnerRadius) / PLAYABLE_WIDTH) * (PIVOT_INNER_GROOVE - PIVOT_OUTER_GROOVE);
-
-        trackLayout.push({ track: track, index: i, startAngle: startAngle, endAngle: endAngle });
+        trackLayout.push({ 
+          track: track, index: i, 
+          startAngle: PIVOT_OUTER_GROOVE + ((GROOVE_START - currentRadius) / PLAYABLE_WIDTH) * (PIVOT_INNER_GROOVE - PIVOT_OUTER_GROOVE), 
+          endAngle: PIVOT_OUTER_GROOVE + ((GROOVE_START - trackInnerRadius) / PLAYABLE_WIDTH) * (PIVOT_INNER_GROOVE - PIVOT_OUTER_GROOVE) 
+        });
         currentRadius = trackInnerRadius;
       });
     }
 
-    // --- 4. TONEARM PHYSICS ---
+    // --- 3. TONEARM PHYSICS & PLAYBACK ROUTING ---
     tonearm.addEventListener('touchstart', startDrag); tonearm.addEventListener('mousedown', startDrag);
     window.addEventListener('touchmove', dragArm, {passive: false}); window.addEventListener('mousemove', dragArm);
     window.addEventListener('touchend', endDrag); window.addEventListener('mouseup', endDrag);
@@ -330,29 +275,23 @@
       if(!isDragging) return;
       e.preventDefault();
       
-      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX; const clientY = e.touches ? e.touches[0].clientY : e.clientY;
       const pivotRect = document.querySelector('.tonearm-pivot').getBoundingClientRect();
-      const pivotX = pivotRect.left + pivotRect.width / 2;
-      const pivotY = pivotRect.top + pivotRect.height / 2;
+      let angle = (Math.atan2(clientY - (pivotRect.top + pivotRect.height / 2), clientX - (pivotRect.left + pivotRect.width / 2)) * (180 / Math.PI)) - 90;
       
-      let angle = (Math.atan2(clientY - pivotY, clientX - pivotX) * (180 / Math.PI)) - 90;
       if (angle < PIVOT_REST_ANGLE) angle = PIVOT_REST_ANGLE;
       if (angle > PIVOT_INNER_GROOVE + 5) angle = PIVOT_INNER_GROOVE + 5;
       
-      currentAngle = angle;
-      tonearm.style.transform = `rotate(${angle}deg)`;
-
+      currentAngle = angle; tonearm.style.transform = `rotate(${angle}deg)`;
       const hoverTrack = trackLayout.find(t => angle >= t.startAngle && angle <= t.endAngle);
       if (hoverTrack) currentTrackTxt.innerText = hoverTrack.track.name;
     }
 
     function endDrag(e) { 
-      if(!isDragging) return;
-      isDragging = false; 
+      if(!isDragging) return; isDragging = false; 
       
       if (currentAngle >= PIVOT_OUTER_GROOVE && currentAngle <= PIVOT_INNER_GROOVE && currentAlbumUri) {
-        vinyl.classList.add('spinning'); playTrackAtAngle(currentAngle);
+        playTrackAtAngle(currentAngle);
       } else {
         tonearm.style.transform = `rotate(${PIVOT_REST_ANGLE}deg)`;
         currentTrackTxt.innerText = "Needle Parked"; pauseSpotify();
@@ -361,19 +300,42 @@
 
     async function playTrackAtAngle(angle) {
       const activeTrack = trackLayout.find(t => angle >= t.startAngle && angle <= t.endAngle);
-      if (activeTrack && deviceId) {
-        currentTrackTxt.innerText = "Playing: " + activeTrack.track.name;
-        await fetch(`https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`, {
-          method: 'PUT',
-          headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+      if (!activeTrack) return;
+
+      currentTrackTxt.innerText = "Connecting to Spotify...";
+      warningTxt.style.display = 'none';
+
+      // Find an active device (like your phone's Spotify app)
+      const deviceRes = await fetch('https://api.spotify.com/v1/me/player/devices', { headers: { 'Authorization': `Bearer ${accessToken}` } });
+      const deviceData = await deviceRes.json();
+      
+      let targetDevice = null;
+      if (deviceData.devices.length > 0) {
+        const active = deviceData.devices.find(d => d.is_active);
+        targetDevice = active ? active.id : deviceData.devices[0].id;
+      }
+
+      if (targetDevice) {
+        const playRes = await fetch(`https://api.spotify.com/v1/me/player/play?device_id=${targetDevice}`, {
+          method: 'PUT', headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
           body: JSON.stringify({ context_uri: currentAlbumUri, offset: { position: activeTrack.index } })
         });
+        
+        if (playRes.status === 204 || playRes.status === 202) {
+          vinyl.classList.add('spinning');
+          currentTrackTxt.innerText = "Playing: " + activeTrack.track.name;
+        } else {
+          warningTxt.style.display = 'block';
+        }
+      } else {
+        // No devices found awake
+        warningTxt.style.display = 'block';
+        currentTrackTxt.innerText = "Device not found";
       }
     }
 
     function pauseSpotify() {
-      if(!deviceId) return;
-      fetch(`https://api.spotify.com/v1/me/player/pause?device_id=${deviceId}`, { method: 'PUT', headers: { 'Authorization': `Bearer ${accessToken}` } });
+      fetch(`https://api.spotify.com/v1/me/player/pause`, { method: 'PUT', headers: { 'Authorization': `Bearer ${accessToken}` } });
       vinyl.classList.remove('spinning');
     }
 
