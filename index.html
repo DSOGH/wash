@@ -134,11 +134,10 @@
       position: absolute; top: 7px; left: 19px; width: 6px; height: 215px;
       background: linear-gradient(to right, #999, #fff 40%, #666); border-radius: 3px;
       transform-origin: 3px 15px; 
-      transform: rotate(-3deg); 
+      transform: rotate(-4deg); 
       cursor: grab; z-index: 9;
     }
     
-    /* Smooth CSS transition solely for swinging mechanically */
     .tonearm.swinging { transition: transform 0.6s ease-in-out; }
 
     .headshell {
@@ -211,13 +210,28 @@
     const CLIENT_ID = 'Fdf967e9e0294111a273b5469543c636';
     const REDIRECT_URI = window.location.origin + window.location.pathname; 
     
-    // Mathematically corrected angles for unmistakable drops onto the grooves
-    const GROOVE_START = 142; const GROOVE_END = 55; const PLAYABLE_WIDTH = GROOVE_START - GROOVE_END;
-    
-    // CALIBRATED ANGLES 
-    const PIVOT_REST_ANGLE = -3;  
-    const PIVOT_OUTER_GROOVE = 7; // Perfectly aligned with the outer lip of the record
-    const PIVOT_INNER_GROOVE = 38; // Perfectly aligned just outside the center label
+    // Geometry Constants
+    const GROOVE_START = 142; // Exact pixel radius of outer record edge
+    const GROOVE_END = 55;    // Exact pixel radius of inner record edge
+    const PLAYABLE_WIDTH = GROOVE_START - GROOVE_END;
+    const PIVOT_REST_ANGLE = -4; 
+
+    // --- EXACT GEOMETRY ENGINE ---
+    // Instead of guessing angles, we calculate exact physical intersection.
+    function getCssAngle(radius) {
+      const L = 210; // Arm Length
+      const D = 210.38; // Distance from pivot to spindle center
+      let cosGamma = (L*L + D*D - radius*radius) / (2 * L * D);
+      cosGamma = Math.max(-1, Math.min(1, cosGamma)); // Prevent math errors
+      let gamma = Math.acos(cosGamma) * (180 / Math.PI);
+      return 50.48 - gamma; // 50.48 is the absolute angle of the pivot-spindle line
+    }
+
+    function getRadiusFromAngle(cssAngle) {
+      const L = 210; const D = 210.38;
+      let gamma = (50.48 - cssAngle) * (Math.PI / 180);
+      return Math.sqrt(L*L + D*D - 2*L*D*Math.cos(gamma));
+    }
 
     let accessToken = null; 
     let albumData = null; let currentSide = 'A'; let currentSideTracks = [];
@@ -290,9 +304,9 @@
     async function beginAlbumSwap(album) {
       resultsDropdown.classList.remove('active');
       
-      // Clear the search bar and hide the iPhone keyboard
+      // Instantly clear the search text and hide iPhone keyboard
       searchInput.value = '';
-      searchInput.blur();
+      searchInput.blur(); 
       
       btnStop();
       startBtn.disabled = true;
@@ -333,7 +347,6 @@
     function generatePhysicalGrooves(tracks) {
       if(!tracks || tracks.length === 0) return;
       
-      // Safe math fallback to prevent NaN errors
       let totalMs = tracks.reduce((sum, t) => sum + (t.duration_ms || 180000), 0);
       if(totalMs === 0) totalMs = 180000;
       
@@ -348,14 +361,17 @@
           const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
           circle.setAttribute('cx', '145'); circle.setAttribute('cy', '145');
           circle.setAttribute('r', trackInnerRadius); circle.setAttribute('fill', 'none');
-          circle.setAttribute('stroke', 'rgba(0,0,0,0.8)'); circle.setAttribute('stroke-width', '1.5');
+          circle.setAttribute('stroke', 'rgba(0,0,0,0.85)'); circle.setAttribute('stroke-width', '1.5');
           grooveSvg.appendChild(circle);
         }
         
-        const safeStartAngle = PIVOT_OUTER_GROOVE + ((GROOVE_START - currentRadius) / PLAYABLE_WIDTH) * (PIVOT_INNER_GROOVE - PIVOT_OUTER_GROOVE);
-        const safeEndAngle = PIVOT_OUTER_GROOVE + ((GROOVE_START - trackInnerRadius) / PLAYABLE_WIDTH) * (PIVOT_INNER_GROOVE - PIVOT_OUTER_GROOVE);
-
-        trackLayout.push({ track: track, index: i, startAngle: safeStartAngle, endAngle: safeEndAngle });
+        // Save the exact radii bounds so the needle physics knows where the song lives
+        trackLayout.push({ 
+          track: track, 
+          index: i, 
+          startRadius: currentRadius, 
+          endRadius: trackInnerRadius 
+        });
         currentRadius = trackInnerRadius;
       });
     }
@@ -369,7 +385,10 @@
         if (progressMs > activeTrackDuration) progressMs = activeTrackDuration;
         
         let fraction = progressMs / activeTrackDuration;
-        currentAngle = layout.startAngle + (fraction * (layout.endAngle - layout.startAngle));
+        
+        // Interpolate the radius linearly, THEN convert to angle mathematically
+        let currentRadius = layout.startRadius - (fraction * (layout.startRadius - layout.endRadius));
+        currentAngle = getCssAngle(currentRadius);
         
         if(!isNaN(currentAngle)) {
            tonearm.style.transform = `rotate(${currentAngle}deg)`;
@@ -412,15 +431,15 @@
       startBtn.disabled = true;
       trackTitle.innerText = "Lowering Needle...";
 
-      const targetLayout = trackLayout[currentTrackIdx || 0];
-      const dropAngle = targetLayout ? targetLayout.startAngle : PIVOT_OUTER_GROOVE;
+      // When hitting start, drop perfectly onto the beginning of the first track
+      const dropAngle = getCssAngle(trackLayout[0].startRadius);
 
       tonearm.classList.add('swinging');
       tonearm.style.transform = `rotate(${dropAngle}deg)`;
 
       setTimeout(() => {
         tonearm.classList.remove('swinging');
-        playTrack(currentTrackIdx || 0, 0);
+        playTrack(0, 0); // Always start on track 0
         startBtn.disabled = false;
       }, 600);
     }
@@ -508,10 +527,14 @@
     window.addEventListener('touchend', () => { 
       if(!isDragging) return;
       isDragging = false; 
-      if(currentAngle >= PIVOT_OUTER_GROOVE - 2 && currentAngle <= PIVOT_INNER_GROOVE + 2 && albumData) {
-        const target = trackLayout.find(t => currentAngle >= t.startAngle && currentAngle <= t.endAngle);
+      
+      const currentRadius = getRadiusFromAngle(currentAngle);
+
+      if(currentRadius <= GROOVE_START + 2 && currentRadius >= GROOVE_END - 2 && albumData) {
+        // Find which track block this radius falls into
+        const target = trackLayout.find(t => currentRadius <= t.startRadius && currentRadius >= t.endRadius);
         if(target) {
-          const fraction = (currentAngle - target.startAngle) / (target.endAngle - target.startAngle);
+          const fraction = (target.startRadius - currentRadius) / (target.startRadius - target.endRadius);
           playTrack(target.index, Math.floor(fraction * (target.track.duration_ms || 180000)));
         }
       } else {
@@ -526,11 +549,15 @@
       const pivotRect = document.querySelector('.tonearm-pivot').getBoundingClientRect();
       
       let angle = (Math.atan2(clientY - (pivotRect.top + pivotRect.height/2), clientX - (pivotRect.left + pivotRect.width/2)) * (180 / Math.PI)) - 90;
+      
+      // Boundary constraints based on math
       if (angle < PIVOT_REST_ANGLE) angle = PIVOT_REST_ANGLE;
-      if (angle > PIVOT_INNER_GROOVE + 5) angle = PIVOT_INNER_GROOVE + 5;
+      if (angle > getCssAngle(50)) angle = getCssAngle(50);
       
       currentAngle = angle; tonearm.style.transform = `rotate(${angle}deg)`;
-      const hover = trackLayout.find(t => angle >= t.startAngle && angle <= t.endAngle);
+      
+      const currentRadius = getRadiusFromAngle(angle);
+      const hover = trackLayout.find(t => currentRadius <= t.startRadius && currentRadius >= t.endRadius);
       if(hover) trackTitle.innerText = `${hover.index+1}. ${hover.track.name}`;
     }, { passive: false });
 
