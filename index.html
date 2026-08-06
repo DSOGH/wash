@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <!-- viewport-fit=cover ensures the layout extends behind the Dynamic Island so we can control the padding perfectly -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Landscape Spotify Turntable</title>
   <style>
@@ -19,10 +18,9 @@
       color: #fff;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       display: flex;
-      flex-direction: row; /* Landscape Layout */
+      flex-direction: row;
       height: 100vh;
       overflow: hidden;
-      /* iPhone 17 Pro Dynamic Island Safe Areas */
       padding-left: env(safe-area-inset-left);
       padding-right: env(safe-area-inset-right);
       padding-bottom: env(safe-area-inset-bottom);
@@ -30,17 +28,9 @@
 
     /* Portrait Blocker */
     #portraitWarning {
-      display: none;
-      position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: #000;
-      z-index: 9999;
-      color: #fff;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      font-size: 20px;
-      font-weight: bold;
+      display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+      background: #000; z-index: 9999; color: #fff; align-items: center; justify-content: center;
+      text-align: center; font-size: 20px; font-weight: bold;
     }
     @media (orientation: portrait) {
       #portraitWarning { display: flex; flex-direction: column; gap: 15px; }
@@ -59,53 +49,29 @@
     }
 
     /* Main Layout */
-    #appContainer {
-      display: none;
-      flex: 1;
-      flex-direction: row;
-      width: 100%;
-    }
+    #appContainer { display: none; flex: 1; flex-direction: row; width: 100%; }
 
     /* Left Side: Turntable */
-    .left-panel {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-    }
+    .left-panel { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; }
 
     .deck {
-      position: relative;
-      width: 380px;
-      height: 350px;
+      position: relative; width: 380px; height: 350px;
       background: linear-gradient(145deg, #23252c, #141518);
-      border-radius: 20px;
-      box-shadow: inset 0 1px 1px rgba(255,255,255,0.1), 0 20px 40px rgba(0,0,0,0.8);
+      border-radius: 20px; box-shadow: inset 0 1px 1px rgba(255,255,255,0.1), 0 20px 40px rgba(0,0,0,0.8);
+      overflow: hidden;
     }
 
     /* Right Side: UI & Controls */
     .right-panel {
-      width: 320px;
-      background: #111115;
-      border-left: 1px solid #222;
-      display: flex;
-      flex-direction: column;
-      padding: 20px;
+      width: 320px; background: #111115; border-left: 1px solid #222;
+      display: flex; flex-direction: column; padding: 20px; z-index: 10;
     }
 
-    /* Search Bar */
     .search-container { position: relative; margin-bottom: 20px; z-index: 100; }
-    .search-input {
-      width: 100%; padding: 12px 16px; border-radius: 10px; border: 1px solid #333;
-      background: #09090b; color: #fff; font-size: 16px; outline: none;
-    }
+    .search-input { width: 100%; padding: 12px 16px; border-radius: 10px; border: 1px solid #333; background: #09090b; color: #fff; font-size: 16px; outline: none; }
     .search-input:focus { border-color: var(--accent); }
     
-    .results-dropdown {
-      position: absolute; top: 100%; left: 0; right: 0; background: #18181c;
-      border-radius: 0 0 12px 12px; max-height: 200px; overflow-y: auto; display: none; border: 1px solid #2a2a30;
-    }
+    .results-dropdown { position: absolute; top: 100%; left: 0; right: 0; background: #18181c; border-radius: 0 0 12px 12px; max-height: 200px; overflow-y: auto; display: none; border: 1px solid #2a2a30; }
     .results-dropdown.active { display: block; }
     .album-item { display: flex; align-items: center; gap: 12px; padding: 10px; cursor: pointer; border-bottom: 1px solid #222; }
     .album-item img { width: 40px; height: 40px; border-radius: 4px; }
@@ -121,15 +87,21 @@
 
     /* Controls */
     .controls-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
-    .btn {
-      padding: 12px; border-radius: 10px; border: none; background: #22222a;
-      color: #fff; font-size: 12px; font-weight: 600; cursor: pointer;
-    }
+    .btn { padding: 12px; border-radius: 10px; border: none; background: #22222a; color: #fff; font-size: 12px; font-weight: 600; cursor: pointer; }
     .btn-primary { background: var(--accent); color: #000; }
     .btn:active { transform: scale(0.95); }
+    .btn:disabled { opacity: 0.5; pointer-events: none; }
 
     /* Platter & Vinyl */
-    .platter-container { position: absolute; top: 25px; left: 20px; width: 300px; height: 300px; perspective: 800px; }
+    .platter-wrapper {
+      position: absolute; top: 25px; left: 20px; width: 300px; height: 300px;
+      perspective: 800px; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s;
+    }
+    
+    /* Album Swap Animations */
+    .platter-wrapper.swapping-out { transform: translateX(-150%) scale(0.8); opacity: 0; }
+    .platter-wrapper.swapping-in-prep { transform: translateX(150%) scale(0.8); opacity: 0; transition: none; }
+
     .platter {
       width: 100%; height: 100%; border-radius: 50%; background: #000;
       box-shadow: 0 10px 25px rgba(0,0,0,0.9), inset 0 0 4px #555;
@@ -137,34 +109,47 @@
       transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1); transform-style: preserve-3d;
     }
     .platter.flipping { transform: rotateY(180deg) scale(0.85); }
+    
     .vinyl {
       position: relative; width: 290px; height: 290px; border-radius: 50%;
-      background: conic-gradient(from 20deg, transparent 15%, rgba(255,255,255,0.12) 25%, transparent 35%, transparent 65%, rgba(255,255,255,0.12) 75%, transparent 85%),
-                  repeating-radial-gradient(circle, #0a0a0c 0px, #0a0a0c 1.5px, #141418 2px);
+      background: conic-gradient(from 20deg, transparent 15%, rgba(255,255,255,0.12) 25%, transparent 35%, transparent 65%, rgba(255,255,255,0.12) 75%, transparent 85%), repeating-radial-gradient(circle, #0a0a0c 0px, #0a0a0c 1.5px, #141418 2px);
       display: flex; align-items: center; justify-content: center;
     }
     .vinyl.spinning { animation: spin 1.8s linear infinite; }
     @keyframes spin { 100% { transform: rotate(360deg); } }
+    
     .grooves-svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; transform: rotate(-90deg); }
     .center-label { width: 96px; height: 96px; border-radius: 50%; background: #222; background-size: cover; background-position: center; border: 3px solid #000; display: flex; align-items: center; justify-content: center; z-index: 2; }
     .spindle { width: 8px; height: 8px; background: #ccc; border-radius: 50%; }
 
-    /* Tonearm */
+    /* --- TONEARM & REST HOLDER --- */
+    .tonearm-rest {
+      position: absolute; bottom: 85px; right: 28px; width: 14px; height: 18px;
+      background: #333; border-radius: 4px; border-top: 4px solid #111;
+      box-shadow: -2px 4px 6px rgba(0,0,0,0.6); z-index: 8;
+    }
+
     .tonearm-pivot {
       position: absolute; top: 20px; right: 25px; width: 44px; height: 44px;
       background: radial-gradient(circle at 35% 35%, #555, #111); border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.7); z-index: 10;
     }
+
     .tonearm {
-      position: absolute; top: 20px; left: 19px; width: 6px; height: 200px;
+      position: absolute; top: 20px; left: 19px; width: 6px; height: 210px;
       background: linear-gradient(to right, #999, #fff 40%, #666); border-radius: 3px;
-      transform-origin: 3px 3px; transform: rotate(-28deg); cursor: grab; z-index: 9;
-      /* Removed transition so requestAnimationFrame is perfectly fluid 1:1 */
+      transform-origin: center 15px; /* Perfect pivot alignment */
+      transform: rotate(-35deg); /* Aligns precisely over the rest */
+      cursor: grab; z-index: 9;
     }
+    
+    /* Active transition class applied only when moving from rest to start */
+    .tonearm.swinging { transition: transform 0.6s ease-in-out; }
+
     .headshell {
-      position: absolute; bottom: -12px; left: -6px; width: 18px; height: 32px;
-      background: #111; border-radius: 2px; transform: rotate(20deg);
+      position: absolute; bottom: -12px; left: -8px; width: 22px; height: 32px;
+      background: #111; border-radius: 2px; transform: rotate(18deg);
     }
-    .stylus-glow { position: absolute; bottom: 2px; left: 7px; width: 4px; height: 4px; background: #1DB954; border-radius: 50%; box-shadow: 0 0 6px #1DB954; }
+    .stylus-glow { position: absolute; bottom: 2px; left: 9px; width: 4px; height: 4px; background: #1DB954; border-radius: 50%; box-shadow: 0 0 6px #1DB954; }
   </style>
 </head>
 <body>
@@ -185,7 +170,8 @@
     <!-- Turntable Deck (Left) -->
     <div class="left-panel">
       <div class="deck">
-        <div class="platter-container">
+        
+        <div class="platter-wrapper" id="platterWrapper">
           <div class="platter" id="platter">
             <div class="vinyl" id="vinyl">
               <svg class="grooves-svg" id="grooveSvg" viewBox="0 0 290 290"></svg>
@@ -193,11 +179,14 @@
             </div>
           </div>
         </div>
+
+        <div class="tonearm-rest"></div>
         <div class="tonearm-pivot">
           <div class="tonearm" id="tonearm">
             <div class="headshell"><div class="stylus-glow"></div></div>
           </div>
         </div>
+        
       </div>
     </div>
 
@@ -217,9 +206,9 @@
       </div>
 
       <div class="controls-grid">
-        <button class="btn btn-primary" onclick="btnStart()">START</button>
-        <button class="btn" onclick="btnPauseResume()">PAUSE / RESUME</button>
-        <button class="btn" onclick="btnStop()">STOP</button>
+        <button class="btn btn-primary" id="btnStart" onclick="triggerStartSequence()" disabled>START</button>
+        <button class="btn" id="btnPause" onclick="btnPauseResume()" disabled>PAUSE</button>
+        <button class="btn" onclick="btnStop()">STOP / PARK</button>
         <button class="btn" onclick="flipRecordManually()">FLIP SIDE</button>
       </div>
     </div>
@@ -229,22 +218,24 @@
     const CLIENT_ID = 'Fdf967e9e0294111a273b5469543c636';
     const REDIRECT_URI = window.location.origin + window.location.pathname; 
     
-    // Geometry Constants
-    const GROOVE_START = 140; const GROOVE_END = 55; const PLAYABLE_WIDTH = GROOVE_START - GROOVE_END;
-    const PIVOT_REST_ANGLE = -28; const PIVOT_OUTER_GROOVE = -10; const PIVOT_INNER_GROOVE = 14;
+    // Aligned Geometry Constants
+    const GROOVE_START = 142; const GROOVE_END = 55; const PLAYABLE_WIDTH = GROOVE_START - GROOVE_END;
+    const PIVOT_REST_ANGLE = -35; // Perfect park over the holder
+    const PIVOT_OUTER_GROOVE = -14; // Edge of the record
+    const PIVOT_INNER_GROOVE = 14;  // Edge of the center label
 
     let accessToken = null; 
     let albumData = null; let currentSide = 'A'; let currentSideTracks = [];
     let currentTrackIdx = 0; let trackLayout = [];
     
-    // Smooth Animation Sync Variables
     let isPlaying = false; let isDragging = false;
     let trackStartTime = 0; let activeTrackDuration = 0; let currentAngle = PIVOT_REST_ANGLE;
-    let pollInterval = null;
 
     const vinyl = document.getElementById('vinyl'); const tonearm = document.getElementById('tonearm');
+    const platterWrapper = document.getElementById('platterWrapper');
     const grooveSvg = document.getElementById('grooveSvg'); const trackTitle = document.getElementById('trackTitle');
     const warningTxt = document.getElementById('deviceWarning'); const resultsDropdown = document.getElementById('resultsDropdown');
+    const startBtn = document.getElementById('btnStart'); const pauseBtn = document.getElementById('btnPause');
 
     // --- 1. PKCE AUTHENTICATION ---
     const generateRandomString = (length) => crypto.getRandomValues(new Uint8Array(length)).reduce((a, x) => a + 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'[x % 62], "");
@@ -276,12 +267,12 @@
           window.history.replaceState({}, document.title, window.location.pathname);
           document.getElementById('authOverlay').style.display = 'none';
           document.getElementById('appContainer').style.display = 'flex';
-          startPlaybackPoller(); // Start checking Spotify state
+          startPlaybackPoller(); 
         }
       }
     }
 
-    // --- 2. SPOTIFY API SEARCH & SPLIT ---
+    // --- 2. SPOTIFY API SEARCH & SWAP ANIMATION ---
     let searchTimeout = null;
     document.getElementById('searchInput').addEventListener('input', (e) => {
       clearTimeout(searchTimeout);
@@ -294,26 +285,49 @@
         data.albums.items.forEach(album => {
           const div = document.createElement('div'); div.className = 'album-item';
           div.innerHTML = `<img src="${album.images[2].url}"><div class="album-info"><div class="album-title">${album.name}</div><div class="album-artist">${album.artists[0].name}</div></div>`;
-          div.onclick = () => loadAlbum(album); resultsDropdown.appendChild(div);
+          div.onclick = () => beginAlbumSwap(album); resultsDropdown.appendChild(div);
         });
         resultsDropdown.classList.add('active');
       }, 300);
     });
 
-    async function loadAlbum(album) {
+    async function beginAlbumSwap(album) {
       resultsDropdown.classList.remove('active');
       document.getElementById('searchInput').value = album.name;
-      document.getElementById('centerLabel').style.backgroundImage = `url(${album.images[0].url})`;
-      document.getElementById('artistName').innerText = album.artists[0].name;
       
+      // Stop music and park needle
+      btnStop();
+      startBtn.disabled = true;
+
+      // Animate old record sliding out
+      platterWrapper.classList.add('swapping-out');
+
+      // Fetch tracks while record is animating
       const res = await fetch(`https://api.spotify.com/v1/albums/${album.id}/tracks`, { headers: { 'Authorization': `Bearer ${accessToken}` } });
       const data = await res.json();
       
       const splitIdx = Math.ceil(data.items.length / 2);
-      albumData = { uri: album.uri, sideA: data.items.slice(0, splitIdx), sideB: data.items.slice(splitIdx) };
-      loadSide('A', 0);
-      tonearm.style.transform = `rotate(${PIVOT_REST_ANGLE}deg)`;
-      trackTitle.innerText = "Ready - Press START";
+      albumData = { uri: album.uri, meta: album, sideA: data.items.slice(0, splitIdx), sideB: data.items.slice(splitIdx) };
+
+      setTimeout(() => {
+        // Swap out visuals while hidden
+        document.getElementById('centerLabel').style.backgroundImage = `url(${album.images[0].url})`;
+        document.getElementById('artistName').innerText = album.artists[0].name;
+        loadSide('A', 0);
+        
+        // Move wrapper to opposite side instantly, then slide it in
+        platterWrapper.classList.remove('swapping-out');
+        platterWrapper.classList.add('swapping-in-prep');
+        
+        // Force reflow
+        void platterWrapper.offsetWidth;
+        
+        platterWrapper.classList.remove('swapping-in-prep');
+        trackTitle.innerText = "Ready - Press START";
+        startBtn.disabled = false;
+        pauseBtn.disabled = false;
+
+      }, 600); // Matches CSS transition time
     }
 
     function loadSide(side, startIdx = 0) {
@@ -351,7 +365,6 @@
         let progressMs = Date.now() - trackStartTime;
         let layout = trackLayout[currentTrackIdx];
         
-        // Prevent needle from shooting past the groove if API polling lags slightly
         if (progressMs > activeTrackDuration) progressMs = activeTrackDuration;
         
         let fraction = progressMs / activeTrackDuration;
@@ -360,9 +373,8 @@
       }
       requestAnimationFrame(animationLoop);
     }
-    requestAnimationFrame(animationLoop); // Start engine
+    requestAnimationFrame(animationLoop); 
 
-    // Poll Spotify API every 2s to ensure perfect correlation and handle auto-advancing
     function startPlaybackPoller() {
       setInterval(async () => {
         if(!isPlaying) return;
@@ -370,20 +382,15 @@
         if(res.status === 200) {
           const data = await res.json();
           if(data.is_playing) {
-            // Re-sync local timer with real Spotify time
             trackStartTime = Date.now() - data.progress_ms;
-            
-            // Handle Track Changes
             const currentSpotifyId = data.item.id;
             if (trackLayout[currentTrackIdx] && trackLayout[currentTrackIdx].track.id !== currentSpotifyId) {
-              // Song changed! Did it go to next track on this side?
               const nextLayout = trackLayout.find(t => t.track.id === currentSpotifyId);
               if (nextLayout) {
                 currentTrackIdx = nextLayout.index;
                 activeTrackDuration = nextLayout.track.duration_ms;
                 trackTitle.innerText = `${currentTrackIdx+1}. ${nextLayout.track.name}`;
               } else {
-                // Song ended and next song is NOT on this side -> Auto Flip
                 triggerAutoFlip();
               }
             }
@@ -393,6 +400,24 @@
     }
 
     // --- 4. CONTROLS & API PLAYBACK ---
+    function triggerStartSequence() {
+      if(!albumData || isPlaying) return;
+      
+      startBtn.disabled = true;
+      trackTitle.innerText = "Lowering Needle...";
+
+      // Enable CSS transition for smooth mechanical sweep
+      tonearm.classList.add('swinging');
+      tonearm.style.transform = `rotate(${trackLayout[0].startAngle}deg)`;
+
+      // Wait for arm to arrive, then remove transition and start playback
+      setTimeout(() => {
+        tonearm.classList.remove('swinging');
+        playTrack(0, 0);
+        startBtn.disabled = false;
+      }, 600);
+    }
+
     async function playTrack(idx, positionMs = 0) {
       if(!albumData) return;
       currentTrackIdx = idx;
@@ -417,19 +442,29 @@
       }
     }
 
-    function btnStart() { if(albumData) playTrack(currentTrackIdx); }
     function btnPauseResume() {
+      if (!albumData) return;
       if(isPlaying) {
         fetch(`https://api.spotify.com/v1/me/player/pause`, { method: 'PUT', headers: { 'Authorization': `Bearer ${accessToken}` } });
         isPlaying = false; vinyl.classList.remove('spinning');
       } else {
-        btnStart();
+        if(currentAngle === PIVOT_REST_ANGLE) {
+           triggerStartSequence();
+        } else {
+           playTrack(currentTrackIdx, Date.now() - trackStartTime);
+        }
       }
     }
+
     function btnStop() {
-      fetch(`https://api.spotify.com/v1/me/player/pause`, { method: 'PUT', headers: { 'Authorization': `Bearer ${accessToken}` } });
+      if(accessToken) fetch(`https://api.spotify.com/v1/me/player/pause`, { method: 'PUT', headers: { 'Authorization': `Bearer ${accessToken}` } });
       isPlaying = false; vinyl.classList.remove('spinning');
-      currentAngle = PIVOT_REST_ANGLE; tonearm.style.transform = `rotate(${currentAngle}deg)`;
+      
+      tonearm.classList.add('swinging');
+      currentAngle = PIVOT_REST_ANGLE; 
+      tonearm.style.transform = `rotate(${currentAngle}deg)`;
+      
+      setTimeout(() => tonearm.classList.remove('swinging'), 600);
       currentTrackIdx = 0; trackTitle.innerText = "Needle Parked";
     }
 
@@ -441,14 +476,19 @@
         setTimeout(() => {
           document.getElementById('platter').classList.remove('flipping');
           loadSide(currentSide === 'A' ? 'B' : 'A', 0);
-          setTimeout(() => btnStart(), 800);
+          setTimeout(() => triggerStartSequence(), 800);
         }, 800);
       }, 500);
     }
+    
     function flipRecordManually() { if(albumData) triggerAutoFlip(); }
 
     // --- 5. DRAG & DROP NEEDLE ---
-    tonearm.addEventListener('touchstart', (e) => { isDragging = true; vinyl.classList.remove('spinning'); });
+    tonearm.addEventListener('touchstart', (e) => { 
+      isDragging = true; vinyl.classList.remove('spinning'); 
+      tonearm.classList.remove('swinging');
+    });
+    
     window.addEventListener('touchend', () => { 
       if(!isDragging) return;
       isDragging = false; 
