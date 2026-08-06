@@ -134,7 +134,7 @@
       position: absolute; top: 7px; left: 19px; width: 6px; height: 215px;
       background: linear-gradient(to right, #999, #fff 40%, #666); border-radius: 3px;
       transform-origin: 3px 15px; 
-      transform: rotate(-4deg); 
+      transform: rotate(-6deg); 
       cursor: grab; z-index: 9;
     }
     
@@ -211,20 +211,19 @@
     const REDIRECT_URI = window.location.origin + window.location.pathname; 
     
     // Geometry Constants
-    const GROOVE_START = 142; // Exact pixel radius of outer record edge
-    const GROOVE_END = 55;    // Exact pixel radius of inner record edge
+    const GROOVE_START = 128; // Pulled inward to match the actual textured grooves
+    const GROOVE_END = 48;    // Tightened to match the center paper label
     const PLAYABLE_WIDTH = GROOVE_START - GROOVE_END;
-    const PIVOT_REST_ANGLE = -4; 
+    const PIVOT_REST_ANGLE = -6; // Recalibrated for the park block
 
     // --- EXACT GEOMETRY ENGINE ---
-    // Instead of guessing angles, we calculate exact physical intersection.
     function getCssAngle(radius) {
       const L = 210; // Arm Length
       const D = 210.38; // Distance from pivot to spindle center
       let cosGamma = (L*L + D*D - radius*radius) / (2 * L * D);
-      cosGamma = Math.max(-1, Math.min(1, cosGamma)); // Prevent math errors
+      cosGamma = Math.max(-1, Math.min(1, cosGamma)); 
       let gamma = Math.acos(cosGamma) * (180 / Math.PI);
-      return 50.48 - gamma; // 50.48 is the absolute angle of the pivot-spindle line
+      return 50.48 - gamma; 
     }
 
     function getRadiusFromAngle(cssAngle) {
@@ -303,8 +302,6 @@
 
     async function beginAlbumSwap(album) {
       resultsDropdown.classList.remove('active');
-      
-      // Instantly clear the search text and hide iPhone keyboard
       searchInput.value = '';
       searchInput.blur(); 
       
@@ -328,7 +325,7 @@
         platterWrapper.classList.remove('swapping-out');
         platterWrapper.classList.add('swapping-in-prep');
         
-        void platterWrapper.offsetWidth; // Force Reflow
+        void platterWrapper.offsetWidth; 
         
         platterWrapper.classList.remove('swapping-in-prep');
         trackTitle.innerText = "Ready - Press START";
@@ -365,7 +362,6 @@
           grooveSvg.appendChild(circle);
         }
         
-        // Save the exact radii bounds so the needle physics knows where the song lives
         trackLayout.push({ 
           track: track, 
           index: i, 
@@ -386,7 +382,6 @@
         
         let fraction = progressMs / activeTrackDuration;
         
-        // Interpolate the radius linearly, THEN convert to angle mathematically
         let currentRadius = layout.startRadius - (fraction * (layout.startRadius - layout.endRadius));
         currentAngle = getCssAngle(currentRadius);
         
@@ -431,7 +426,6 @@
       startBtn.disabled = true;
       trackTitle.innerText = "Lowering Needle...";
 
-      // When hitting start, drop perfectly onto the beginning of the first track
       const dropAngle = getCssAngle(trackLayout[0].startRadius);
 
       tonearm.classList.add('swinging');
@@ -439,7 +433,7 @@
 
       setTimeout(() => {
         tonearm.classList.remove('swinging');
-        playTrack(0, 0); // Always start on track 0
+        playTrack(0, 0); 
         startBtn.disabled = false;
       }, 600);
     }
@@ -531,7 +525,6 @@
       const currentRadius = getRadiusFromAngle(currentAngle);
 
       if(currentRadius <= GROOVE_START + 2 && currentRadius >= GROOVE_END - 2 && albumData) {
-        // Find which track block this radius falls into
         const target = trackLayout.find(t => currentRadius <= t.startRadius && currentRadius >= t.endRadius);
         if(target) {
           const fraction = (target.startRadius - currentRadius) / (target.startRadius - target.endRadius);
@@ -550,9 +543,8 @@
       
       let angle = (Math.atan2(clientY - (pivotRect.top + pivotRect.height/2), clientX - (pivotRect.left + pivotRect.width/2)) * (180 / Math.PI)) - 90;
       
-      // Boundary constraints based on math
       if (angle < PIVOT_REST_ANGLE) angle = PIVOT_REST_ANGLE;
-      if (angle > getCssAngle(50)) angle = getCssAngle(50);
+      if (angle > getCssAngle(30)) angle = getCssAngle(30);
       
       currentAngle = angle; tonearm.style.transform = `rotate(${angle}deg)`;
       
