@@ -125,23 +125,26 @@
       box-shadow: -2px 4px 6px rgba(0,0,0,0.6); z-index: 8;
     }
 
-    .tonearm-pivot {
-      position: absolute; top: 20px; right: 25px; width: 44px; height: 44px;
-      background: radial-gradient(circle at 35% 35%, #555, #111); border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.7); z-index: 10;
+    /* SOLID RIGID TONEARM WRAPPER */
+    .tonearm-wrapper {
+      position: absolute; top: 20px; right: 25px; width: 44px; height: 260px;
+      transform-origin: 22px 22px; /* Center of the 44px pivot circle */
+      transform: rotate(-5deg) translateZ(0); /* Hardware accel lock */
+      z-index: 10; cursor: grab;
     }
+    .tonearm-wrapper.swinging { transition: transform 0.6s ease-in-out; }
 
-    .tonearm {
-      position: absolute; top: 7px; left: 19px; width: 6px; height: 215px;
+    .pivot-circle {
+      position: absolute; top: 0; left: 0; width: 44px; height: 44px;
+      background: radial-gradient(circle at 35% 35%, #555, #111);
+      border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.7);
+    }
+    .arm-tube {
+      position: absolute; top: 22px; left: 19px; width: 6px; height: 205px;
       background: linear-gradient(to right, #999, #fff 40%, #666); border-radius: 3px;
-      transform-origin: 3px 15px; 
-      transform: rotate(-6deg); 
-      cursor: grab; z-index: 9;
     }
-    
-    .tonearm.swinging { transition: transform 0.6s ease-in-out; }
-
     .headshell {
-      position: absolute; bottom: -12px; left: -8px; width: 22px; height: 32px;
+      position: absolute; top: 222px; left: 11px; width: 22px; height: 32px;
       background: #111; border-radius: 2px; transform: rotate(18deg);
     }
     .stylus-glow { position: absolute; bottom: 2px; left: 9px; width: 4px; height: 4px; background: #1DB954; border-radius: 50%; box-shadow: 0 0 6px #1DB954; }
@@ -162,7 +165,7 @@
 
   <div id="appContainer">
     <div class="left-panel">
-      <div class="deck">
+      <div class="deck" id="deckFrame">
         
         <div class="platter-wrapper" id="platterWrapper">
           <div class="platter" id="platter">
@@ -174,10 +177,12 @@
         </div>
 
         <div class="tonearm-rest"></div>
-        <div class="tonearm-pivot">
-          <div class="tonearm" id="tonearm">
-            <div class="headshell"><div class="stylus-glow"></div></div>
-          </div>
+        
+        <!-- Re-engineered Rigid Tonearm Container -->
+        <div class="tonearm-wrapper" id="tonearm">
+          <div class="pivot-circle"></div>
+          <div class="arm-tube"></div>
+          <div class="headshell"><div class="stylus-glow"></div></div>
         </div>
         
       </div>
@@ -211,24 +216,24 @@
     const REDIRECT_URI = window.location.origin + window.location.pathname; 
     
     // Geometry Constants
-    const GROOVE_START = 128; // Pulled inward to match the actual textured grooves
-    const GROOVE_END = 48;    // Tightened to match the center paper label
+    const GROOVE_START = 128; // Start of textured grooves
+    const GROOVE_END = 48;    // End of textured grooves
     const PLAYABLE_WIDTH = GROOVE_START - GROOVE_END;
-    const PIVOT_REST_ANGLE = -6; // Recalibrated for the park block
+    const PIVOT_REST_ANGLE = -5; // Locks cleanly onto the park block
 
-    // --- EXACT GEOMETRY ENGINE ---
+    // --- EXACT PHYSICS ENGINE ---
     function getCssAngle(radius) {
-      const L = 210; // Arm Length
-      const D = 210.38; // Distance from pivot to spindle center
+      const L = 210; 
+      const D = 210.38; 
       let cosGamma = (L*L + D*D - radius*radius) / (2 * L * D);
       cosGamma = Math.max(-1, Math.min(1, cosGamma)); 
       let gamma = Math.acos(cosGamma) * (180 / Math.PI);
-      return 50.48 - gamma; 
+      return 50.78 - gamma; 
     }
 
     function getRadiusFromAngle(cssAngle) {
       const L = 210; const D = 210.38;
-      let gamma = (50.48 - cssAngle) * (Math.PI / 180);
+      let gamma = (50.78 - cssAngle) * (Math.PI / 180);
       return Math.sqrt(L*L + D*D - 2*L*D*Math.cos(gamma));
     }
 
@@ -239,11 +244,15 @@
     let isPlaying = false; let isDragging = false;
     let trackStartTime = 0; let activeTrackDuration = 0; let currentAngle = PIVOT_REST_ANGLE;
 
-    const vinyl = document.getElementById('vinyl'); const tonearm = document.getElementById('tonearm');
+    const vinyl = document.getElementById('vinyl'); 
+    const tonearm = document.getElementById('tonearm');
     const platterWrapper = document.getElementById('platterWrapper');
-    const grooveSvg = document.getElementById('grooveSvg'); const trackTitle = document.getElementById('trackTitle');
-    const warningTxt = document.getElementById('deviceWarning'); const resultsDropdown = document.getElementById('resultsDropdown');
-    const startBtn = document.getElementById('btnStart'); const pauseBtn = document.getElementById('btnPause');
+    const grooveSvg = document.getElementById('grooveSvg'); 
+    const trackTitle = document.getElementById('trackTitle');
+    const warningTxt = document.getElementById('deviceWarning'); 
+    const resultsDropdown = document.getElementById('resultsDropdown');
+    const startBtn = document.getElementById('btnStart'); 
+    const pauseBtn = document.getElementById('btnPause');
     const searchInput = document.getElementById('searchInput');
 
     // --- 1. PKCE AUTHENTICATION ---
@@ -324,10 +333,9 @@
         
         platterWrapper.classList.remove('swapping-out');
         platterWrapper.classList.add('swapping-in-prep');
-        
         void platterWrapper.offsetWidth; 
-        
         platterWrapper.classList.remove('swapping-in-prep');
+        
         trackTitle.innerText = "Ready - Press START";
         startBtn.disabled = false;
         pauseBtn.disabled = false;
@@ -362,12 +370,7 @@
           grooveSvg.appendChild(circle);
         }
         
-        trackLayout.push({ 
-          track: track, 
-          index: i, 
-          startRadius: currentRadius, 
-          endRadius: trackInnerRadius 
-        });
+        trackLayout.push({ track: track, index: i, startRadius: currentRadius, endRadius: trackInnerRadius });
         currentRadius = trackInnerRadius;
       });
     }
@@ -381,12 +384,11 @@
         if (progressMs > activeTrackDuration) progressMs = activeTrackDuration;
         
         let fraction = progressMs / activeTrackDuration;
-        
         let currentRadius = layout.startRadius - (fraction * (layout.startRadius - layout.endRadius));
         currentAngle = getCssAngle(currentRadius);
         
         if(!isNaN(currentAngle)) {
-           tonearm.style.transform = `rotate(${currentAngle}deg)`;
+           tonearm.style.transform = `rotate(${currentAngle}deg) translateZ(0)`;
         }
       }
       requestAnimationFrame(animationLoop);
@@ -429,7 +431,7 @@
       const dropAngle = getCssAngle(trackLayout[0].startRadius);
 
       tonearm.classList.add('swinging');
-      tonearm.style.transform = `rotate(${dropAngle}deg)`;
+      tonearm.style.transform = `rotate(${dropAngle}deg) translateZ(0)`;
 
       setTimeout(() => {
         tonearm.classList.remove('swinging');
@@ -491,7 +493,7 @@
       
       tonearm.classList.add('swinging');
       currentAngle = PIVOT_REST_ANGLE; 
-      tonearm.style.transform = `rotate(${currentAngle}deg)`;
+      tonearm.style.transform = `rotate(${currentAngle}deg) translateZ(0)`;
       
       setTimeout(() => tonearm.classList.remove('swinging'), 600);
       currentTrackIdx = 0; trackTitle.innerText = "Needle Parked";
@@ -538,15 +540,19 @@
     window.addEventListener('touchmove', (e) => {
       if(!isDragging || !trackLayout.length) return;
       e.preventDefault();
-      const clientX = e.touches[0].clientX; const clientY = e.touches[0].clientY;
-      const pivotRect = document.querySelector('.tonearm-pivot').getBoundingClientRect();
       
-      let angle = (Math.atan2(clientY - (pivotRect.top + pivotRect.height/2), clientX - (pivotRect.left + pivotRect.width/2)) * (180 / Math.PI)) - 90;
+      const clientX = e.touches[0].clientX; const clientY = e.touches[0].clientY;
+      const deckRect = document.getElementById('deckFrame').getBoundingClientRect();
+      const pivotX = deckRect.left + (380 - 25 - 22);
+      const pivotY = deckRect.top + 20 + 22;
+      
+      let angle = (Math.atan2(clientY - pivotY, clientX - pivotX) * (180 / Math.PI)) - 90;
       
       if (angle < PIVOT_REST_ANGLE) angle = PIVOT_REST_ANGLE;
       if (angle > getCssAngle(30)) angle = getCssAngle(30);
       
-      currentAngle = angle; tonearm.style.transform = `rotate(${angle}deg)`;
+      currentAngle = angle; 
+      tonearm.style.transform = `rotate(${angle}deg) translateZ(0)`;
       
       const currentRadius = getRadiusFromAngle(angle);
       const hover = trackLayout.find(t => currentRadius <= t.startRadius && currentRadius >= t.endRadius);
