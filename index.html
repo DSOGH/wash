@@ -135,14 +135,14 @@
     }
 
     .tonearm {
-      position: absolute; top: 20px; left: 19px; width: 6px; height: 210px;
+      position: absolute; top: 7px; left: 19px; width: 6px; height: 215px;
       background: linear-gradient(to right, #999, #fff 40%, #666); border-radius: 3px;
-      transform-origin: center 15px; /* Perfect pivot alignment */
-      transform: rotate(-35deg); /* Aligns precisely over the rest */
+      transform-origin: 3px 15px; /* Perfectly centered rotation point */
+      transform: rotate(-3deg); /* Exact angle to sit flush on the rest holder */
       cursor: grab; z-index: 9;
     }
     
-    /* Active transition class applied only when moving from rest to start */
+    /* Dynamic smooth animation class for Auto-Start and Auto-Park */
     .tonearm.swinging { transition: transform 0.6s ease-in-out; }
 
     .headshell {
@@ -154,7 +154,6 @@
 </head>
 <body>
 
-  <!-- Force Landscape Message -->
   <div id="portraitWarning">
     <svg width="40" height="40" viewBox="0 0 24 24" fill="white"><path d="M16.48 2.52c3.27 1.55 5.61 4.72 5.97 8.48h1.5C23.44 4.84 18.29.34 12 0l-.66.03 3.81 3.81 1.33-1.32zm-6.25-.77c-.59-.59-1.54-.59-2.12 0L1.75 8.11c-.59.59-.59 1.54 0 2.12l12.02 12.02c.59.59 1.54.59 2.12 0l6.36-6.36c.59-.59.59-1.54 0-2.12L10.23 1.75zm4.6 19.44L2.81 9.17l6.36-6.36 12.02 12.02-6.36 6.36zm-7.31.29C4.25 19.94 1.91 16.76 1.55 13H.05C.56 19.16 5.71 23.66 12 24l.66-.03-3.81-3.81-1.33 1.32z"/></svg>
     Please rotate your iPhone to landscape mode.
@@ -167,7 +166,6 @@
   </div>
 
   <div id="appContainer">
-    <!-- Turntable Deck (Left) -->
     <div class="left-panel">
       <div class="deck">
         
@@ -180,7 +178,9 @@
           </div>
         </div>
 
+        <!-- The physical needle park holder block -->
         <div class="tonearm-rest"></div>
+        
         <div class="tonearm-pivot">
           <div class="tonearm" id="tonearm">
             <div class="headshell"><div class="stylus-glow"></div></div>
@@ -190,7 +190,6 @@
       </div>
     </div>
 
-    <!-- UI & Controls (Right) -->
     <div class="right-panel">
       <div class="search-container">
         <input type="text" id="searchInput" class="search-input" placeholder="Search Spotify..." autocomplete="off">
@@ -218,11 +217,11 @@
     const CLIENT_ID = 'Fdf967e9e0294111a273b5469543c636';
     const REDIRECT_URI = window.location.origin + window.location.pathname; 
     
-    // Aligned Geometry Constants
+    // Mathematically corrected geometry for exact deck mapping
     const GROOVE_START = 142; const GROOVE_END = 55; const PLAYABLE_WIDTH = GROOVE_START - GROOVE_END;
-    const PIVOT_REST_ANGLE = -35; // Perfect park over the holder
-    const PIVOT_OUTER_GROOVE = -14; // Edge of the record
-    const PIVOT_INNER_GROOVE = 14;  // Edge of the center label
+    const PIVOT_REST_ANGLE = -3;  // Sits perfectly center on the rest block
+    const PIVOT_OUTER_GROOVE = 13; // Reaches exact outer edge of vinyl
+    const PIVOT_INNER_GROOVE = 37; // Reaches exact inner edge before center label
 
     let accessToken = null; 
     let albumData = null; let currentSide = 'A'; let currentSideTracks = [];
@@ -272,7 +271,7 @@
       }
     }
 
-    // --- 2. SPOTIFY API SEARCH & SWAP ANIMATION ---
+    // --- 2. LIVE SEARCH & SMOOTH ALBUM SWAPPING ---
     let searchTimeout = null;
     document.getElementById('searchInput').addEventListener('input', (e) => {
       clearTimeout(searchTimeout);
@@ -295,14 +294,13 @@
       resultsDropdown.classList.remove('active');
       document.getElementById('searchInput').value = album.name;
       
-      // Stop music and park needle
       btnStop();
       startBtn.disabled = true;
+      pauseBtn.disabled = true;
 
-      // Animate old record sliding out
+      // Slide old record out
       platterWrapper.classList.add('swapping-out');
 
-      // Fetch tracks while record is animating
       const res = await fetch(`https://api.spotify.com/v1/albums/${album.id}/tracks`, { headers: { 'Authorization': `Bearer ${accessToken}` } });
       const data = await res.json();
       
@@ -310,16 +308,15 @@
       albumData = { uri: album.uri, meta: album, sideA: data.items.slice(0, splitIdx), sideB: data.items.slice(splitIdx) };
 
       setTimeout(() => {
-        // Swap out visuals while hidden
+        // Swap images while hidden
         document.getElementById('centerLabel').style.backgroundImage = `url(${album.images[0].url})`;
         document.getElementById('artistName').innerText = album.artists[0].name;
         loadSide('A', 0);
         
-        // Move wrapper to opposite side instantly, then slide it in
         platterWrapper.classList.remove('swapping-out');
         platterWrapper.classList.add('swapping-in-prep');
         
-        // Force reflow
+        // Force browser to register the swap before sliding in
         void platterWrapper.offsetWidth;
         
         platterWrapper.classList.remove('swapping-in-prep');
@@ -327,7 +324,7 @@
         startBtn.disabled = false;
         pauseBtn.disabled = false;
 
-      }, 600); // Matches CSS transition time
+      }, 600);
     }
 
     function loadSide(side, startIdx = 0) {
@@ -406,14 +403,14 @@
       startBtn.disabled = true;
       trackTitle.innerText = "Lowering Needle...";
 
-      // Enable CSS transition for smooth mechanical sweep
+      // CSS transition active during auto-swing
       tonearm.classList.add('swinging');
-      tonearm.style.transform = `rotate(${trackLayout[0].startAngle}deg)`;
+      tonearm.style.transform = `rotate(${trackLayout[currentTrackIdx || 0].startAngle}deg)`;
 
-      // Wait for arm to arrive, then remove transition and start playback
       setTimeout(() => {
+        // Remove transition so the rendering loop can take precise control
         tonearm.classList.remove('swinging');
-        playTrack(0, 0);
+        playTrack(currentTrackIdx || 0, 0);
         startBtn.disabled = false;
       }, 600);
     }
