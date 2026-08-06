@@ -213,9 +213,11 @@
     
     // Mathematically corrected angles for unmistakable drops onto the grooves
     const GROOVE_START = 142; const GROOVE_END = 55; const PLAYABLE_WIDTH = GROOVE_START - GROOVE_END;
+    
+    // CALIBRATED ANGLES 
     const PIVOT_REST_ANGLE = -3;  
-    const PIVOT_OUTER_GROOVE = 16; 
-    const PIVOT_INNER_GROOVE = 42; 
+    const PIVOT_OUTER_GROOVE = 7; // Perfectly aligned with the outer lip of the record
+    const PIVOT_INNER_GROOVE = 38; // Perfectly aligned just outside the center label
 
     let accessToken = null; 
     let albumData = null; let currentSide = 'A'; let currentSideTracks = [];
@@ -229,6 +231,7 @@
     const grooveSvg = document.getElementById('grooveSvg'); const trackTitle = document.getElementById('trackTitle');
     const warningTxt = document.getElementById('deviceWarning'); const resultsDropdown = document.getElementById('resultsDropdown');
     const startBtn = document.getElementById('btnStart'); const pauseBtn = document.getElementById('btnPause');
+    const searchInput = document.getElementById('searchInput');
 
     // --- 1. PKCE AUTHENTICATION ---
     const generateRandomString = (length) => crypto.getRandomValues(new Uint8Array(length)).reduce((a, x) => a + 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'[x % 62], "");
@@ -267,7 +270,7 @@
 
     // --- 2. LIVE SEARCH & SWAP ANIMATION ---
     let searchTimeout = null;
-    document.getElementById('searchInput').addEventListener('input', (e) => {
+    searchInput.addEventListener('input', (e) => {
       clearTimeout(searchTimeout);
       const q = e.target.value.trim();
       if(q.length < 2) return resultsDropdown.classList.remove('active');
@@ -286,7 +289,10 @@
 
     async function beginAlbumSwap(album) {
       resultsDropdown.classList.remove('active');
-      document.getElementById('searchInput').value = album.name;
+      
+      // Clear the search bar and hide the iPhone keyboard
+      searchInput.value = '';
+      searchInput.blur();
       
       btnStop();
       startBtn.disabled = true;
@@ -365,7 +371,6 @@
         let fraction = progressMs / activeTrackDuration;
         currentAngle = layout.startAngle + (fraction * (layout.endAngle - layout.startAngle));
         
-        // Final fallback block just in case fraction evaluates to NaN
         if(!isNaN(currentAngle)) {
            tonearm.style.transform = `rotate(${currentAngle}deg)`;
         }
