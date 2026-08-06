@@ -214,29 +214,15 @@
     const CLIENT_ID = 'Fdf967e9e0294111a273b5469543c636';
     const REDIRECT_URI = window.location.origin + window.location.pathname; 
     
-    // Bounds for perfectly scaled physical tracking
-    const GROOVE_START = 140; 
-    const GROOVE_END = 54;    
-    const PLAYABLE_WIDTH = GROOVE_START - GROOVE_END;
-    const PIVOT_REST_ANGLE = -5; 
-
-    // --- EXACT PHYSICS ENGINE ---
-    function getCssAngle(radius) {
-      const L = 227.44; // Exact structural tonearm length 
-      const D = 210.38; // Exact distance from Pivot to Spindle
-      const ANGLE_OFFSET = 51.72; // True absolute angle correlation
-      
-      let cosGamma = (L*L + D*D - radius*radius) / (2 * L * D);
-      cosGamma = Math.max(-1, Math.min(1, cosGamma)); 
-      let gamma = Math.acos(cosGamma) * (180 / Math.PI);
-      return ANGLE_OFFSET - gamma; 
-    }
-
-    function getRadiusFromAngle(cssAngle) {
-      const L = 227.44; const D = 210.38; const ANGLE_OFFSET = 51.72;
-      let gamma = (ANGLE_OFFSET - cssAngle) * (Math.PI / 180);
-      return Math.sqrt(L*L + D*D - 2*L*D*Math.cos(gamma));
-    }
+    // --- THE NEW PERCENTAGE ENGINE CONSTANTS ---
+    // Physical Radius Bounds for Drawing SVG
+    const GROOVE_OUTER_R = 140; 
+    const GROOVE_INNER_R = 52;
+    
+    // Exact Tonearm Angles mapped directly to those Radii bounds
+    const ANGLE_OUTER = 12; // Dead center of track 1
+    const ANGLE_INNER = 38; // Dead center of final track
+    const PIVOT_REST_ANGLE = -5; // Physical park position
 
     let accessToken = null; 
     let albumData = null; let currentSide = 'A'; let currentSideTracks = [];
@@ -350,44 +336,59 @@
       currentTrackIdx = startIdx;
     }
 
+    // NEW CLEAN PERCENTAGE MAPPING
     function generatePhysicalGrooves(tracks) {
       if(!tracks || tracks.length === 0) return;
       
       let totalMs = tracks.reduce((sum, t) => sum + (t.duration_ms || 180000), 0);
       if(totalMs === 0) totalMs = 180000;
       
-      let currentRadius = GROOVE_START;
       grooveSvg.innerHTML = ''; trackLayout = [];
+      let accumulatedTime = 0;
 
-      // Create a visual anchor for the very start of track 1
+      // Ensure first visual target exists
       const startRing = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
       startRing.setAttribute('cx', '145'); startRing.setAttribute('cy', '145');
-      startRing.setAttribute('r', GROOVE_START); startRing.setAttribute('fill', 'none');
-      startRing.setAttribute('stroke', 'rgba(0,0,0,0.7)'); 
-      startRing.setAttribute('stroke-width', '2');
+      startRing.setAttribute('r', GROOVE_OUTER_R); startRing.setAttribute('fill', 'none');
+      startRing.setAttribute('stroke', 'rgba(0,0,0,0.7)'); startRing.setAttribute('stroke-width', '2');
       grooveSvg.appendChild(startRing);
 
       tracks.forEach((track, i) => {
         const dur = track.duration_ms || 180000;
-        const trackInnerRadius = currentRadius - ((dur / totalMs) * PLAYABLE_WIDTH);
         
-        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-        circle.setAttribute('cx', '145'); circle.setAttribute('cy', '145');
-        circle.setAttribute('r', trackInnerRadius); circle.setAttribute('fill', 'none');
+        // Calculate percentages
+        const startPercent = accumulatedTime / totalMs;
+        const endPercent = (accumulatedTime + dur) / totalMs;
         
-        if (i === tracks.length - 1) {
-            circle.setAttribute('stroke', 'rgba(0,0,0,0.9)'); 
-            circle.setAttribute('stroke-width', '2.5');
-        } else {
-            circle.setAttribute('stroke', 'rgba(0,0,0,0.7)'); 
-            circle.setAttribute('stroke-width', '1.5');
+        // Map percentages to physical Radius bounds
+        const startRadius = GROOVE_OUTER_R - (startPercent * (GROOVE_OUTER_R - GROOVE_INNER_R));
+        const endRadius = GROOVE_OUTER_R - (endPercent * (GROOVE_OUTER_R - GROOVE_INNER_R));
+
+        // Map percentages to Tonearm Angle bounds
+        const startAngle = ANGLE_OUTER + (startPercent * (ANGLE_INNER - ANGLE_OUTER));
+        const endAngle = ANGLE_OUTER + (endPercent * (ANGLE_INNER - ANGLE_OUTER));
+        
+        if (i < tracks.length - 1) {
+          const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+          circle.setAttribute('cx', '145'); circle.setAttribute('cy', '145');
+          circle.setAttribute('r', endRadius); circle.setAttribute('fill', 'none');
+          circle.setAttribute('stroke', 'rgba(0,0,0,0.7)'); circle.setAttribute('stroke-width', '1.5');
+          grooveSvg.appendChild(circle);
         }
         
-        grooveSvg.appendChild(circle);
+        trackLayout.push({ 
+            track: track, index: i, 
+            startAngle: startAngle, endAngle: endAngle 
+        });
         
-        trackLayout.push({ track: track, index: i, startRadius: currentRadius, endRadius: trackInnerRadius });
-        currentRadius = trackInnerRadius;
+        accumulatedTime += dur;
       });
+
+      const innerRing = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      innerRing.setAttribute('cx', '145'); innerRing.setAttribute('cy', '145');
+      innerRing.setAttribute('r', GROOVE_INNER_R); innerRing.setAttribute('fill', 'none');
+      innerRing.setAttribute('stroke', 'rgba(0,0,0,0.85)'); innerRing.setAttribute('stroke-width', '2');
+      grooveSvg.appendChild(innerRing);
     }
 
     // --- 3. HIGH-PERFORMANCE NEEDLE SYNC ---
@@ -399,8 +400,9 @@
         if (progressMs > activeTrackDuration) progressMs = activeTrackDuration;
         
         let fraction = progressMs / activeTrackDuration;
-        let currentRadius = layout.startRadius - (fraction * (layout.startRadius - layout.endRadius));
-        currentAngle = getCssAngle(currentRadius);
+        
+        // Linear angle interpolation! Flawless syncing.
+        currentAngle = layout.startAngle + (fraction * (layout.endAngle - layout.startAngle));
         
         if(!isNaN(currentAngle)) {
            tonearm.style.transform = `rotate(${currentAngle}deg) translateZ(0)`;
@@ -443,7 +445,7 @@
       startBtn.disabled = true;
       trackTitle.innerText = "Lowering Needle...";
 
-      currentAngle = getCssAngle(trackLayout[0].startRadius);
+      currentAngle = trackLayout[0].startAngle; // Grabs perfectly from the clean mapped array
 
       tonearm.classList.add('swinging');
       tonearm.style.transform = `rotate(${currentAngle}deg) translateZ(0)`;
@@ -474,7 +476,6 @@
           });
           
           if(playRes.ok || playRes.status === 204) {
-            // Wait to set the timer until the async fetch actually finishes to prevent jump glitch
             trackStartTime = Date.now() - positionMs; 
             isPlaying = true; 
             vinyl.classList.add('spinning');
@@ -531,7 +532,7 @@
     
     function flipRecordManually() { if(albumData) triggerAutoFlip(); }
 
-    // --- 5. DRAG & DROP NEEDLE ---
+    // --- 5. DRAG & DROP NEEDLE (ANGLE MAPPED) ---
     tonearm.addEventListener('touchstart', (e) => { 
       isDragging = true; vinyl.classList.remove('spinning'); 
       tonearm.classList.remove('swinging');
@@ -541,12 +542,10 @@
       if(!isDragging) return;
       isDragging = false; 
       
-      const currentRadius = getRadiusFromAngle(currentAngle);
-
-      if(currentRadius <= GROOVE_START + 2 && currentRadius >= GROOVE_END - 2 && albumData) {
-        const target = trackLayout.find(t => currentRadius <= t.startRadius && currentRadius >= t.endRadius);
+      if(currentAngle >= ANGLE_OUTER - 2 && currentAngle <= ANGLE_INNER + 2 && albumData) {
+        const target = trackLayout.find(t => currentAngle >= t.startAngle && currentAngle <= t.endAngle);
         if(target) {
-          const fraction = (target.startRadius - currentRadius) / (target.startRadius - target.endRadius);
+          const fraction = (currentAngle - target.startAngle) / (target.endAngle - target.startAngle);
           playTrack(target.index, Math.floor(fraction * (target.track.duration_ms || 180000)));
         }
       } else {
@@ -566,13 +565,12 @@
       let angle = (Math.atan2(clientY - pivotY, clientX - pivotX) * (180 / Math.PI)) - 90;
       
       if (angle < PIVOT_REST_ANGLE) angle = PIVOT_REST_ANGLE;
-      if (angle > getCssAngle(45)) angle = getCssAngle(45); // Don't drag onto paper label
+      if (angle > ANGLE_INNER + 4) angle = ANGLE_INNER + 4; 
       
       currentAngle = angle; 
       tonearm.style.transform = `rotate(${angle}deg) translateZ(0)`;
       
-      const currentRadius = getRadiusFromAngle(angle);
-      const hover = trackLayout.find(t => currentRadius <= t.startRadius && currentRadius >= t.endRadius);
+      const hover = trackLayout.find(t => angle >= t.startAngle && angle <= t.endAngle);
       if(hover) trackTitle.innerText = `${hover.index+1}. ${hover.track.name}`;
     }, { passive: false });
 
