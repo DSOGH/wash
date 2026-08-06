@@ -214,17 +214,15 @@
     const CLIENT_ID = 'Fdf967e9e0294111a273b5469543c636';
     const REDIRECT_URI = window.location.origin + window.location.pathname; 
     
-    // Adjusted bounds to create a perfectly scaled playable area
-    const GROOVE_START = 140; // True outer rim
-    const GROOVE_END = 52;    // True inner rim
+    const GROOVE_START = 138; // Cleanly starts within the texture boundary
+    const GROOVE_END = 52;    
     const PLAYABLE_WIDTH = GROOVE_START - GROOVE_END;
-    const PIVOT_REST_ANGLE = -5; // Locks cleanly onto the park block
+    const PIVOT_REST_ANGLE = -5;
 
     // --- EXACT PHYSICS ENGINE ---
-    // The physics engine now perfectly maps the 228px visual arm length 
     function getCssAngle(radius) {
-      const L = 228; // Mathematically true pixel length of the tonearm assembly
-      const D = 210.38; // Mathematically true pixel distance from Pivot to Spindle
+      const L = 228; 
+      const D = 210.38; 
       let cosGamma = (L*L + D*D - radius*radius) / (2 * L * D);
       cosGamma = Math.max(-1, Math.min(1, cosGamma)); 
       let gamma = Math.acos(cosGamma) * (180 / Math.PI);
@@ -358,35 +356,29 @@
       let currentRadius = GROOVE_START;
       grooveSvg.innerHTML = ''; trackLayout = [];
 
-      // Draw explicit boundary ring to separate the unplayable glossy edge from track 1
-      const outerDropRing = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-      outerDropRing.setAttribute('cx', '145'); outerDropRing.setAttribute('cy', '145');
-      outerDropRing.setAttribute('r', GROOVE_START); outerDropRing.setAttribute('fill', 'none');
-      outerDropRing.setAttribute('stroke', 'rgba(0,0,0,0.9)'); outerDropRing.setAttribute('stroke-width', '2');
-      grooveSvg.appendChild(outerDropRing);
-
       tracks.forEach((track, i) => {
         const dur = track.duration_ms || 180000;
         const trackInnerRadius = currentRadius - ((dur / totalMs) * PLAYABLE_WIDTH);
         
-        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-        circle.setAttribute('cx', '145'); circle.setAttribute('cy', '145');
-        circle.setAttribute('r', trackInnerRadius); circle.setAttribute('fill', 'none');
-        
-        // Make the very last groove ring thicker to frame the end of the record
-        if (i === tracks.length - 1) {
-            circle.setAttribute('stroke', 'rgba(0,0,0,0.9)'); 
-            circle.setAttribute('stroke-width', '2.5');
-        } else {
-            circle.setAttribute('stroke', 'rgba(0,0,0,0.6)'); 
-            circle.setAttribute('stroke-width', '1.5');
+        if (i < tracks.length - 1) {
+          const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+          circle.setAttribute('cx', '145'); circle.setAttribute('cy', '145');
+          circle.setAttribute('r', trackInnerRadius); circle.setAttribute('fill', 'none');
+          circle.setAttribute('stroke', 'rgba(0,0,0,0.6)'); 
+          circle.setAttribute('stroke-width', '1.5');
+          grooveSvg.appendChild(circle);
         }
-        
-        grooveSvg.appendChild(circle);
         
         trackLayout.push({ track: track, index: i, startRadius: currentRadius, endRadius: trackInnerRadius });
         currentRadius = trackInnerRadius;
       });
+
+      // Explicitly draw the final thick ring to frame the paper label cleanly
+      const innerDropRing = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      innerDropRing.setAttribute('cx', '145'); innerDropRing.setAttribute('cy', '145');
+      innerDropRing.setAttribute('r', GROOVE_END); innerDropRing.setAttribute('fill', 'none');
+      innerDropRing.setAttribute('stroke', 'rgba(0,0,0,0.85)'); innerDropRing.setAttribute('stroke-width', '2');
+      grooveSvg.appendChild(innerDropRing);
     }
 
     // --- 3. HIGH-PERFORMANCE NEEDLE SYNC ---
