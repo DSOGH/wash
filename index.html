@@ -128,8 +128,8 @@
     /* SOLID RIGID TONEARM WRAPPER */
     .tonearm-wrapper {
       position: absolute; top: 20px; right: 25px; width: 44px; height: 260px;
-      transform-origin: 22px 22px; /* Center of the 44px pivot circle */
-      transform: rotate(-5deg) translateZ(0); /* Hardware accel lock */
+      transform-origin: 22px 22px; 
+      transform: rotate(-5deg) translateZ(0); 
       z-index: 10; cursor: grab;
     }
     .tonearm-wrapper.swinging { transition: transform 0.6s ease-in-out; }
@@ -178,7 +178,6 @@
 
         <div class="tonearm-rest"></div>
         
-        <!-- Re-engineered Rigid Tonearm Container -->
         <div class="tonearm-wrapper" id="tonearm">
           <div class="pivot-circle"></div>
           <div class="arm-tube"></div>
@@ -215,16 +214,17 @@
     const CLIENT_ID = 'Fdf967e9e0294111a273b5469543c636';
     const REDIRECT_URI = window.location.origin + window.location.pathname; 
     
-    // Geometry Constants
-    const GROOVE_START = 128; // Start of textured grooves
-    const GROOVE_END = 48;    // End of textured grooves
+    // Adjusted bounds to create a perfectly scaled playable area
+    const GROOVE_START = 140; // True outer rim
+    const GROOVE_END = 52;    // True inner rim
     const PLAYABLE_WIDTH = GROOVE_START - GROOVE_END;
     const PIVOT_REST_ANGLE = -5; // Locks cleanly onto the park block
 
     // --- EXACT PHYSICS ENGINE ---
+    // The physics engine now perfectly maps the 228px visual arm length 
     function getCssAngle(radius) {
-      const L = 210; 
-      const D = 210.38; 
+      const L = 228; // Mathematically true pixel length of the tonearm assembly
+      const D = 210.38; // Mathematically true pixel distance from Pivot to Spindle
       let cosGamma = (L*L + D*D - radius*radius) / (2 * L * D);
       cosGamma = Math.max(-1, Math.min(1, cosGamma)); 
       let gamma = Math.acos(cosGamma) * (180 / Math.PI);
@@ -232,7 +232,7 @@
     }
 
     function getRadiusFromAngle(cssAngle) {
-      const L = 210; const D = 210.38;
+      const L = 228; const D = 210.38;
       let gamma = (50.78 - cssAngle) * (Math.PI / 180);
       return Math.sqrt(L*L + D*D - 2*L*D*Math.cos(gamma));
     }
@@ -358,17 +358,31 @@
       let currentRadius = GROOVE_START;
       grooveSvg.innerHTML = ''; trackLayout = [];
 
+      // Draw explicit boundary ring to separate the unplayable glossy edge from track 1
+      const outerDropRing = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      outerDropRing.setAttribute('cx', '145'); outerDropRing.setAttribute('cy', '145');
+      outerDropRing.setAttribute('r', GROOVE_START); outerDropRing.setAttribute('fill', 'none');
+      outerDropRing.setAttribute('stroke', 'rgba(0,0,0,0.9)'); outerDropRing.setAttribute('stroke-width', '2');
+      grooveSvg.appendChild(outerDropRing);
+
       tracks.forEach((track, i) => {
         const dur = track.duration_ms || 180000;
         const trackInnerRadius = currentRadius - ((dur / totalMs) * PLAYABLE_WIDTH);
         
-        if (i < tracks.length - 1) {
-          const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-          circle.setAttribute('cx', '145'); circle.setAttribute('cy', '145');
-          circle.setAttribute('r', trackInnerRadius); circle.setAttribute('fill', 'none');
-          circle.setAttribute('stroke', 'rgba(0,0,0,0.85)'); circle.setAttribute('stroke-width', '1.5');
-          grooveSvg.appendChild(circle);
+        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('cx', '145'); circle.setAttribute('cy', '145');
+        circle.setAttribute('r', trackInnerRadius); circle.setAttribute('fill', 'none');
+        
+        // Make the very last groove ring thicker to frame the end of the record
+        if (i === tracks.length - 1) {
+            circle.setAttribute('stroke', 'rgba(0,0,0,0.9)'); 
+            circle.setAttribute('stroke-width', '2.5');
+        } else {
+            circle.setAttribute('stroke', 'rgba(0,0,0,0.6)'); 
+            circle.setAttribute('stroke-width', '1.5');
         }
+        
+        grooveSvg.appendChild(circle);
         
         trackLayout.push({ track: track, index: i, startRadius: currentRadius, endRadius: trackInnerRadius });
         currentRadius = trackInnerRadius;
