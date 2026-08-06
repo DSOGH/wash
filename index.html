@@ -214,24 +214,27 @@
     const CLIENT_ID = 'Fdf967e9e0294111a273b5469543c636';
     const REDIRECT_URI = window.location.origin + window.location.pathname; 
     
-    const GROOVE_START = 138; // Cleanly starts within the texture boundary
-    const GROOVE_END = 52;    
+    // Bounds for perfectly scaled physical tracking
+    const GROOVE_START = 140; 
+    const GROOVE_END = 54;    
     const PLAYABLE_WIDTH = GROOVE_START - GROOVE_END;
-    const PIVOT_REST_ANGLE = -5;
+    const PIVOT_REST_ANGLE = -5; 
 
     // --- EXACT PHYSICS ENGINE ---
     function getCssAngle(radius) {
-      const L = 228; 
-      const D = 210.38; 
+      const L = 227.44; // Exact structural tonearm length 
+      const D = 210.38; // Exact distance from Pivot to Spindle
+      const ANGLE_OFFSET = 51.72; // True absolute angle correlation
+      
       let cosGamma = (L*L + D*D - radius*radius) / (2 * L * D);
       cosGamma = Math.max(-1, Math.min(1, cosGamma)); 
       let gamma = Math.acos(cosGamma) * (180 / Math.PI);
-      return 50.78 - gamma; 
+      return ANGLE_OFFSET - gamma; 
     }
 
     function getRadiusFromAngle(cssAngle) {
-      const L = 228; const D = 210.38;
-      let gamma = (50.78 - cssAngle) * (Math.PI / 180);
+      const L = 227.44; const D = 210.38; const ANGLE_OFFSET = 51.72;
+      let gamma = (ANGLE_OFFSET - cssAngle) * (Math.PI / 180);
       return Math.sqrt(L*L + D*D - 2*L*D*Math.cos(gamma));
     }
 
@@ -356,29 +359,35 @@
       let currentRadius = GROOVE_START;
       grooveSvg.innerHTML = ''; trackLayout = [];
 
+      // Create a visual anchor for the very start of track 1
+      const startRing = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      startRing.setAttribute('cx', '145'); startRing.setAttribute('cy', '145');
+      startRing.setAttribute('r', GROOVE_START); startRing.setAttribute('fill', 'none');
+      startRing.setAttribute('stroke', 'rgba(0,0,0,0.7)'); 
+      startRing.setAttribute('stroke-width', '2');
+      grooveSvg.appendChild(startRing);
+
       tracks.forEach((track, i) => {
         const dur = track.duration_ms || 180000;
         const trackInnerRadius = currentRadius - ((dur / totalMs) * PLAYABLE_WIDTH);
         
-        if (i < tracks.length - 1) {
-          const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-          circle.setAttribute('cx', '145'); circle.setAttribute('cy', '145');
-          circle.setAttribute('r', trackInnerRadius); circle.setAttribute('fill', 'none');
-          circle.setAttribute('stroke', 'rgba(0,0,0,0.6)'); 
-          circle.setAttribute('stroke-width', '1.5');
-          grooveSvg.appendChild(circle);
+        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('cx', '145'); circle.setAttribute('cy', '145');
+        circle.setAttribute('r', trackInnerRadius); circle.setAttribute('fill', 'none');
+        
+        if (i === tracks.length - 1) {
+            circle.setAttribute('stroke', 'rgba(0,0,0,0.9)'); 
+            circle.setAttribute('stroke-width', '2.5');
+        } else {
+            circle.setAttribute('stroke', 'rgba(0,0,0,0.7)'); 
+            circle.setAttribute('stroke-width', '1.5');
         }
+        
+        grooveSvg.appendChild(circle);
         
         trackLayout.push({ track: track, index: i, startRadius: currentRadius, endRadius: trackInnerRadius });
         currentRadius = trackInnerRadius;
       });
-
-      // Explicitly draw the final thick ring to frame the paper label cleanly
-      const innerDropRing = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-      innerDropRing.setAttribute('cx', '145'); innerDropRing.setAttribute('cy', '145');
-      innerDropRing.setAttribute('r', GROOVE_END); innerDropRing.setAttribute('fill', 'none');
-      innerDropRing.setAttribute('stroke', 'rgba(0,0,0,0.85)'); innerDropRing.setAttribute('stroke-width', '2');
-      grooveSvg.appendChild(innerDropRing);
     }
 
     // --- 3. HIGH-PERFORMANCE NEEDLE SYNC ---
@@ -434,10 +443,10 @@
       startBtn.disabled = true;
       trackTitle.innerText = "Lowering Needle...";
 
-      const dropAngle = getCssAngle(trackLayout[0].startRadius);
+      currentAngle = getCssAngle(trackLayout[0].startRadius);
 
       tonearm.classList.add('swinging');
-      tonearm.style.transform = `rotate(${dropAngle}deg) translateZ(0)`;
+      tonearm.style.transform = `rotate(${currentAngle}deg) translateZ(0)`;
 
       setTimeout(() => {
         tonearm.classList.remove('swinging');
@@ -451,7 +460,6 @@
       currentTrackIdx = idx;
       const trackObj = currentSideTracks[idx];
       activeTrackDuration = trackObj.duration_ms || 180000;
-      trackStartTime = Date.now() - positionMs;
       warningTxt.style.display = 'none';
 
       try {
@@ -466,7 +474,10 @@
           });
           
           if(playRes.ok || playRes.status === 204) {
-            isPlaying = true; vinyl.classList.add('spinning');
+            // Wait to set the timer until the async fetch actually finishes to prevent jump glitch
+            trackStartTime = Date.now() - positionMs; 
+            isPlaying = true; 
+            vinyl.classList.add('spinning');
             trackTitle.innerText = `${idx+1}. ${trackObj.name}`;
           } else {
             warningTxt.innerText = "Playback failed. Check Spotify Premium.";
@@ -555,7 +566,7 @@
       let angle = (Math.atan2(clientY - pivotY, clientX - pivotX) * (180 / Math.PI)) - 90;
       
       if (angle < PIVOT_REST_ANGLE) angle = PIVOT_REST_ANGLE;
-      if (angle > getCssAngle(30)) angle = getCssAngle(30);
+      if (angle > getCssAngle(45)) angle = getCssAngle(45); // Don't drag onto paper label
       
       currentAngle = angle; 
       tonearm.style.transform = `rotate(${angle}deg) translateZ(0)`;
