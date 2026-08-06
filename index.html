@@ -2,127 +2,72 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Interactive Web Turntable</title>
+  <!-- viewport-fit=cover ensures the layout extends behind the Dynamic Island so we can control the padding perfectly -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Landscape Spotify Turntable</title>
   <style>
     :root {
-      --bg: #0d0d11;
+      --bg: #0a0a0c;
       --deck: #1c1d22;
-      --accent: #ff4b4b;
-      --vinyl-color: #121212;
+      --accent: #1DB954;
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      user-select: none;
-      -webkit-user-select: none;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
 
     body {
       background: var(--bg);
       color: #fff;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       display: flex;
-      flex-direction: column;
+      flex-direction: row; /* Landscape Layout */
       height: 100vh;
       overflow: hidden;
+      /* iPhone 17 Pro Dynamic Island Safe Areas */
+      padding-left: env(safe-area-inset-left);
+      padding-right: env(safe-area-inset-right);
+      padding-bottom: env(safe-area-inset-bottom);
     }
 
-    /* Live Search Header */
-    .header {
-      padding: 12px 16px;
-      background: #141418;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-      z-index: 100;
-      position: relative;
-    }
-
-    .search-container {
-      position: relative;
-      width: 100%;
-    }
-
-    .search-input {
-      width: 100%;
-      padding: 12px 16px;
-      border-radius: 10px;
-      border: 1px solid #333;
-      background: #09090b;
-      color: #fff;
-      font-size: 16px;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-
-    .search-input:focus {
-      border-color: var(--accent);
-    }
-
-    /* Floating Live Results Dropdown */
-    .results-dropdown {
-      position: absolute;
-      top: 100%;
-      left: 0;
-      right: 0;
-      background: #18181c;
-      border-radius: 0 0 12px 12px;
-      max-height: 240px;
-      overflow-y: auto;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.8);
-      z-index: 200;
+    /* Portrait Blocker */
+    #portraitWarning {
       display: none;
-      border: 1px solid #2a2a30;
-      border-top: none;
-    }
-
-    .results-dropdown.active {
-      display: block;
-    }
-
-    .album-item {
-      display: flex;
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: #000;
+      z-index: 9999;
+      color: #fff;
       align-items: center;
-      gap: 12px;
-      padding: 10px 14px;
-      cursor: pointer;
-      border-bottom: 1px solid #222;
-      transition: background 0.15s;
+      justify-content: center;
+      text-align: center;
+      font-size: 20px;
+      font-weight: bold;
+    }
+    @media (orientation: portrait) {
+      #portraitWarning { display: flex; flex-direction: column; gap: 15px; }
+      #appContainer { display: none !important; }
     }
 
-    .album-item:hover, .album-item:active {
-      background: #282830;
+    /* Auth Overlay */
+    #authOverlay {
+      position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(10, 10, 12, 0.95); z-index: 1000;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+    }
+    .btn-spotify {
+      background: var(--accent); color: #000; border: none; padding: 15px 30px;
+      border-radius: 30px; font-size: 16px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 15px rgba(29, 185, 84, 0.4);
     }
 
-    .album-item img {
-      width: 42px;
-      height: 42px;
-      border-radius: 6px;
-      object-fit: cover;
-    }
-
-    .album-info-text {
+    /* Main Layout */
+    #appContainer {
+      display: none;
       flex: 1;
-      overflow: hidden;
+      flex-direction: row;
+      width: 100%;
     }
 
-    .album-title {
-      font-size: 14px;
-      font-weight: 600;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .album-artist {
-      font-size: 12px;
-      color: #888;
-      margin-top: 2px;
-    }
-
-    /* Deck Layout */
-    .deck-area {
+    /* Left Side: Turntable */
+    .left-panel {
       flex: 1;
       display: flex;
       align-items: center;
@@ -132,589 +77,408 @@
 
     .deck {
       position: relative;
-      width: 350px;
-      height: 400px;
+      width: 380px;
+      height: 350px;
       background: linear-gradient(145deg, #23252c, #141518);
-      border-radius: 16px;
-      box-shadow: 
-        inset 0 1px 1px rgba(255,255,255,0.1),
-        0 20px 40px rgba(0,0,0,0.8);
+      border-radius: 20px;
+      box-shadow: inset 0 1px 1px rgba(255,255,255,0.1), 0 20px 40px rgba(0,0,0,0.8);
     }
+
+    /* Right Side: UI & Controls */
+    .right-panel {
+      width: 320px;
+      background: #111115;
+      border-left: 1px solid #222;
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+    }
+
+    /* Search Bar */
+    .search-container { position: relative; margin-bottom: 20px; z-index: 100; }
+    .search-input {
+      width: 100%; padding: 12px 16px; border-radius: 10px; border: 1px solid #333;
+      background: #09090b; color: #fff; font-size: 16px; outline: none;
+    }
+    .search-input:focus { border-color: var(--accent); }
+    
+    .results-dropdown {
+      position: absolute; top: 100%; left: 0; right: 0; background: #18181c;
+      border-radius: 0 0 12px 12px; max-height: 200px; overflow-y: auto; display: none; border: 1px solid #2a2a30;
+    }
+    .results-dropdown.active { display: block; }
+    .album-item { display: flex; align-items: center; gap: 12px; padding: 10px; cursor: pointer; border-bottom: 1px solid #222; }
+    .album-item img { width: 40px; height: 40px; border-radius: 4px; }
+    .album-info { flex: 1; overflow: hidden; white-space: nowrap; }
+    .album-title { font-size: 13px; font-weight: bold; text-overflow: ellipsis; overflow: hidden; }
+    .album-artist { font-size: 11px; color: #888; }
+
+    /* HUD */
+    .hud { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+    .hud-title { font-size: 16px; font-weight: bold; color: var(--accent); margin-bottom: 5px; }
+    .hud-meta { font-size: 12px; color: #888; margin-bottom: 20px; }
+    .warning { color: #ff4b4b; font-size: 11px; margin-bottom: 10px; font-weight: bold; display: none; }
+
+    /* Controls */
+    .controls-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
+    .btn {
+      padding: 12px; border-radius: 10px; border: none; background: #22222a;
+      color: #fff; font-size: 12px; font-weight: 600; cursor: pointer;
+    }
+    .btn-primary { background: var(--accent); color: #000; }
+    .btn:active { transform: scale(0.95); }
 
     /* Platter & Vinyl */
-    .platter-container {
-      position: absolute;
-      top: 35px;
-      left: 15px;
-      width: 300px;
-      height: 300px;
-      perspective: 800px;
-    }
-
+    .platter-container { position: absolute; top: 25px; left: 20px; width: 300px; height: 300px; perspective: 800px; }
     .platter {
-      width: 100%;
-      height: 100%;
-      border-radius: 50%;
-      background: #000;
-      box-shadow: 0 12px 25px rgba(0,0,0,0.9), inset 0 0 4px #555;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-      transform-style: preserve-3d;
+      width: 100%; height: 100%; border-radius: 50%; background: #000;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.9), inset 0 0 4px #555;
+      display: flex; align-items: center; justify-content: center;
+      transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1); transform-style: preserve-3d;
     }
-
-    .platter.flipping {
-      transform: rotateY(180deg) scale(0.85);
-    }
-
+    .platter.flipping { transform: rotateY(180deg) scale(0.85); }
     .vinyl {
-      position: relative;
-      width: 290px;
-      height: 290px;
-      border-radius: 50%;
-      background: 
-        conic-gradient(from 20deg, transparent 15%, rgba(255,255,255,0.12) 25%, transparent 35%, transparent 65%, rgba(255,255,255,0.12) 75%, transparent 85%),
-        repeating-radial-gradient(circle, #0a0a0c 0px, #0a0a0c 1.5px, #141418 2px);
-      box-shadow: inset 0 0 15px rgba(0,0,0,0.9);
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      position: relative; width: 290px; height: 290px; border-radius: 50%;
+      background: conic-gradient(from 20deg, transparent 15%, rgba(255,255,255,0.12) 25%, transparent 35%, transparent 65%, rgba(255,255,255,0.12) 75%, transparent 85%),
+                  repeating-radial-gradient(circle, #0a0a0c 0px, #0a0a0c 1.5px, #141418 2px);
+      display: flex; align-items: center; justify-content: center;
     }
+    .vinyl.spinning { animation: spin 1.8s linear infinite; }
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+    .grooves-svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; transform: rotate(-90deg); }
+    .center-label { width: 96px; height: 96px; border-radius: 50%; background: #222; background-size: cover; background-position: center; border: 3px solid #000; display: flex; align-items: center; justify-content: center; z-index: 2; }
+    .spindle { width: 8px; height: 8px; background: #ccc; border-radius: 50%; }
 
-    .vinyl.spinning {
-      animation: spin 1.8s linear infinite;
-    }
-
-    @keyframes spin {
-      100% { transform: rotate(360deg); }
-    }
-
-    .grooves-svg {
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      pointer-events: none;
-      transform: rotate(-90deg);
-    }
-
-    .center-label {
-      position: relative;
-      width: 96px;
-      height: 96px;
-      border-radius: 50%;
-      background: #222;
-      background-size: cover;
-      background-position: center;
-      border: 3px solid var(--accent);
-      z-index: 2;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 0 10px rgba(0,0,0,0.8);
-    }
-
-    .spindle {
-      width: 8px;
-      height: 8px;
-      background: #ccc;
-      border-radius: 50%;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.8);
-    }
-
-    /* Tonearm Assembly */
+    /* Tonearm */
     .tonearm-pivot {
-      position: absolute;
-      top: 25px;
-      right: 20px;
-      width: 48px;
-      height: 48px;
-      background: radial-gradient(circle at 35% 35%, #555, #111);
-      border-radius: 50%;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.7);
-      z-index: 10;
+      position: absolute; top: 20px; right: 25px; width: 44px; height: 44px;
+      background: radial-gradient(circle at 35% 35%, #555, #111); border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.7); z-index: 10;
     }
-
     .tonearm {
-      position: absolute;
-      top: 22px;
-      left: 20px;
-      width: 6px;
-      height: 215px;
-      background: linear-gradient(to right, #999, #fff 40%, #666);
-      border-radius: 3px;
-      transform-origin: 3px 3px;
-      transform: rotate(-28deg); /* Parked angle */
-      box-shadow: -4px 8px 12px rgba(0,0,0,0.5);
-      cursor: grab;
-      transition: transform 0.15s ease-out;
-      z-index: 9;
+      position: absolute; top: 20px; left: 19px; width: 6px; height: 200px;
+      background: linear-gradient(to right, #999, #fff 40%, #666); border-radius: 3px;
+      transform-origin: 3px 3px; transform: rotate(-28deg); cursor: grab; z-index: 9;
+      /* Removed transition so requestAnimationFrame is perfectly fluid 1:1 */
     }
-
-    .tonearm:active { cursor: grabbing; }
-
     .headshell {
-      position: absolute;
-      bottom: -12px;
-      left: -6px;
-      width: 18px;
-      height: 32px;
-      background: #111;
-      border-radius: 2px;
-      transform: rotate(20deg);
+      position: absolute; bottom: -12px; left: -6px; width: 18px; height: 32px;
+      background: #111; border-radius: 2px; transform: rotate(20deg);
     }
-
-    .stylus-glow {
-      position: absolute;
-      bottom: 2px;
-      left: 7px;
-      width: 4px;
-      height: 4px;
-      background: #00e5ff;
-      border-radius: 50%;
-      box-shadow: 0 0 6px #00e5ff;
-    }
-
-    /* Info HUD & Controls */
-    .hud {
-      padding: 16px;
-      background: #0d0d11;
-      text-align: center;
-      border-top: 1px solid #1a1a20;
-    }
-
-    .hud-title {
-      font-size: 16px;
-      font-weight: 700;
-      color: #fff;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .hud-meta {
-      font-size: 13px;
-      color: #888;
-      margin-top: 4px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-    }
-
-    .badge {
-      background: #252530;
-      color: var(--accent);
-      padding: 2px 8px;
-      border-radius: 10px;
-      font-size: 11px;
-      font-weight: 700;
-    }
-
-    .controls-row {
-      display: flex;
-      flex-wrap: wrap; /* Allows buttons to wrap on small screens */
-      justify-content: center;
-      gap: 10px;
-      margin-top: 12px;
-    }
-
-    .btn {
-      padding: 8px 16px;
-      border-radius: 20px;
-      border: none;
-      background: #22222a;
-      color: #fff;
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .btn-primary {
-      background: var(--accent);
-      color: #fff;
-    }
-
-    .btn:active { transform: scale(0.95); }
+    .stylus-glow { position: absolute; bottom: 2px; left: 7px; width: 4px; height: 4px; background: #1DB954; border-radius: 50%; box-shadow: 0 0 6px #1DB954; }
   </style>
 </head>
 <body>
 
-  <!-- Live Search Bar -->
-  <div class="header">
-    <div class="search-container">
-      <input type="text" id="searchInput" class="search-input" placeholder="Search artist or album name..." autocomplete="off">
-      <div id="resultsDropdown" class="results-dropdown"></div>
-    </div>
+  <!-- Force Landscape Message -->
+  <div id="portraitWarning">
+    <svg width="40" height="40" viewBox="0 0 24 24" fill="white"><path d="M16.48 2.52c3.27 1.55 5.61 4.72 5.97 8.48h1.5C23.44 4.84 18.29.34 12 0l-.66.03 3.81 3.81 1.33-1.32zm-6.25-.77c-.59-.59-1.54-.59-2.12 0L1.75 8.11c-.59.59-.59 1.54 0 2.12l12.02 12.02c.59.59 1.54.59 2.12 0l6.36-6.36c.59-.59.59-1.54 0-2.12L10.23 1.75zm4.6 19.44L2.81 9.17l6.36-6.36 12.02 12.02-6.36 6.36zm-7.31.29C4.25 19.94 1.91 16.76 1.55 13H.05C.56 19.16 5.71 23.66 12 24l.66-.03-3.81-3.81-1.33 1.32z"/></svg>
+    Please rotate your iPhone to landscape mode.
   </div>
 
-  <!-- Turntable Deck -->
-  <div class="deck-area">
-    <div class="deck">
-      <div class="platter-container">
-        <div class="platter" id="platter">
-          <div class="vinyl" id="vinyl">
-            <svg class="grooves-svg" id="grooveSvg" viewBox="0 0 290 290"></svg>
-            <div class="center-label" id="centerLabel">
-              <div class="spindle"></div>
+  <div id="authOverlay">
+    <h2>Spotify Landscape Turntable</h2>
+    <p style="color: #aaa; margin: 10px 0 20px; font-size: 14px;">Requires Spotify Premium</p>
+    <button class="btn-spotify" onclick="startSpotifyAuth()">Connect with Spotify</button>
+  </div>
+
+  <div id="appContainer">
+    <!-- Turntable Deck (Left) -->
+    <div class="left-panel">
+      <div class="deck">
+        <div class="platter-container">
+          <div class="platter" id="platter">
+            <div class="vinyl" id="vinyl">
+              <svg class="grooves-svg" id="grooveSvg" viewBox="0 0 290 290"></svg>
+              <div class="center-label" id="centerLabel"><div class="spindle"></div></div>
             </div>
           </div>
         </div>
-      </div>
-
-      <div class="tonearm-pivot">
-        <div class="tonearm" id="tonearm">
-          <div class="headshell">
-            <div class="stylus-glow"></div>
+        <div class="tonearm-pivot">
+          <div class="tonearm" id="tonearm">
+            <div class="headshell"><div class="stylus-glow"></div></div>
           </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- HUD Control Panel -->
-  <div class="hud">
-    <div class="hud-title" id="trackTitle">Type above to select an album</div>
-    <div class="hud-meta">
-      <span id="artistName">Web Audio Ready</span>
-      <span class="badge" id="sideBadge">SIDE A</span>
+    <!-- UI & Controls (Right) -->
+    <div class="right-panel">
+      <div class="search-container">
+        <input type="text" id="searchInput" class="search-input" placeholder="Search Spotify..." autocomplete="off">
+        <div id="resultsDropdown" class="results-dropdown"></div>
+      </div>
+
+      <div class="hud">
+        <div class="warning" id="deviceWarning">Open Spotify app in background!</div>
+        <div class="hud-title" id="trackTitle">Awaiting Search</div>
+        <div class="hud-meta">
+          <span id="artistName">...</span> • <span id="sideBadge" style="color:var(--accent);">SIDE A</span>
+        </div>
+      </div>
+
+      <div class="controls-grid">
+        <button class="btn btn-primary" onclick="btnStart()">START</button>
+        <button class="btn" onclick="btnPauseResume()">PAUSE / RESUME</button>
+        <button class="btn" onclick="btnStop()">STOP</button>
+        <button class="btn" onclick="flipRecordManually()">FLIP SIDE</button>
+      </div>
     </div>
-
-    <!-- Updated Mechanical Turntable Controls -->
-    <div class="controls-row">
-      <button class="btn btn-primary" onclick="btnStart()">START</button>
-      <button class="btn" onclick="btnPauseResume()">PAUSE / RESUME</button>
-      <button class="btn" onclick="btnStop()">STOP</button>
-      <button class="btn" onclick="flipRecordManually()">FLIP</button>
-    </div>
   </div>
-
-  <!-- Invisible Audio Player -->
-  <audio id="audioPlayer" preload="auto"></audio>
 
   <script>
-    // Geometry & Angles
-    const GROOVE_START = 140; // Outer radius
-    const GROOVE_END = 55;    // Inner radius near label
-    const PLAYABLE_WIDTH = GROOVE_START - GROOVE_END;
+    const CLIENT_ID = 'Fdf967e9e0294111a273b5469543c636';
+    const REDIRECT_URI = window.location.origin + window.location.pathname; 
+    
+    // Geometry Constants
+    const GROOVE_START = 140; const GROOVE_END = 55; const PLAYABLE_WIDTH = GROOVE_START - GROOVE_END;
+    const PIVOT_REST_ANGLE = -28; const PIVOT_OUTER_GROOVE = -10; const PIVOT_INNER_GROOVE = 14;
 
-    const PIVOT_REST_ANGLE = -28;
-    const PIVOT_OUTER_GROOVE = -10;
-    const PIVOT_INNER_GROOVE = 14;
+    let accessToken = null; 
+    let albumData = null; let currentSide = 'A'; let currentSideTracks = [];
+    let currentTrackIdx = 0; let trackLayout = [];
+    
+    // Smooth Animation Sync Variables
+    let isPlaying = false; let isDragging = false;
+    let trackStartTime = 0; let activeTrackDuration = 0; let currentAngle = PIVOT_REST_ANGLE;
+    let pollInterval = null;
 
-    // Album & Playback State
-    let albumData = null;
-    let currentSide = 'A';
-    let currentSideTracks = [];
-    let currentTrackIdx = 0;
-    let trackLayout = [];
-    let isPlaying = false;
-    let searchTimeout = null;
+    const vinyl = document.getElementById('vinyl'); const tonearm = document.getElementById('tonearm');
+    const grooveSvg = document.getElementById('grooveSvg'); const trackTitle = document.getElementById('trackTitle');
+    const warningTxt = document.getElementById('deviceWarning'); const resultsDropdown = document.getElementById('resultsDropdown');
 
-    // DOM Elements
-    const searchInput = document.getElementById('searchInput');
-    const resultsDropdown = document.getElementById('resultsDropdown');
-    const vinyl = document.getElementById('vinyl');
-    const platter = document.getElementById('platter');
-    const tonearm = document.getElementById('tonearm');
-    const grooveSvg = document.getElementById('grooveSvg');
-    const centerLabel = document.getElementById('centerLabel');
-    const trackTitle = document.getElementById('trackTitle');
-    const artistName = document.getElementById('artistName');
-    const sideBadge = document.getElementById('sideBadge');
-    const audioPlayer = document.getElementById('audioPlayer');
+    // --- 1. PKCE AUTHENTICATION ---
+    const generateRandomString = (length) => crypto.getRandomValues(new Uint8Array(length)).reduce((a, x) => a + 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'[x % 62], "");
+    const sha256 = async (plain) => window.crypto.subtle.digest('SHA-256', new TextEncoder().encode(plain));
+    const base64encode = (input) => btoa(String.fromCharCode(...new Uint8Array(input))).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
 
-    // --- 1. INSTANT LIVE SEARCH (AS YOU TYPE) ---
-    searchInput.addEventListener('input', (e) => {
-      clearTimeout(searchTimeout);
-      const query = e.target.value.trim();
-      
-      if (query.length < 2) {
-        resultsDropdown.classList.remove('active');
-        resultsDropdown.innerHTML = '';
-        return;
-      }
+    async function startSpotifyAuth() {
+      const codeVerifier = generateRandomString(64);
+      localStorage.setItem('code_verifier', codeVerifier);
+      const codeChallenge = base64encode(await sha256(codeVerifier));
+      const authUrl = new URL("https://accounts.spotify.com/authorize");
+      authUrl.search = new URLSearchParams({
+        response_type: 'code', client_id: CLIENT_ID, scope: 'user-read-playback-state user-modify-playback-state',
+        code_challenge_method: 'S256', code_challenge: codeChallenge, redirect_uri: REDIRECT_URI,
+      }).toString();
+      window.location.href = authUrl.toString();
+    }
 
-      searchTimeout = setTimeout(() => {
-        fetchLiveSearchResults(query);
-      }, 250);
-    });
-
-    async function fetchLiveSearchResults(query) {
-      try {
-        const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=album&limit=6`);
-        const data = await res.json();
-        
-        resultsDropdown.innerHTML = '';
-        if (data.results.length === 0) {
-          resultsDropdown.classList.remove('active');
-          return;
-        }
-
-        data.results.forEach(album => {
-          const item = document.createElement('div');
-          item.className = 'album-item';
-          item.innerHTML = `
-            <img src="${album.artworkUrl100}">
-            <div class="album-info-text">
-              <div class="album-title">${album.collectionName}</div>
-              <div class="album-artist">${album.artistName}</div>
-            </div>
-          `;
-          item.onclick = () => selectAlbum(album);
-          resultsDropdown.appendChild(item);
+    async function checkAuth() {
+      const code = new URLSearchParams(window.location.search).get('code');
+      if (code) {
+        const body = await fetch("https://accounts.spotify.com/api/token", {
+          method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams({ client_id: CLIENT_ID, grant_type: 'authorization_code', code: code, redirect_uri: REDIRECT_URI, code_verifier: localStorage.getItem('code_verifier') })
         });
-
-        resultsDropdown.classList.add('active');
-      } catch (err) {
-        console.error("Search error:", err);
+        const res = await body.json();
+        if (res.access_token) {
+          accessToken = res.access_token;
+          window.history.replaceState({}, document.title, window.location.pathname);
+          document.getElementById('authOverlay').style.display = 'none';
+          document.getElementById('appContainer').style.display = 'flex';
+          startPlaybackPoller(); // Start checking Spotify state
+        }
       }
     }
 
-    document.addEventListener('click', (e) => {
-      if (!searchInput.contains(e.target) && !resultsDropdown.contains(e.target)) {
-        resultsDropdown.classList.remove('active');
-      }
+    // --- 2. SPOTIFY API SEARCH & SPLIT ---
+    let searchTimeout = null;
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+      clearTimeout(searchTimeout);
+      const q = e.target.value.trim();
+      if(q.length < 2) return resultsDropdown.classList.remove('active');
+      searchTimeout = setTimeout(async () => {
+        const res = await fetch(`https://api.spotify.com/v1/search?q=${encodeURIComponent(q)}&type=album&limit=5`, { headers: { 'Authorization': `Bearer ${accessToken}` } });
+        const data = await res.json();
+        resultsDropdown.innerHTML = '';
+        data.albums.items.forEach(album => {
+          const div = document.createElement('div'); div.className = 'album-item';
+          div.innerHTML = `<img src="${album.images[2].url}"><div class="album-info"><div class="album-title">${album.name}</div><div class="album-artist">${album.artists[0].name}</div></div>`;
+          div.onclick = () => loadAlbum(album); resultsDropdown.appendChild(div);
+        });
+        resultsDropdown.classList.add('active');
+      }, 300);
     });
 
-    // --- 2. LOAD ALBUM & DIVIDE INTO SIDE A / SIDE B ---
-    async function selectAlbum(albumMeta) {
+    async function loadAlbum(album) {
       resultsDropdown.classList.remove('active');
-      searchInput.value = albumMeta.collectionName;
-
-      const artworkHighRes = albumMeta.artworkUrl100.replace('100x100', '300x300');
-      centerLabel.style.backgroundImage = `url(${artworkHighRes})`;
-      artistName.innerText = albumMeta.artistName;
-
-      const res = await fetch(`https://itunes.apple.com/lookup?id=${albumMeta.collectionId}&entity=song`);
-      const data = await res.json();
-      const allTracks = data.results.filter(item => item.wrapperType === 'track');
-
-      if (allTracks.length === 0) return;
-
-      const splitIdx = Math.ceil(allTracks.length / 2);
-      albumData = {
-        meta: albumMeta,
-        sideA: allTracks.slice(0, splitIdx),
-        sideB: allTracks.slice(splitIdx)
-      };
-
-      currentSide = 'A';
-      loadSide('A', 0);
+      document.getElementById('searchInput').value = album.name;
+      document.getElementById('centerLabel').style.backgroundImage = `url(${album.images[0].url})`;
+      document.getElementById('artistName').innerText = album.artists[0].name;
       
-      // Do not auto-play, wait for user to hit START
-      trackTitle.innerText = `Record Loaded - Press START`;
+      const res = await fetch(`https://api.spotify.com/v1/albums/${album.id}/tracks`, { headers: { 'Authorization': `Bearer ${accessToken}` } });
+      const data = await res.json();
+      
+      const splitIdx = Math.ceil(data.items.length / 2);
+      albumData = { uri: album.uri, sideA: data.items.slice(0, splitIdx), sideB: data.items.slice(splitIdx) };
+      loadSide('A', 0);
       tonearm.style.transform = `rotate(${PIVOT_REST_ANGLE}deg)`;
+      trackTitle.innerText = "Ready - Press START";
     }
 
-    function loadSide(side, startTrackIdx = 0) {
-      currentSide = side;
-      currentSideTracks = side === 'A' ? albumData.sideA : albumData.sideB;
-      currentTrackIdx = startTrackIdx;
-      sideBadge.innerText = "SIDE " + currentSide;
+    function loadSide(side, startIdx = 0) {
+      currentSide = side; currentSideTracks = side === 'A' ? albumData.sideA : albumData.sideB;
+      document.getElementById('sideBadge').innerText = `SIDE ${side}`;
       generatePhysicalGrooves(currentSideTracks);
     }
 
-    // --- 3. PHYSICAL GROOVE GEOMETRY ---
     function generatePhysicalGrooves(tracks) {
-      let totalMs = tracks.reduce((sum, t) => sum + (t.trackTimeMillis || 30000), 0);
+      let totalMs = tracks.reduce((sum, t) => sum + t.duration_ms, 0);
       let currentRadius = GROOVE_START;
-      
-      grooveSvg.innerHTML = '';
-      trackLayout = [];
+      grooveSvg.innerHTML = ''; trackLayout = [];
 
       tracks.forEach((track, i) => {
-        const duration = track.trackTimeMillis || 30000;
-        const percentage = duration / totalMs;
-        const width = percentage * PLAYABLE_WIDTH;
-        const trackInnerRadius = currentRadius - width;
-
+        const trackInnerRadius = currentRadius - ((track.duration_ms / totalMs) * PLAYABLE_WIDTH);
         if (i < tracks.length - 1) {
           const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-          circle.setAttribute('cx', '145');
-          circle.setAttribute('cy', '145');
-          circle.setAttribute('r', trackInnerRadius);
-          circle.setAttribute('fill', 'none');
-          circle.setAttribute('stroke', 'rgba(0,0,0,0.85)');
-          circle.setAttribute('stroke-width', '2');
+          circle.setAttribute('cx', '145'); circle.setAttribute('cy', '145');
+          circle.setAttribute('r', trackInnerRadius); circle.setAttribute('fill', 'none');
+          circle.setAttribute('stroke', 'rgba(0,0,0,0.8)'); circle.setAttribute('stroke-width', '1.5');
           grooveSvg.appendChild(circle);
         }
-
-        const startAngle = PIVOT_OUTER_GROOVE + ((GROOVE_START - currentRadius) / PLAYABLE_WIDTH) * (PIVOT_INNER_GROOVE - PIVOT_OUTER_GROOVE);
-        const endAngle = PIVOT_OUTER_GROOVE + ((GROOVE_START - trackInnerRadius) / PLAYABLE_WIDTH) * (PIVOT_INNER_GROOVE - PIVOT_OUTER_GROOVE);
-
-        trackLayout.push({
-          track: track,
-          index: i,
-          startRadius: currentRadius,
-          endRadius: trackInnerRadius,
-          startAngle: startAngle,
-          endAngle: endAngle
+        trackLayout.push({ 
+          track: track, index: i, 
+          startAngle: PIVOT_OUTER_GROOVE + ((GROOVE_START - currentRadius) / PLAYABLE_WIDTH) * (PIVOT_INNER_GROOVE - PIVOT_OUTER_GROOVE), 
+          endAngle: PIVOT_OUTER_GROOVE + ((GROOVE_START - trackInnerRadius) / PLAYABLE_WIDTH) * (PIVOT_INNER_GROOVE - PIVOT_OUTER_GROOVE) 
         });
-
         currentRadius = trackInnerRadius;
       });
     }
 
-    // --- 4. NEW MECHANICAL CONTROLS ---
-    function btnStart() {
-      if (!albumData) return;
-      
-      // If currently paused in the middle of a track, resume it
-      if (audioPlayer.src && audioPlayer.paused && currentTrackIdx !== null) {
-        audioPlayer.play();
-        isPlaying = true;
-        vinyl.classList.add('spinning');
-        return;
-      }
-      
-      // Otherwise, drop needle at the beginning of the side
-      playTrack(currentTrackIdx);
-    }
-
-    function btnPauseResume() {
-      if (!audioPlayer.src) return;
-      if (isPlaying) {
-        audioPlayer.pause();
-        isPlaying = false;
-        vinyl.classList.remove('spinning');
-      } else {
-        audioPlayer.play();
-        isPlaying = true;
-        vinyl.classList.add('spinning');
-      }
-    }
-
-    function btnStop() {
-      if (!albumData) return;
-      
-      // Pause playback and reset
-      audioPlayer.pause();
-      if (audioPlayer.duration) audioPlayer.currentTime = 0;
-      
-      isPlaying = false;
-      vinyl.classList.remove('spinning');
-      
-      // Mechanically park the needle
-      tonearm.style.transform = `rotate(${PIVOT_REST_ANGLE}deg)`;
-      trackTitle.innerText = "Needle Parked";
-      currentTrackIdx = 0; // Reset to start of current side
-    }
-
-    // --- 5. AUDIO PLAYBACK & NEEDLE SYNC ---
-    function playTrack(idx) {
-      if (!currentSideTracks[idx]) return;
-
-      currentTrackIdx = idx;
-      const track = currentSideTracks[idx];
-      trackTitle.innerText = `${idx + 1}. ${track.trackName}`;
-
-      if (track.previewUrl) {
-        audioPlayer.src = track.previewUrl;
-        audioPlayer.play().then(() => {
-          isPlaying = true;
-          vinyl.classList.add('spinning');
-        }).catch(() => {
-          isPlaying = false;
-          vinyl.classList.remove('spinning');
-        });
-      }
-    }
-
-    // Continuously update needle angle as audio plays
-    audioPlayer.ontimeupdate = () => {
-      if (!audioPlayer.duration || !trackLayout[currentTrackIdx]) return;
-
-      const layout = trackLayout[currentTrackIdx];
-      const progress = audioPlayer.currentTime / audioPlayer.duration;
-      
-      const currentAngle = layout.startAngle + (progress * (layout.endAngle - layout.startAngle));
-      tonearm.style.transform = `rotate(${currentAngle}deg)`;
-    };
-
-    // Auto-advance to next track when current finishes
-    audioPlayer.onended = () => {
-      if (currentTrackIdx + 1 < currentSideTracks.length) {
-        playTrack(currentTrackIdx + 1);
-      } else {
-        triggerAutoFlip();
-      }
-    };
-
-    // --- 6. AUTOMATIC FLIP SEQUENCE ---
-    function triggerAutoFlip() {
-      audioPlayer.pause();
-      isPlaying = false;
-      vinyl.classList.remove('spinning');
-      
-      tonearm.style.transform = `rotate(${PIVOT_REST_ANGLE}deg)`;
-      trackTitle.innerText = `Side ${currentSide} Finished. Flipping...`;
-
-      setTimeout(() => {
-        platter.classList.add('flipping');
+    // --- 3. HIGH-PERFORMANCE NEEDLE SYNC ---
+    function animationLoop() {
+      if (isPlaying && !isDragging && activeTrackDuration > 0 && trackLayout[currentTrackIdx]) {
+        let progressMs = Date.now() - trackStartTime;
+        let layout = trackLayout[currentTrackIdx];
         
+        // Prevent needle from shooting past the groove if API polling lags slightly
+        if (progressMs > activeTrackDuration) progressMs = activeTrackDuration;
+        
+        let fraction = progressMs / activeTrackDuration;
+        currentAngle = layout.startAngle + (fraction * (layout.endAngle - layout.startAngle));
+        tonearm.style.transform = `rotate(${currentAngle}deg)`;
+      }
+      requestAnimationFrame(animationLoop);
+    }
+    requestAnimationFrame(animationLoop); // Start engine
+
+    // Poll Spotify API every 2s to ensure perfect correlation and handle auto-advancing
+    function startPlaybackPoller() {
+      setInterval(async () => {
+        if(!isPlaying) return;
+        const res = await fetch('https://api.spotify.com/v1/me/player', { headers: { 'Authorization': `Bearer ${accessToken}` } });
+        if(res.status === 200) {
+          const data = await res.json();
+          if(data.is_playing) {
+            // Re-sync local timer with real Spotify time
+            trackStartTime = Date.now() - data.progress_ms;
+            
+            // Handle Track Changes
+            const currentSpotifyId = data.item.id;
+            if (trackLayout[currentTrackIdx] && trackLayout[currentTrackIdx].track.id !== currentSpotifyId) {
+              // Song changed! Did it go to next track on this side?
+              const nextLayout = trackLayout.find(t => t.track.id === currentSpotifyId);
+              if (nextLayout) {
+                currentTrackIdx = nextLayout.index;
+                activeTrackDuration = nextLayout.track.duration_ms;
+                trackTitle.innerText = `${currentTrackIdx+1}. ${nextLayout.track.name}`;
+              } else {
+                // Song ended and next song is NOT on this side -> Auto Flip
+                triggerAutoFlip();
+              }
+            }
+          }
+        }
+      }, 2000);
+    }
+
+    // --- 4. CONTROLS & API PLAYBACK ---
+    async function playTrack(idx, positionMs = 0) {
+      if(!albumData) return;
+      currentTrackIdx = idx;
+      const trackObj = currentSideTracks[idx];
+      activeTrackDuration = trackObj.duration_ms;
+      trackStartTime = Date.now() - positionMs;
+      warningTxt.style.display = 'none';
+
+      const res = await fetch('https://api.spotify.com/v1/me/player/devices', { headers: { 'Authorization': `Bearer ${accessToken}` } });
+      const devData = await res.json();
+      const targetDevice = devData.devices.find(d => d.is_active)?.id || devData.devices[0]?.id;
+
+      if(targetDevice) {
+        await fetch(`https://api.spotify.com/v1/me/player/play?device_id=${targetDevice}`, {
+          method: 'PUT', headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ context_uri: albumData.uri, offset: { uri: trackObj.uri }, position_ms: positionMs })
+        });
+        isPlaying = true; vinyl.classList.add('spinning');
+        trackTitle.innerText = `${idx+1}. ${trackObj.name}`;
+      } else {
+        warningTxt.style.display = 'block'; isPlaying = false;
+      }
+    }
+
+    function btnStart() { if(albumData) playTrack(currentTrackIdx); }
+    function btnPauseResume() {
+      if(isPlaying) {
+        fetch(`https://api.spotify.com/v1/me/player/pause`, { method: 'PUT', headers: { 'Authorization': `Bearer ${accessToken}` } });
+        isPlaying = false; vinyl.classList.remove('spinning');
+      } else {
+        btnStart();
+      }
+    }
+    function btnStop() {
+      fetch(`https://api.spotify.com/v1/me/player/pause`, { method: 'PUT', headers: { 'Authorization': `Bearer ${accessToken}` } });
+      isPlaying = false; vinyl.classList.remove('spinning');
+      currentAngle = PIVOT_REST_ANGLE; tonearm.style.transform = `rotate(${currentAngle}deg)`;
+      currentTrackIdx = 0; trackTitle.innerText = "Needle Parked";
+    }
+
+    function triggerAutoFlip() {
+      btnStop();
+      trackTitle.innerText = `Flipping to Side ${currentSide === 'A' ? 'B' : 'A'}...`;
+      setTimeout(() => {
+        document.getElementById('platter').classList.add('flipping');
         setTimeout(() => {
-          const nextSide = currentSide === 'A' ? 'B' : 'A';
-          platter.classList.remove('flipping');
-          loadSide(nextSide, 0);
-          
-          // Auto-start next side after flip
-          setTimeout(() => {
-            btnStart();
-          }, 800);
-          
+          document.getElementById('platter').classList.remove('flipping');
+          loadSide(currentSide === 'A' ? 'B' : 'A', 0);
+          setTimeout(() => btnStart(), 800);
         }, 800);
       }, 500);
     }
+    function flipRecordManually() { if(albumData) triggerAutoFlip(); }
 
-    function flipRecordManually() {
-      if (!albumData) return;
-      triggerAutoFlip();
-    }
+    // --- 5. DRAG & DROP NEEDLE ---
+    tonearm.addEventListener('touchstart', (e) => { isDragging = true; vinyl.classList.remove('spinning'); });
+    window.addEventListener('touchend', () => { 
+      if(!isDragging) return;
+      isDragging = false; 
+      if(currentAngle >= PIVOT_OUTER_GROOVE && currentAngle <= PIVOT_INNER_GROOVE && albumData) {
+        const target = trackLayout.find(t => currentAngle >= t.startAngle && currentAngle <= t.endAngle);
+        if(target) {
+          const fraction = (currentAngle - target.startAngle) / (target.endAngle - target.startAngle);
+          playTrack(target.index, Math.floor(fraction * target.track.duration_ms));
+        }
+      } else {
+        btnStop();
+      }
+    });
 
-    // --- 7. DRAG / DROP NEEDLE TO SEEK ---
-    let isDragging = false;
-
-    tonearm.addEventListener('touchstart', () => { isDragging = true; });
-    tonearm.addEventListener('mousedown', () => { isDragging = true; });
-    window.addEventListener('touchend', () => { isDragging = false; });
-    window.addEventListener('mouseup', () => { isDragging = false; });
-
-    window.addEventListener('touchmove', handleNeedleDrag, { passive: false });
-    window.addEventListener('mousemove', handleNeedleDrag);
-
-    function handleNeedleDrag(e) {
-      if (!isDragging || trackLayout.length === 0) return;
+    window.addEventListener('touchmove', (e) => {
+      if(!isDragging || !trackLayout.length) return;
       e.preventDefault();
-
-      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-
+      const clientX = e.touches[0].clientX; const clientY = e.touches[0].clientY;
       const pivotRect = document.querySelector('.tonearm-pivot').getBoundingClientRect();
-      const pivotX = pivotRect.left + pivotRect.width / 2;
-      const pivotY = pivotRect.top + pivotRect.height / 2;
-
-      let angle = (Math.atan2(clientY - pivotY, clientX - pivotX) * (180 / Math.PI)) - 90;
-
+      
+      let angle = (Math.atan2(clientY - (pivotRect.top + pivotRect.height/2), clientX - (pivotRect.left + pivotRect.width/2)) * (180 / Math.PI)) - 90;
       if (angle < PIVOT_REST_ANGLE) angle = PIVOT_REST_ANGLE;
       if (angle > PIVOT_INNER_GROOVE + 5) angle = PIVOT_INNER_GROOVE + 5;
+      
+      currentAngle = angle; tonearm.style.transform = `rotate(${angle}deg)`;
+      const hover = trackLayout.find(t => angle >= t.startAngle && angle <= t.endAngle);
+      if(hover) trackTitle.innerText = `${hover.index+1}. ${hover.track.name}`;
+    }, { passive: false });
 
-      tonearm.style.transform = `rotate(${angle}deg)`;
-
-      const targetLayout = trackLayout.find(t => angle >= t.startAngle && angle <= t.endAngle);
-      if (targetLayout) {
-        trackTitle.innerText = `${targetLayout.index + 1}. ${targetLayout.track.trackName}`;
-        if (currentTrackIdx !== targetLayout.index) {
-          playTrack(targetLayout.index);
-        }
-        
-        const angleProgress = (angle - targetLayout.startAngle) / (targetLayout.endAngle - targetLayout.startAngle);
-        if (audioPlayer.duration) {
-          audioPlayer.currentTime = angleProgress * audioPlayer.duration;
-        }
-      }
-    }
+    checkAuth();
   </script>
 </body>
 </html>
