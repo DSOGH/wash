@@ -1,585 +1,512 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Landscape Spotify Turntable</title>
-  <style>
-    :root {
-      --bg: #0a0a0c;
-      --deck: #1c1d22;
-      --accent: #1DB954;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Virtual Blackjack</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
 
-    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
+        :root {
+            --bg-color: #1a2c38;
+            --table-color: #0f1923;
+            --primary: #00e701;
+            --primary-hover: #1fff20;
+            --text-main: #ffffff;
+            --text-muted: #b1b6c6;
+            --card-bg: #ffffff;
+            --danger: #ff4949;
+        }
 
-    body {
-      background: var(--bg);
-      color: #fff;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      display: flex;
-      flex-direction: row;
-      height: 100vh;
-      overflow: hidden;
-      padding-left: env(safe-area-inset-left);
-      padding-right: env(safe-area-inset-right);
-      padding-bottom: env(safe-area-inset-bottom);
-    }
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
 
-    #portraitWarning {
-      display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-      background: #000; z-index: 9999; color: #fff; align-items: center; justify-content: center;
-      text-align: center; font-size: 20px; font-weight: bold;
-    }
-    @media (orientation: portrait) {
-      #portraitWarning { display: flex; flex-direction: column; gap: 15px; }
-      #appContainer { display: none !important; }
-    }
+        /* Header & Bank */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 30px;
+            background-color: #213743;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
 
-    #authOverlay {
-      position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(10, 10, 12, 0.95); z-index: 1000;
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-    }
-    .btn-spotify {
-      background: var(--accent); color: #000; border: none; padding: 15px 30px;
-      border-radius: 30px; font-size: 16px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 15px rgba(29, 185, 84, 0.4);
-    }
+        .logo { font-size: 24px; font-weight: 800; letter-spacing: 1px; }
+        
+        .bank-section {
+            display: flex;
+            align-items: center;
+            background: var(--table-color);
+            padding: 5px 5px 5px 20px;
+            border-radius: 8px;
+            border: 1px solid #2f4553;
+        }
 
-    #appContainer { display: none; flex: 1; flex-direction: row; width: 100%; }
+        .balance { font-size: 18px; font-weight: 600; margin-right: 15px; color: var(--primary); }
+        
+        .deposit-btn {
+            background-color: var(--primary);
+            color: #000;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .deposit-btn:hover { background-color: var(--primary-hover); }
 
-    /* Left Side: Turntable */
-    .left-panel { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; }
+        /* Game Area */
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            background: radial-gradient(circle at center, #1e3340 0%, var(--table-color) 100%);
+        }
 
-    .deck {
-      position: relative; width: 380px; height: 350px;
-      background: linear-gradient(145deg, #23252c, #141518);
-      border-radius: 20px; box-shadow: inset 0 1px 1px rgba(255,255,255,0.1), 0 20px 40px rgba(0,0,0,0.8);
-      overflow: hidden;
-    }
+        .hand-container {
+            min-height: 160px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 20px 0;
+        }
 
-    /* Right Side: UI & Controls */
-    .right-panel {
-      width: 320px; background: #111115; border-left: 1px solid #222;
-      display: flex; flex-direction: column; padding: 20px; z-index: 10;
-    }
+        .hand-title { color: var(--text-muted); font-size: 14px; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px;}
+        
+        .cards {
+            display: flex;
+            gap: -40px; /* Overlap cards */
+            justify-content: center;
+        }
 
-    .search-container { position: relative; margin-bottom: 20px; z-index: 100; }
-    .search-input { width: 100%; padding: 12px 16px; border-radius: 10px; border: 1px solid #333; background: #09090b; color: #fff; font-size: 16px; outline: none; }
-    .search-input:focus { border-color: var(--accent); }
-    
-    .results-dropdown { position: absolute; top: 100%; left: 0; right: 0; background: #18181c; border-radius: 0 0 12px 12px; max-height: 200px; overflow-y: auto; display: none; border: 1px solid #2a2a30; }
-    .results-dropdown.active { display: block; }
-    .album-item { display: flex; align-items: center; gap: 12px; padding: 10px; cursor: pointer; border-bottom: 1px solid #222; }
-    .album-item img { width: 40px; height: 40px; border-radius: 4px; }
-    .album-info { flex: 1; overflow: hidden; white-space: nowrap; }
-    .album-title { font-size: 13px; font-weight: bold; text-overflow: ellipsis; overflow: hidden; }
-    .album-artist { font-size: 11px; color: #888; }
+        .card {
+            width: 100px;
+            height: 140px;
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 10px;
+            box-sizing: border-box;
+            font-size: 24px;
+            font-weight: bold;
+            box-shadow: -2px 2px 10px rgba(0,0,0,0.5);
+            position: relative;
+            margin-right: -50px;
+            opacity: 0;
+            transform: translateY(-30px);
+            animation: slideIn 0.3s ease forwards;
+        }
+        .card:last-child { margin-right: 0; }
 
-    /* HUD */
-    .hud { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
-    .hud-title { font-size: 16px; font-weight: bold; color: var(--accent); margin-bottom: 5px; }
-    .hud-meta { font-size: 12px; color: #888; margin-bottom: 20px; }
-    .warning { color: #ff4b4b; font-size: 11px; margin-bottom: 10px; font-weight: bold; display: none; }
+        @keyframes slideIn {
+            to { opacity: 1; transform: translateY(0); }
+        }
 
-    /* Controls */
-    .controls-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
-    .btn { padding: 12px; border-radius: 10px; border: none; background: #22222a; color: #fff; font-size: 12px; font-weight: 600; cursor: pointer; }
-    .btn-primary { background: var(--accent); color: #000; }
-    .btn:active { transform: scale(0.95); }
-    .btn:disabled { opacity: 0.5; pointer-events: none; }
+        .card.red { color: var(--danger); }
+        .card.black { color: #0f1923; }
+        .card.hidden-card { background: repeating-linear-gradient(45deg, #2f4553, #2f4553 10px, #213743 10px, #213743 20px); color: transparent; border: 2px solid #fff;}
 
-    /* Platter & Vinyl */
-    .platter-wrapper {
-      position: absolute; top: 25px; left: 20px; width: 300px; height: 300px;
-      perspective: 800px; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s;
-    }
-    
-    .platter-wrapper.swapping-out { transform: translateX(-150%) scale(0.8); opacity: 0; }
-    .platter-wrapper.swapping-in-prep { transform: translateX(150%) scale(0.8); opacity: 0; transition: none; }
+        #message {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--primary);
+            height: 40px;
+            margin: 10px 0;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
 
-    .platter {
-      width: 100%; height: 100%; border-radius: 50%; background: #000;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.9), inset 0 0 4px #555;
-      display: flex; align-items: center; justify-content: center;
-      transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1); transform-style: preserve-3d;
-    }
-    .platter.flipping { transform: rotateY(180deg) scale(0.85); }
-    
-    .vinyl {
-      position: relative; width: 290px; height: 290px; border-radius: 50%;
-      background: conic-gradient(from 20deg, transparent 15%, rgba(255,255,255,0.12) 25%, transparent 35%, transparent 65%, rgba(255,255,255,0.12) 75%, transparent 85%), repeating-radial-gradient(circle, #0a0a0c 0px, #0a0a0c 1.5px, #141418 2px);
-      display: flex; align-items: center; justify-content: center;
-    }
-    .vinyl.spinning { animation: spin 1.8s linear infinite; }
-    @keyframes spin { 100% { transform: rotate(360deg); } }
-    
-    .grooves-svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; transform: rotate(-90deg); }
-    .center-label { width: 96px; height: 96px; border-radius: 50%; background: #222; background-size: cover; background-position: center; border: 3px solid #000; display: flex; align-items: center; justify-content: center; z-index: 2; }
-    .spindle { width: 8px; height: 8px; background: #ccc; border-radius: 50%; }
+        /* Controls */
+        .controls {
+            background-color: #213743;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            border-top: 1px solid #2f4553;
+        }
 
-    /* --- TONEARM & REST HOLDER --- */
-    .tonearm-rest {
-      position: absolute; bottom: 85px; right: 28px; width: 14px; height: 18px;
-      background: #333; border-radius: 4px; border-top: 4px solid #111;
-      box-shadow: -2px 4px 6px rgba(0,0,0,0.6); z-index: 8;
-    }
+        .bet-input-wrapper {
+            display: flex;
+            align-items: center;
+            background: var(--table-color);
+            border: 2px solid #2f4553;
+            border-radius: 6px;
+            overflow: hidden;
+        }
 
-    /* SOLID RIGID TONEARM WRAPPER */
-    .tonearm-wrapper {
-      position: absolute; top: 20px; right: 25px; width: 44px; height: 260px;
-      transform-origin: 22px 22px; 
-      transform: rotate(-5deg) translateZ(0); 
-      z-index: 10; cursor: grab;
-    }
-    .tonearm-wrapper.swinging { transition: transform 0.6s ease-in-out; }
+        .bet-input-wrapper input {
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-size: 18px;
+            padding: 12px 20px;
+            width: 150px;
+            outline: none;
+            text-align: center;
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+        }
+        
+        .currency-symbol { padding-left: 20px; color: var(--primary); font-weight: bold; font-size: 18px;}
 
-    .pivot-circle {
-      position: absolute; top: 0; left: 0; width: 44px; height: 44px;
-      background: radial-gradient(circle at 35% 35%, #555, #111);
-      border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.7);
-    }
-    .arm-tube {
-      position: absolute; top: 22px; left: 19px; width: 6px; height: 205px;
-      background: linear-gradient(to right, #999, #fff 40%, #666); border-radius: 3px;
-    }
-    .headshell {
-      position: absolute; top: 222px; left: 11px; width: 22px; height: 32px;
-      background: #111; border-radius: 2px; transform: rotate(18deg);
-    }
-    .stylus-glow { position: absolute; bottom: 2px; left: 9px; width: 4px; height: 4px; background: #1DB954; border-radius: 50%; box-shadow: 0 0 6px #1DB954; }
-  </style>
+        .action-buttons { display: flex; gap: 10px; }
+
+        button.action-btn {
+            background-color: #2f4553;
+            color: #fff;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+        }
+        button.action-btn:hover:not(:disabled) { background-color: #3e5b6e; transform: translateY(-2px); }
+        button.action-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        
+        button.deal-btn { background-color: var(--primary); color: #000; width: 200px; }
+        button.deal-btn:hover:not(:disabled) { background-color: var(--primary-hover); }
+
+        /* Deposit Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+
+        .modal {
+            background: var(--table-color);
+            padding: 30px;
+            border-radius: 12px;
+            width: 350px;
+            text-align: center;
+            border: 1px solid #2f4553;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+        }
+
+        .modal h2 { margin-top: 0; }
+        .modal input {
+            width: 80%;
+            padding: 12px;
+            margin: 20px 0;
+            border-radius: 6px;
+            border: 1px solid #2f4553;
+            background: #1a2c38;
+            color: #fff;
+            font-size: 18px;
+            text-align: center;
+        }
+        .modal button { width: 100%; }
+
+    </style>
 </head>
 <body>
 
-  <div id="portraitWarning">
-    <svg width="40" height="40" viewBox="0 0 24 24" fill="white"><path d="M16.48 2.52c3.27 1.55 5.61 4.72 5.97 8.48h1.5C23.44 4.84 18.29.34 12 0l-.66.03 3.81 3.81 1.33-1.32zm-6.25-.77c-.59-.59-1.54-.59-2.12 0L1.75 8.11c-.59.59-.59 1.54 0 2.12l12.02 12.02c.59.59 1.54.59 2.12 0l6.36-6.36c.59-.59.59-1.54 0-2.12L10.23 1.75zm4.6 19.44L2.81 9.17l6.36-6.36 12.02 12.02-6.36 6.36zm-7.31.29C4.25 19.94 1.91 16.76 1.55 13H.05C.56 19.16 5.71 23.66 12 24l.66-.03-3.81-3.81-1.33 1.32z"/></svg>
-    Please rotate your iPhone to landscape mode.
-  </div>
+    <header>
+        <div class="logo">♠️ 21CLUB</div>
+        <div class="bank-section">
+            <div class="balance" id="balanceDisplay">$1,000.00</div>
+            <button class="deposit-btn" onclick="openModal()">+ Deposit</button>
+        </div>
+    </header>
 
-  <div id="authOverlay">
-    <h2>Spotify Landscape Turntable</h2>
-    <p style="color: #aaa; margin: 10px 0 20px; font-size: 14px;">Requires Spotify Premium</p>
-    <button class="btn-spotify" onclick="startSpotifyAuth()">Connect with Spotify</button>
-  </div>
-
-  <div id="appContainer">
-    <div class="left-panel">
-      <div class="deck" id="deckFrame">
-        
-        <div class="platter-wrapper" id="platterWrapper">
-          <div class="platter" id="platter">
-            <div class="vinyl" id="vinyl">
-              <svg class="grooves-svg" id="grooveSvg" viewBox="0 0 290 290"></svg>
-              <div class="center-label" id="centerLabel"><div class="spindle"></div></div>
-            </div>
-          </div>
+    <main>
+        <div class="hand-container">
+            <div class="hand-title">Dealer <span id="dealerScoreText"></span></div>
+            <div class="cards" id="dealerCards"></div>
         </div>
 
-        <div class="tonearm-rest"></div>
-        
-        <div class="tonearm-wrapper" id="tonearm">
-          <div class="pivot-circle"></div>
-          <div class="arm-tube"></div>
-          <div class="headshell"><div class="stylus-glow"></div></div>
+        <div id="message">Place your bet!</div>
+
+        <div class="hand-container">
+            <div class="hand-title">Player <span id="playerScoreText"></span></div>
+            <div class="cards" id="playerCards"></div>
+        </div>
+    </main>
+
+    <div class="controls">
+        <div class="bet-input-wrapper">
+            <span class="currency-symbol">$</span>
+            <input type="number" id="betAmount" value="10.00" step="10.00" min="1">
         </div>
         
-      </div>
+        <div class="action-buttons">
+            <button class="action-btn deal-btn" id="btnDeal" onclick="deal()">Deal</button>
+            <button class="action-btn" id="btnHit" onclick="hit()" disabled>Hit</button>
+            <button class="action-btn" id="btnStand" onclick="stand()" disabled>Stand</button>
+            <button class="action-btn" id="btnDouble" onclick="doubleDown()" disabled>Double</button>
+            <!-- Split is disabled visually if hands aren't pair, logic is complex for 1 file so it's a placeholder button -->
+            <button class="action-btn" id="btnSplit" disabled title="Split requires pairs">Split</button> 
+        </div>
     </div>
 
-    <div class="right-panel">
-      <div class="search-container">
-        <input type="text" id="searchInput" class="search-input" placeholder="Search Spotify..." autocomplete="off">
-        <div id="resultsDropdown" class="results-dropdown"></div>
-      </div>
-
-      <div class="hud">
-        <div class="warning" id="deviceWarning">Open Spotify app in background!</div>
-        <div class="hud-title" id="trackTitle">Awaiting Search</div>
-        <div class="hud-meta">
-          <span id="artistName">...</span> • <span id="sideBadge" style="color:var(--accent);">SIDE A</span>
+    <!-- Deposit Modal -->
+    <div class="modal-overlay" id="depositModal">
+        <div class="modal">
+            <h2>Add Virtual Funds</h2>
+            <p style="color: var(--text-muted); font-size: 14px;">Enter amount to deposit into your virtual balance.</p>
+            <input type="number" id="depositAmount" value="500" min="1">
+            <button class="action-btn deal-btn" onclick="processDeposit()">Confirm Deposit</button>
+            <button class="action-btn" style="margin-top: 10px; background: transparent;" onclick="closeModal()">Cancel</button>
         </div>
-      </div>
-
-      <div class="controls-grid">
-        <button class="btn btn-primary" id="btnStart" onclick="triggerStartSequence()" disabled>START</button>
-        <button class="btn" id="btnPause" onclick="btnPauseResume()" disabled>PAUSE</button>
-        <button class="btn" onclick="btnStop()">STOP / PARK</button>
-        <button class="btn" onclick="flipRecordManually()">FLIP SIDE</button>
-      </div>
     </div>
-  </div>
 
-  <script>
-    const CLIENT_ID = 'Fdf967e9e0294111a273b5469543c636';
-    const REDIRECT_URI = window.location.origin + window.location.pathname; 
-    
-    // --- THE NEW PERCENTAGE ENGINE ---
-    // Instead of fighting geometry, we map time exactly to a linear arc.
-    const GROOVE_OUTER_R = 140; 
-    const GROOVE_INNER_R = 55;
-    const PLAYABLE_WIDTH = GROOVE_OUTER_R - GROOVE_INNER_R;
+    <script>
+        // Game State
+        let balance = 1000.00;
+        let currentBet = 0;
+        let deck = [];
+        let playerHand = [];
+        let dealerHand = [];
+        let isGameOver = true;
 
-    const ANGLE_OUTER = 12; // Tonearm drops exactly on outer groove
-    const ANGLE_INNER = 38; // Tonearm reaches exact inner groove
-    const PIVOT_REST_ANGLE = -5; // Sits perfectly on the rest holder
+        const suits = ['♥', '♦', '♣', '♠'];
+        const values = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
 
-    let accessToken = null; 
-    let albumData = null; let currentSide = 'A'; let currentSideTracks = [];
-    let currentTrackIdx = 0; let trackLayout = [];
-    let albumTotalMs = 180000;
-    
-    let isPlaying = false; let isDragging = false;
-    let trackStartTime = 0; let activeTrackDuration = 0; let currentAngle = PIVOT_REST_ANGLE;
+        // DOM Elements
+        const elBalance = document.getElementById('balanceDisplay');
+        const elBet = document.getElementById('betAmount');
+        const elPlayerCards = document.getElementById('playerCards');
+        const elDealerCards = document.getElementById('dealerCards');
+        const elMessage = document.getElementById('message');
+        const elPlayerScore = document.getElementById('playerScoreText');
+        const elDealerScore = document.getElementById('dealerScoreText');
+        
+        const btnDeal = document.getElementById('btnDeal');
+        const btnHit = document.getElementById('btnHit');
+        const btnStand = document.getElementById('btnStand');
+        const btnDouble = document.getElementById('btnDouble');
 
-    const vinyl = document.getElementById('vinyl'); 
-    const tonearm = document.getElementById('tonearm');
-    const platterWrapper = document.getElementById('platterWrapper');
-    const grooveSvg = document.getElementById('grooveSvg'); 
-    const trackTitle = document.getElementById('trackTitle');
-    const warningTxt = document.getElementById('deviceWarning'); 
-    const resultsDropdown = document.getElementById('resultsDropdown');
-    const startBtn = document.getElementById('btnStart'); 
-    const pauseBtn = document.getElementById('btnPause');
-    const searchInput = document.getElementById('searchInput');
-
-    // --- 1. PKCE AUTHENTICATION ---
-    const generateRandomString = (length) => crypto.getRandomValues(new Uint8Array(length)).reduce((a, x) => a + 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'[x % 62], "");
-    const sha256 = async (plain) => window.crypto.subtle.digest('SHA-256', new TextEncoder().encode(plain));
-    const base64encode = (input) => btoa(String.fromCharCode(...new Uint8Array(input))).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
-
-    async function startSpotifyAuth() {
-      const codeVerifier = generateRandomString(64);
-      localStorage.setItem('code_verifier', codeVerifier);
-      const codeChallenge = base64encode(await sha256(codeVerifier));
-      const authUrl = new URL("https://accounts.spotify.com/authorize");
-      authUrl.search = new URLSearchParams({
-        response_type: 'code', client_id: CLIENT_ID, scope: 'user-read-playback-state user-modify-playback-state',
-        code_challenge_method: 'S256', code_challenge: codeChallenge, redirect_uri: REDIRECT_URI,
-      }).toString();
-      window.location.href = authUrl.toString();
-    }
-
-    async function checkAuth() {
-      const code = new URLSearchParams(window.location.search).get('code');
-      if (code) {
-        const body = await fetch("https://accounts.spotify.com/api/token", {
-          method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: new URLSearchParams({ client_id: CLIENT_ID, grant_type: 'authorization_code', code: code, redirect_uri: REDIRECT_URI, code_verifier: localStorage.getItem('code_verifier') })
-        });
-        const res = await body.json();
-        if (res.access_token) {
-          accessToken = res.access_token;
-          window.history.replaceState({}, document.title, window.location.pathname);
-          document.getElementById('authOverlay').style.display = 'none';
-          document.getElementById('appContainer').style.display = 'flex';
-          startPlaybackPoller(); 
+        // Initialization
+        function updateBalanceUI() {
+            elBalance.innerText = `$${balance.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,')}`;
         }
-      }
-    }
 
-    // --- 2. LIVE SEARCH & SWAP ANIMATION ---
-    let searchTimeout = null;
-    searchInput.addEventListener('input', (e) => {
-      clearTimeout(searchTimeout);
-      const q = e.target.value.trim();
-      if(q.length < 2) return resultsDropdown.classList.remove('active');
-      searchTimeout = setTimeout(async () => {
-        const res = await fetch(`https://api.spotify.com/v1/search?q=${encodeURIComponent(q)}&type=album&limit=5`, { headers: { 'Authorization': `Bearer ${accessToken}` } });
-        const data = await res.json();
-        resultsDropdown.innerHTML = '';
-        data.albums.items.forEach(album => {
-          const div = document.createElement('div'); div.className = 'album-item';
-          div.innerHTML = `<img src="${album.images[2].url}"><div class="album-info"><div class="album-title">${album.name}</div><div class="album-artist">${album.artists[0].name}</div></div>`;
-          div.onclick = () => beginAlbumSwap(album); resultsDropdown.appendChild(div);
-        });
-        resultsDropdown.classList.add('active');
-      }, 300);
-    });
-
-    async function beginAlbumSwap(album) {
-      resultsDropdown.classList.remove('active');
-      searchInput.value = '';
-      searchInput.blur(); 
-      
-      btnStop();
-      startBtn.disabled = true;
-      pauseBtn.disabled = true;
-
-      platterWrapper.classList.add('swapping-out');
-
-      const res = await fetch(`https://api.spotify.com/v1/albums/${album.id}/tracks`, { headers: { 'Authorization': `Bearer ${accessToken}` } });
-      const data = await res.json();
-      
-      const splitIdx = Math.ceil(data.items.length / 2);
-      albumData = { uri: album.uri, meta: album, sideA: data.items.slice(0, splitIdx), sideB: data.items.slice(splitIdx) };
-
-      setTimeout(() => {
-        document.getElementById('centerLabel').style.backgroundImage = `url(${album.images[0].url})`;
-        document.getElementById('artistName').innerText = album.artists[0].name;
-        loadSide('A', 0);
-        
-        platterWrapper.classList.remove('swapping-out');
-        platterWrapper.classList.add('swapping-in-prep');
-        void platterWrapper.offsetWidth; 
-        platterWrapper.classList.remove('swapping-in-prep');
-        
-        trackTitle.innerText = "Ready - Press START";
-        startBtn.disabled = false;
-        pauseBtn.disabled = false;
-      }, 600);
-    }
-
-    function loadSide(side, startIdx = 0) {
-      currentSide = side; currentSideTracks = side === 'A' ? albumData.sideA : albumData.sideB;
-      document.getElementById('sideBadge').innerText = `SIDE ${side}`;
-      generatePhysicalGrooves(currentSideTracks);
-      currentTrackIdx = startIdx;
-    }
-
-    // --- NEW VISUAL ENGINE: Thick Track Bands ---
-    function generatePhysicalGrooves(tracks) {
-      if(!tracks || tracks.length === 0) return;
-      
-      albumTotalMs = tracks.reduce((sum, t) => sum + (t.duration_ms || 180000), 0);
-      if(albumTotalMs === 0) albumTotalMs = 180000;
-      
-      grooveSvg.innerHTML = ''; trackLayout = [];
-      let accumulatedMs = 0;
-      let currentOuterRadius = GROOVE_OUTER_R;
-
-      tracks.forEach((track, i) => {
-        const dur = track.duration_ms || 180000;
-        
-        // Calculate the physical radial thickness of this track based on its length
-        const trackWidth = (dur / albumTotalMs) * PLAYABLE_WIDTH;
-        
-        // Instead of drawing thin border lines, we draw the track itself as a solid thick stroke
-        const centerR = currentOuterRadius - (trackWidth / 2);
-        
-        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-        circle.setAttribute('cx', '145'); circle.setAttribute('cy', '145');
-        circle.setAttribute('r', centerR);
-        circle.setAttribute('fill', 'none');
-        
-        // Semi-transparent black acts as the darker "groove" texture
-        circle.setAttribute('stroke', 'rgba(0,0,0,0.5)'); 
-        
-        // We subtract 1 pixel from the width to create a natural lighter gap between songs
-        circle.setAttribute('stroke-width', Math.max(0, trackWidth - 1));
-        
-        grooveSvg.appendChild(circle);
-
-        // Map the exact angles to this track's start and end times
-        const startPercent = accumulatedMs / albumTotalMs;
-        const endPercent = (accumulatedMs + dur) / albumTotalMs;
-        
-        const startAngle = ANGLE_OUTER + (startPercent * (ANGLE_INNER - ANGLE_OUTER));
-        const endAngle = ANGLE_OUTER + (endPercent * (ANGLE_INNER - ANGLE_OUTER));
-
-        trackLayout.push({ 
-          track: track, index: i, 
-          startAngle: startAngle, endAngle: endAngle,
-          startTimeMs: accumulatedMs 
-        });
-        
-        accumulatedMs += dur;
-        currentOuterRadius -= trackWidth;
-      });
-    }
-
-    // --- 3. HIGH-PERFORMANCE NEEDLE SYNC ---
-    function animationLoop() {
-      if (isPlaying && !isDragging && activeTrackDuration > 0 && trackLayout[currentTrackIdx]) {
-        let progressMs = Date.now() - trackStartTime;
-        let layout = trackLayout[currentTrackIdx];
-        
-        if (progressMs > activeTrackDuration) progressMs = activeTrackDuration;
-        
-        let fraction = progressMs / activeTrackDuration;
-        
-        // Because the visual rings and the angle use the same percentage math, this tracking is unbreakable
-        currentAngle = layout.startAngle + (fraction * (layout.endAngle - layout.startAngle));
-        
-        if(!isNaN(currentAngle)) {
-           tonearm.style.transform = `rotate(${currentAngle}deg) translateZ(0)`;
-        }
-      }
-      requestAnimationFrame(animationLoop);
-    }
-    requestAnimationFrame(animationLoop); 
-
-    function startPlaybackPoller() {
-      setInterval(async () => {
-        if(!isPlaying) return;
-        try {
-          const res = await fetch('https://api.spotify.com/v1/me/player', { headers: { 'Authorization': `Bearer ${accessToken}` } });
-          if(res.status === 200) {
-            const data = await res.json();
-            if(data.is_playing && data.item) {
-              trackStartTime = Date.now() - data.progress_ms;
-              const currentSpotifyId = data.item.id;
-              if (trackLayout[currentTrackIdx] && trackLayout[currentTrackIdx].track.id !== currentSpotifyId) {
-                const nextLayout = trackLayout.find(t => t.track.id === currentSpotifyId);
-                if (nextLayout) {
-                  currentTrackIdx = nextLayout.index;
-                  activeTrackDuration = nextLayout.track.duration_ms || 180000;
-                  trackTitle.innerText = `${currentTrackIdx+1}. ${nextLayout.track.name}`;
-                } else {
-                  triggerAutoFlip();
+        function createDeck() {
+            deck = [];
+            for (let s of suits) {
+                for (let v of values) {
+                    deck.push({ suit: s, value: v, weight: getWeight(v) });
                 }
-              }
             }
-          }
-        } catch(e) {}
-      }, 2000);
-    }
-
-    // --- 4. CONTROLS & API PLAYBACK ---
-    function triggerStartSequence() {
-      if(!albumData || isPlaying) return;
-      
-      startBtn.disabled = true;
-      trackTitle.innerText = "Lowering Needle...";
-
-      currentAngle = trackLayout[0].startAngle; 
-
-      tonearm.classList.add('swinging');
-      tonearm.style.transform = `rotate(${currentAngle}deg) translateZ(0)`;
-
-      setTimeout(() => {
-        tonearm.classList.remove('swinging');
-        playTrack(0, 0); 
-        startBtn.disabled = false;
-      }, 600);
-    }
-
-    async function playTrack(idx, positionMs = 0) {
-      if(!albumData || !currentSideTracks[idx]) return;
-      currentTrackIdx = idx;
-      const trackObj = currentSideTracks[idx];
-      activeTrackDuration = trackObj.duration_ms || 180000;
-      warningTxt.style.display = 'none';
-
-      try {
-        const res = await fetch('https://api.spotify.com/v1/me/player/devices', { headers: { 'Authorization': `Bearer ${accessToken}` } });
-        const devData = await res.json();
-        const targetDevice = devData.devices.find(d => d.is_active)?.id || devData.devices[0]?.id;
-
-        if(targetDevice) {
-          const playRes = await fetch(`https://api.spotify.com/v1/me/player/play?device_id=${targetDevice}`, {
-            method: 'PUT', headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ context_uri: albumData.uri, offset: { uri: trackObj.uri }, position_ms: positionMs })
-          });
-          
-          if(playRes.ok || playRes.status === 204) {
-            trackStartTime = Date.now() - positionMs; 
-            isPlaying = true; 
-            vinyl.classList.add('spinning');
-            trackTitle.innerText = `${idx+1}. ${trackObj.name}`;
-          } else {
-            warningTxt.innerText = "Playback failed. Check Spotify Premium.";
-            warningTxt.style.display = 'block';
-          }
-        } else {
-          warningTxt.innerText = "Open Spotify app in background!";
-          warningTxt.style.display = 'block'; 
+            // Shuffle
+            for (let i = deck.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [deck[i], deck[j]] = [deck[j], deck[i]];
+            }
         }
-      } catch(e) {}
-    }
 
-    function btnPauseResume() {
-      if (!albumData) return;
-      if(isPlaying) {
-        fetch(`https://api.spotify.com/v1/me/player/pause`, { method: 'PUT', headers: { 'Authorization': `Bearer ${accessToken}` } });
-        isPlaying = false; vinyl.classList.remove('spinning');
-      } else {
-        if(currentAngle <= PIVOT_REST_ANGLE + 1) {
-           triggerStartSequence();
-        } else {
-           playTrack(currentTrackIdx, Date.now() - trackStartTime);
+        function getWeight(v) {
+            if (v === 'J' || v === 'Q' || v === 'K') return 10;
+            if (v === 'A') return 11;
+            return parseInt(v);
         }
-      }
-    }
 
-    function btnStop() {
-      if(accessToken) fetch(`https://api.spotify.com/v1/me/player/pause`, { method: 'PUT', headers: { 'Authorization': `Bearer ${accessToken}` } });
-      isPlaying = false; vinyl.classList.remove('spinning');
-      
-      tonearm.classList.add('swinging');
-      currentAngle = PIVOT_REST_ANGLE; 
-      tonearm.style.transform = `rotate(${currentAngle}deg) translateZ(0)`;
-      
-      setTimeout(() => tonearm.classList.remove('swinging'), 600);
-      currentTrackIdx = 0; trackTitle.innerText = "Needle Parked";
-    }
-
-    function triggerAutoFlip() {
-      btnStop();
-      trackTitle.innerText = `Flipping to Side ${currentSide === 'A' ? 'B' : 'A'}...`;
-      setTimeout(() => {
-        document.getElementById('platter').classList.add('flipping');
-        setTimeout(() => {
-          document.getElementById('platter').classList.remove('flipping');
-          loadSide(currentSide === 'A' ? 'B' : 'A', 0);
-          setTimeout(() => triggerStartSequence(), 800);
-        }, 800);
-      }, 500);
-    }
-    
-    function flipRecordManually() { if(albumData) triggerAutoFlip(); }
-
-    // --- 5. DRAG & DROP NEEDLE ---
-    tonearm.addEventListener('touchstart', (e) => { 
-      isDragging = true; vinyl.classList.remove('spinning'); 
-      tonearm.classList.remove('swinging');
-    });
-    
-    window.addEventListener('touchend', () => { 
-      if(!isDragging) return;
-      isDragging = false; 
-      
-      if(currentAngle >= ANGLE_OUTER - 2 && currentAngle <= ANGLE_INNER + 2 && albumData) {
-        // Find exact album time based on dropped angle
-        let fraction = (currentAngle - ANGLE_OUTER) / (ANGLE_INNER - ANGLE_OUTER);
-        if(fraction < 0) fraction = 0; if(fraction > 1) fraction = 1;
-        
-        let targetMs = fraction * albumTotalMs;
-        
-        // Find which track block this time belongs to
-        const target = trackLayout.find(t => targetMs >= t.startTimeMs && targetMs <= (t.startTimeMs + (t.track.duration_ms || 180000)));
-        
-        if(target) {
-          const trackOffsetMs = targetMs - target.startTimeMs;
-          playTrack(target.index, Math.floor(trackOffsetMs));
+        function calculateScore(hand) {
+            let score = 0;
+            let aces = 0;
+            for (let card of hand) {
+                score += card.weight;
+                if (card.value === 'A') aces++;
+            }
+            while (score > 21 && aces > 0) {
+                score -= 10;
+                aces--;
+            }
+            return score;
         }
-      } else {
-        btnStop();
-      }
-    });
 
-    window.addEventListener('touchmove', (e) => {
-      if(!isDragging || !trackLayout.length) return;
-      e.preventDefault();
-      
-      const clientX = e.touches[0].clientX; const clientY = e.touches[0].clientY;
-      const deckRect = document.getElementById('deckFrame').getBoundingClientRect();
-      const pivotX = deckRect.left + (380 - 25 - 22);
-      const pivotY = deckRect.top + 20 + 22;
-      
-      let angle = (Math.atan2(clientY - pivotY, clientX - pivotX) * (180 / Math.PI)) - 90;
-      
-      if (angle < PIVOT_REST_ANGLE) angle = PIVOT_REST_ANGLE;
-      if (angle > ANGLE_INNER + 4) angle = ANGLE_INNER + 4; 
-      
-      currentAngle = angle; 
-      tonearm.style.transform = `rotate(${angle}deg) translateZ(0)`;
-      
-      const hover = trackLayout.find(t => angle >= t.startAngle && angle <= t.endAngle);
-      if(hover) trackTitle.innerText = `${hover.index+1}. ${hover.track.name}`;
-    }, { passive: false });
+        function renderCard(card, hidden = false) {
+            const div = document.createElement('div');
+            div.className = `card ${hidden ? 'hidden-card' : ''} ${(card.suit === '♥' || card.suit === '♦') ? 'red' : 'black'}`;
+            if (!hidden) {
+                div.innerHTML = `
+                    <div style="text-align: left;">${card.value}<br>${card.suit}</div>
+                    <div style="font-size: 40px; text-align: center; margin-top: -10px;">${card.suit}</div>
+                    <div style="text-align: right; transform: rotate(180deg);">${card.value}<br>${card.suit}</div>
+                `;
+            }
+            return div;
+        }
 
-    checkAuth();
-  </script>
+        function updateBoard(revealDealer = false) {
+            elPlayerCards.innerHTML = '';
+            elDealerCards.innerHTML = '';
+
+            playerHand.forEach((card, index) => {
+                const cardEl = renderCard(card);
+                cardEl.style.animationDelay = `${index * 0.1}s`;
+                elPlayerCards.appendChild(cardEl);
+            });
+
+            dealerHand.forEach((card, index) => {
+                const cardEl = renderCard(card, index === 1 && !revealDealer);
+                cardEl.style.animationDelay = `${index * 0.1}s`;
+                elDealerCards.appendChild(cardEl);
+            });
+
+            const pScore = calculateScore(playerHand);
+            elPlayerScore.innerText = `(${pScore})`;
+
+            if (revealDealer) {
+                elDealerScore.innerText = `(${calculateScore(dealerHand)})`;
+            } else {
+                elDealerScore.innerText = `(${dealerHand[0].weight})`;
+            }
+        }
+
+        // Gameplay Functions
+        function deal() {
+            currentBet = parseFloat(elBet.value);
+            if (currentBet > balance || currentBet <= 0 || isNaN(currentBet)) {
+                elMessage.innerText = "Invalid Bet or Insufficient Funds!";
+                elMessage.style.color = "var(--danger)";
+                return;
+            }
+
+            balance -= currentBet;
+            updateBalanceUI();
+            
+            isGameOver = false;
+            createDeck();
+            playerHand = [deck.pop(), deck.pop()];
+            dealerHand = [deck.pop(), deck.pop()];
+
+            elMessage.innerText = "";
+            btnDeal.disabled = true;
+            btnHit.disabled = false;
+            btnStand.disabled = false;
+            btnDouble.disabled = (balance < currentBet);
+            elBet.disabled = true;
+
+            updateBoard();
+
+            // Check for instant Blackjack
+            if (calculateScore(playerHand) === 21) {
+                endGame(true);
+            }
+        }
+
+        function hit() {
+            btnDouble.disabled = true; // Can only double on first move
+            playerHand.push(deck.pop());
+            updateBoard();
+            if (calculateScore(playerHand) > 21) {
+                endGame(false, "Bust! You Lose.");
+            }
+        }
+
+        function stand() {
+            btnHit.disabled = true;
+            btnStand.disabled = true;
+            btnDouble.disabled = true;
+            playDealer();
+        }
+
+        function doubleDown() {
+            balance -= currentBet;
+            currentBet *= 2;
+            updateBalanceUI();
+            
+            playerHand.push(deck.pop());
+            updateBoard();
+            
+            if (calculateScore(playerHand) > 21) {
+                endGame(false, "Bust! You Lose.");
+            } else {
+                playDealer();
+            }
+        }
+
+        async function playDealer() {
+            updateBoard(true);
+            let dScore = calculateScore(dealerHand);
+            
+            while (dScore < 17) {
+                await new Promise(r => setTimeout(r, 800)); // Dramatic pause
+                dealerHand.push(deck.pop());
+                dScore = calculateScore(dealerHand);
+                updateBoard(true);
+            }
+
+            const pScore = calculateScore(playerHand);
+            if (dScore > 21) {
+                endGame(true, "Dealer Busts! You Win.");
+            } else if (dScore > pScore) {
+                endGame(false, "Dealer Wins.");
+            } else if (dScore < pScore) {
+                endGame(true, "You Win!");
+            } else {
+                endGame(null, "Push! It's a Tie.");
+            }
+        }
+
+        function endGame(playerWon, customMessage = null) {
+            isGameOver = true;
+            updateBoard(true); // Reveal everything
+
+            if (playerWon === true) {
+                const winAmount = calculateScore(playerHand) === 21 && playerHand.length === 2 ? currentBet * 2.5 : currentBet * 2;
+                balance += winAmount;
+                elMessage.innerText = customMessage || "Blackjack! You Win!";
+                elMessage.style.color = "var(--primary)";
+            } else if (playerWon === false) {
+                elMessage.innerText = customMessage;
+                elMessage.style.color = "var(--danger)";
+            } else {
+                balance += currentBet; // Push
+                elMessage.innerText = customMessage;
+                elMessage.style.color = "#fff";
+            }
+
+            updateBalanceUI();
+            btnDeal.disabled = false;
+            btnHit.disabled = true;
+            btnStand.disabled = true;
+            btnDouble.disabled = true;
+            elBet.disabled = false;
+        }
+
+        // Virtual Deposit Modal Functions
+        function openModal() { document.getElementById('depositModal').classList.add('active'); }
+        function closeModal() { document.getElementById('depositModal').classList.remove('active'); }
+        function processDeposit() {
+            const amount = parseFloat(document.getElementById('depositAmount').value);
+            if (!isNaN(amount) && amount > 0) {
+                balance += amount;
+                updateBalanceUI();
+                closeModal();
+                elMessage.innerText = "Deposit Successful!";
+                elMessage.style.color = "var(--primary)";
+                setTimeout(() => { if(isGameOver) elMessage.innerText = "Place your bet!"; }, 2000);
+            }
+        }
+    </script>
 </body>
 </html>
