@@ -1,656 +1,763 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>21CLUB</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Wolf's Fury Slots</title>
+<style>
+  :root{
+    --bark:#241408; --bark-2:#3a2410;
+    --straw:#e8b23a; --straw-2:#c98a1f;
+    --brick:#a8452c; --brick-2:#7a2f1e;
+    --moon:#f4ead2; --gold:#ffd76a; --gold-2:#c98a1f;
+    --blood:#c0392b; --panel:#2d1b0d;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;}
+  html,body{margin:0;padding:0;height:100%;
+    background:radial-gradient(ellipse at 50% 0%, #163414 0%, #0a1608 55%, #05090a 100%);
+    font-family:'Trebuchet MS','Segoe UI',sans-serif;color:var(--moon);overflow-x:hidden;}
+  #stars{position:fixed;inset:0;pointer-events:none;opacity:.5;}
+  .wrap{max-width:480px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;padding:10px 10px 20px;position:relative;}
 
-        :root {
-            --bg-main: #141f27;
-            --bg-panel: #1b2733;
-            --green: #14e041;
-            --green-hover: #17fa49;
-            --red: #ff4d4d;
-            --text-light: #ffffff;
-            --text-muted: #8b9bb4;
-        }
+  .titlebar{text-align:center;padding:4px 0 8px;}
+  .titlebar h1{margin:0;font-family:'Georgia',serif;font-weight:900;font-size:25px;letter-spacing:1px;
+    color:var(--gold);text-shadow:0 0 14px rgba(255,215,106,.6),0 3px 0 #6b3d0e;line-height:1.05;
+    display:flex;align-items:center;justify-content:center;gap:6px;}
+  .titlebar h1 svg{width:28px;height:28px;filter:drop-shadow(0 2px 2px rgba(0,0,0,.6));}
+  .titlebar .sub{font-size:11px;color:#c9b98a;letter-spacing:3px;margin-top:2px;}
 
-        body, html {
-            margin: 0;
-            padding: 0;
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-main);
-            color: var(--text-light);
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            user-select: none;
-        }
+  .hud{display:flex;gap:8px;margin-bottom:8px;}
+  .hud-box{flex:1;background:linear-gradient(180deg,#3a2410,#1c1006);border:2px solid #6b3d0e;border-radius:10px;
+    padding:7px 10px;text-align:center;box-shadow:inset 0 0 10px rgba(0,0,0,.6);}
+  .hud-box .label{font-size:9px;letter-spacing:1.5px;color:#c9a86a;}
+  .hud-box .value{font-size:19px;font-weight:800;color:var(--gold);text-shadow:0 0 6px rgba(255,215,106,.5);}
+  #creditBox{cursor:pointer;position:relative;}
+  #creditBox:active{transform:scale(.96);}
+  #creditBox .tapHint{font-size:9px;color:#8fae7a;margin-top:1px;}
+  .coinPop{position:absolute;left:50%;top:0;transform:translate(-50%,0);font-size:13px;font-weight:800;color:#8fff8f;
+    pointer-events:none;animation:coinFloat 900ms ease-out forwards;}
+  @keyframes coinFloat{0%{opacity:0;transform:translate(-50%,10px) scale(.7);}20%{opacity:1;transform:translate(-50%,-6px) scale(1.1);}100%{opacity:0;transform:translate(-50%,-46px) scale(1);}}
 
-        /* Header */
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 20px;
-            background-color: var(--bg-panel);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-            z-index: 10;
-        }
+  /* House meter */
+  .houseMeter{display:flex;align-items:center;gap:6px;background:linear-gradient(180deg,#241408,#150b03);
+    border:2px solid #6b3d0e;border-radius:10px;padding:7px 9px;margin-bottom:8px;}
+  .houseMeter .stageIcon{width:26px;height:26px;flex-shrink:0;opacity:.35;transition:opacity .3s, filter .3s;}
+  .houseMeter .stageIcon.reached{opacity:1;filter:drop-shadow(0 0 5px rgba(255,215,106,.7));}
+  .houseTrack{flex:1;height:9px;border-radius:5px;background:#0d0703;overflow:hidden;position:relative;
+    box-shadow:inset 0 0 4px rgba(0,0,0,.8);}
+  .houseFill{height:100%;width:0%;border-radius:5px;
+    background:linear-gradient(90deg,#c98a1f,#ffd76a,#fff3c2);
+    box-shadow:0 0 8px rgba(255,215,106,.8);transition:width .5s ease;}
+  .houseLabel{font-size:9px;color:#c9b98a;letter-spacing:.5px;white-space:nowrap;}
 
-        .logo { 
-            font-size: 20px; 
-            font-weight: 800; 
-            display: flex; 
-            align-items: center; 
-            gap: 5px;
-        }
+  .reelFrame{position:relative;background:linear-gradient(180deg,#4a2c12,#2a1608 12%,#2a1608 88%,#4a2c12);
+    border:6px solid #6b3d0e;border-radius:16px;padding:10px;
+    box-shadow:inset 0 0 24px rgba(0,0,0,.7),0 8px 22px rgba(0,0,0,.6);}
+  .reelFrame::before,.reelFrame::after{content:'';position:absolute;top:-10px;bottom:-10px;width:18px;
+    background:repeating-linear-gradient(180deg,#7a4a1e 0 10px,#5a3312 10px 20px);border-radius:8px;}
+  .reelFrame::before{left:-14px;} .reelFrame::after{right:-14px;}
 
-        .bank-box {
-            display: flex;
-            align-items: center;
-            background: var(--bg-main);
-            border-radius: 6px;
-            padding: 4px 4px 4px 15px;
-        }
+  .reels{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;background:#0c0a06;border-radius:8px;padding:6px;
+    position:relative;box-shadow:inset 0 0 14px rgba(0,0,0,.8);}
+  .reelColumn{display:flex;flex-direction:column;gap:6px;background:linear-gradient(180deg,#1a2f14,#0e1b0a);
+    border-radius:6px;overflow:hidden;position:relative;height:225px;}
+  .reelColumn .strip{display:flex;flex-direction:column;gap:6px;position:absolute;top:0;left:0;right:0;}
+  .cell{height:71px;display:flex;align-items:center;justify-content:center;
+    background:radial-gradient(ellipse at 50% 30%,#24401c,#14260f);border-radius:6px;flex-shrink:0;position:relative;
+    filter:drop-shadow(0 2px 3px rgba(0,0,0,.5));}
+  .cell svg.icon{width:44px;height:44px;}
+  .cell.win{animation:winPulse 650ms ease-in-out infinite;box-shadow:0 0 0 2px var(--gold),0 0 18px 4px rgba(255,215,106,.85);}
+  @keyframes winPulse{0%,100%{transform:scale(1);}50%{transform:scale(1.08);}}
+  .spinning .strip{animation:reelSpin 140ms linear infinite;}
+  @keyframes reelSpin{0%{transform:translateY(0);}100%{transform:translateY(77px);}}
 
-        .balance { 
-            color: var(--green); 
-            font-weight: 700; 
-            font-size: 16px; 
-            margin-right: 15px;
-        }
+  #huffOverlay{position:absolute;inset:10px;border-radius:8px;
+    background:radial-gradient(circle at 50% 50%,rgba(255,255,255,.9),rgba(200,220,255,0) 70%);
+    opacity:0;pointer-events:none;}
+  #huffOverlay.active{animation:huffFlash 700ms ease-out;}
+  @keyframes huffFlash{0%{opacity:0;}30%{opacity:.9;}100%{opacity:0;}}
 
-        .deposit-btn {
-            background-color: var(--green);
-            color: #000;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 4px;
-            font-weight: 700;
-            font-size: 13px;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .deposit-btn:hover { background-color: var(--green-hover); }
+  .infoStrip{text-align:center;min-height:24px;margin-top:8px;font-size:13px;font-weight:700;color:var(--gold);
+    letter-spacing:.5px;text-shadow:0 1px 2px #000;}
+  .freeSpinBanner{display:none;text-align:center;font-size:12px;color:#8fff8f;font-weight:700;margin-top:2px;}
+  .freeSpinBanner.show{display:block;}
 
-        /* Game Area */
-        main {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-            padding: 20px 0;
-        }
+  .controls{display:flex;align-items:center;gap:8px;margin-top:10px;}
+  .betBox{flex:1;background:linear-gradient(180deg,#3a2410,#1c1006);border:2px solid #6b3d0e;border-radius:10px;
+    display:flex;align-items:center;justify-content:space-between;padding:6px 10px;}
+  .betBox .label{font-size:10px;color:#c9a86a;letter-spacing:1px;}
+  .betBtn{width:30px;height:30px;border-radius:50%;background:linear-gradient(180deg,#5a3312,#2a1608);
+    border:1px solid #7a4a1e;color:var(--gold);font-size:16px;font-weight:900;line-height:1;
+    display:flex;align-items:center;justify-content:center;}
+  .betBtn:active{transform:scale(.9);}
+  .betVal{font-size:16px;font-weight:800;color:var(--gold);min-width:38px;text-align:center;}
 
-        .hand-area {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            height: 180px;
-        }
+  #spinBtn{width:74px;height:74px;border-radius:50%;
+    background:radial-gradient(circle at 35% 30%,#ff6b4a,#c0392b 60%,#7a2116);border:3px solid #ffd76a;
+    color:#fff;font-size:13px;font-weight:900;letter-spacing:1px;box-shadow:0 4px 0 #6b1a10,0 6px 14px rgba(0,0,0,.6);
+    display:flex;align-items:center;justify-content:center;text-transform:uppercase;flex-shrink:0;}
+  #spinBtn:active{transform:translateY(3px);box-shadow:0 1px 0 #6b1a10;}
+  #spinBtn:disabled{opacity:.55;}
+  #spinBtn .icon{font-size:24px;display:block;}
 
-        .hand-label {
-            color: var(--text-muted);
-            font-size: 12px;
-            font-weight: 600;
-            letter-spacing: 1px;
-            margin-bottom: 15px;
-            text-transform: uppercase;
-        }
+  .miniBtn{background:linear-gradient(180deg,#3a2410,#1c1006);border:2px solid #6b3d0e;border-radius:8px;
+    color:var(--moon);font-size:10.5px;font-weight:700;padding:6px 6px;letter-spacing:.3px;}
+  .bottomRow{display:flex;gap:6px;margin-top:8px;}
+  .bottomRow .miniBtn{flex:1;}
+  #buyBtn{background:linear-gradient(180deg,#6b4a12,#3a2410);border-color:var(--gold);color:var(--gold);}
 
-        /* Split Support Containers */
-        .player-hands-wrapper {
-            display: flex;
-            gap: 40px;
-            justify-content: center;
-        }
+  .modalBg{position:fixed;inset:0;background:rgba(0,0,0,.75);display:none;align-items:center;justify-content:center;
+    z-index:50;padding:20px;}
+  .modalBg.show{display:flex;}
+  .modal{background:linear-gradient(180deg,#2d1b0d,#160c04);border:3px solid #6b3d0e;border-radius:14px;
+    max-width:420px;width:100%;max-height:82vh;overflow-y:auto;padding:16px;}
+  .modal h2{margin:0 0 10px;color:var(--gold);font-size:18px;text-align:center;}
+  .payRow{display:flex;align-items:center;gap:10px;padding:6px 4px;border-bottom:1px solid rgba(255,255,255,.08);font-size:12px;}
+  .payRow svg.icon{width:30px;height:30px;flex-shrink:0;}
+  .payRow .desc{flex:1;color:#e6dcc4;}
+  .payRow .desc b{color:var(--gold);}
+  .closeModal{display:block;margin:12px auto 0;padding:8px 22px;background:var(--blood);border:2px solid var(--gold);
+    border-radius:20px;color:#fff;font-weight:800;text-align:center;}
 
-        .cards-container {
-            display: flex;
-            justify-content: center;
-            padding-left: 30px; /* Offset for overlap */
-            position: relative;
-        }
+  .buyCard{background:linear-gradient(180deg,#3a2410,#1c1006);border:2px solid #6b3d0e;border-radius:12px;
+    padding:12px;margin-bottom:10px;display:flex;align-items:center;gap:12px;}
+  .buyCard svg.icon{width:42px;height:42px;flex-shrink:0;}
+  .buyCard .info{flex:1;}
+  .buyCard .info b{color:var(--gold);font-size:14px;}
+  .buyCard .info div{font-size:11px;color:#c9b98a;margin-top:2px;}
+  .buyCard button{background:var(--blood);border:2px solid var(--gold);border-radius:16px;color:#fff;
+    font-weight:800;padding:8px 12px;font-size:12px;white-space:nowrap;}
+  .buyCard button:disabled{opacity:.4;}
 
-        .active-hand::after {
-            content: '';
-            position: absolute;
-            bottom: -20px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 40px;
-            height: 4px;
-            background-color: var(--green);
-            border-radius: 2px;
-            box-shadow: 0 0 8px var(--green);
-        }
+  #bonusScreen{position:fixed;inset:0;background:rgba(6,10,5,.92);display:none;align-items:center;justify-content:center;
+    z-index:60;flex-direction:column;padding:20px;}
+  #bonusScreen.show{display:flex;}
+  #bonusScreen h2{color:var(--gold);text-align:center;margin:0 0 4px;font-size:20px;}
+  #bonusScreen p{color:#cbb98a;text-align:center;font-size:13px;margin:0 0 14px;}
+  .hatGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;max-width:340px;}
+  .hatCard{width:92px;height:100px;border-radius:10px;background:linear-gradient(180deg,#3a2410,#1c1006);
+    border:3px solid #6b3d0e;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 10px rgba(0,0,0,.5);}
+  .hatCard svg.icon{width:52px;height:52px;}
+  .hatCard.picked{background:radial-gradient(circle,#3a2410,#1c1006);animation:pickPulse 500ms ease;border-color:var(--gold);}
+  @keyframes pickPulse{0%{transform:scale(1);}50%{transform:scale(1.15);}100%{transform:scale(1);}}
+  #bonusResult{margin-top:14px;font-size:15px;font-weight:800;color:#8fff8f;min-height:22px;text-align:center;}
+  #bonusPicksLeft{color:#cbb98a;font-size:12px;margin-bottom:4px;}
 
-        /* Card Styling */
-        .card {
-            width: 85px;
-            height: 120px;
-            background-color: #fff;
-            border-radius: 6px;
-            margin-left: -35px;
-            box-shadow: -4px 0 10px rgba(0,0,0,0.3);
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            padding: 8px;
-            box-sizing: border-box;
-            opacity: 0;
-            transform: translateX(30px) translateY(-20px);
-            animation: dealIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-            -webkit-box-reflect: below 2px linear-gradient(transparent 60%, rgba(255,255,255,0.2));
-        }
+  .particle{position:fixed;pointer-events:none;z-index:80;font-weight:900;}
+  @keyframes goldBurst{0%{transform:translate(0,0) scale(.6);opacity:1;}100%{transform:var(--tx) scale(1);opacity:0;}}
 
-        @keyframes dealIn {
-            to { opacity: 1; transform: translateX(0) translateY(0); }
-        }
-
-        .card.red { color: #e73c3c; }
-        .card.black { color: #1a1a1a; }
-        
-        .card .val { font-size: 22px; font-weight: 800; line-height: 1; }
-        .card .suit { font-size: 18px; margin-top: -2px; }
-        .card .big-suit { position: absolute; bottom: 10px; right: 10px; font-size: 36px; opacity: 0.15; }
-
-        .card.hidden-card {
-            background: linear-gradient(135deg, #1b2733 25%, #233242 25%, #233242 50%, #1b2733 50%, #1b2733 75%, #233242 75%, #233242 100%);
-            background-size: 20px 20px;
-            border: 2px solid #2a3a4a;
-        }
-
-        .game-message {
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 22px;
-            font-weight: 800;
-            z-index: 5;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
-            margin: 10px 0;
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-        .msg-win { color: var(--green); }
-        .msg-lose { color: var(--red); }
-        .msg-push { color: #fff; }
-
-        /* Controls Area */
-        .controls {
-            background-color: var(--bg-panel);
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 15px;
-            border-top: 1px solid #2a3a4a;
-        }
-
-        .bet-box {
-            display: flex;
-            align-items: center;
-            background: var(--bg-main);
-            border-radius: 6px;
-            width: 250px;
-            padding: 0 15px;
-            height: 45px;
-        }
-
-        .bet-box span { color: var(--green); font-weight: 800; font-size: 16px;}
-        .bet-box input {
-            flex: 1;
-            background: transparent;
-            border: none;
-            color: #fff;
-            font-size: 18px;
-            font-weight: 700;
-            text-align: center;
-            outline: none;
-            font-family: 'Inter', sans-serif;
-        }
-
-        .action-row {
-            display: flex;
-            gap: 8px;
-            width: 100%;
-            max-width: 500px;
-            justify-content: center;
-        }
-
-        .btn {
-            flex: 1;
-            padding: 14px 0;
-            border: none;
-            border-radius: 6px;
-            font-weight: 700;
-            font-size: 13px;
-            letter-spacing: 0.5px;
-            cursor: pointer;
-            transition: 0.2s;
-            text-transform: uppercase;
-        }
-        .btn:disabled { opacity: 0.4; cursor: not-allowed; }
-        
-        .btn-green { background-color: var(--green); color: #000; }
-        .btn-green:hover:not(:disabled) { background-color: var(--green-hover); }
-        
-        .btn-dark { background-color: #273746; color: #fff; }
-        .btn-dark:hover:not(:disabled) { background-color: #34495e; }
-
-        .pre-game-btns, .in-game-btns {
-            display: flex;
-            width: 100%;
-            gap: 8px;
-        }
-        .in-game-btns { display: none; }
-
-        /* Deposit Modal */
-        .modal-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s;
-        }
-        .modal-overlay.active { opacity: 1; pointer-events: auto; }
-        .modal {
-            background: var(--bg-panel);
-            padding: 30px;
-            border-radius: 12px;
-            width: 320px;
-            text-align: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
-        }
-        .modal input {
-            width: 80%;
-            padding: 12px;
-            margin: 20px 0;
-            border-radius: 6px;
-            border: none;
-            background: var(--bg-main);
-            color: #fff;
-            font-size: 18px;
-            text-align: center;
-            font-weight: bold;
-        }
-    </style>
+  @media (max-width:360px){
+    .cell{height:64px;} .cell svg.icon{width:38px;height:38px;}
+    .reelColumn{height:204px;} #spinBtn{width:64px;height:64px;}
+  }
+</style>
 </head>
 <body>
+<canvas id="stars"></canvas>
 
-    <header>
-        <div class="logo">♠️ 21CLUB</div>
-        <div class="bank-box">
-            <div class="balance" id="uiBalance">$103,000.00</div>
-            <button class="deposit-btn" onclick="openModal()">+ Deposit</button>
-        </div>
-    </header>
+<!-- ================= SVG ICON LIBRARY ================= -->
+<svg width="0" height="0" style="position:absolute">
+<defs>
+  <linearGradient id="gPig" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffc9d6"/><stop offset="1" stop-color="#f28fa8"/></linearGradient>
+  <linearGradient id="gPigDark" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffb3c6"/><stop offset="1" stop-color="#e06b8c"/></linearGradient>
+  <linearGradient id="gWolf" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8a93a3"/><stop offset="1" stop-color="#4b5566"/></linearGradient>
+  <linearGradient id="gStraw" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe08a"/><stop offset="1" stop-color="#c98a1f"/></linearGradient>
+  <linearGradient id="gWood" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a5713a"/><stop offset="1" stop-color="#6b3d0e"/></linearGradient>
+  <linearGradient id="gBrick" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d4633f"/><stop offset="1" stop-color="#8a2f1e"/></linearGradient>
+  <linearGradient id="gGold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff3c2"/><stop offset=".5" stop-color="#ffd76a"/><stop offset="1" stop-color="#c98a1f"/></linearGradient>
+  <linearGradient id="gApple" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff6b5a"/><stop offset="1" stop-color="#b8262a"/></linearGradient>
+  <linearGradient id="gAcorn" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d9a86a"/><stop offset="1" stop-color="#7a4a1e"/></linearGradient>
+  <linearGradient id="gMoon" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff9e0"/><stop offset="1" stop-color="#c9b98a"/></linearGradient>
+  <linearGradient id="gHat" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3a3a3a"/><stop offset="1" stop-color="#0a0a0a"/></linearGradient>
 
-    <main>
-        <div class="hand-area">
-            <div class="hand-label" id="dealerLabel">DEALER</div>
-            <div class="cards-container" id="dealerCards"></div>
-        </div>
+  <symbol id="ic-straw" viewBox="0 0 64 64">
+    <ellipse cx="32" cy="50" rx="22" ry="7" fill="url(#gWood)"/>
+    <g stroke="url(#gStraw)" stroke-width="4" stroke-linecap="round">
+      <line x1="32" y1="50" x2="14" y2="14"/><line x1="32" y1="50" x2="22" y2="10"/>
+      <line x1="32" y1="50" x2="32" y2="8"/><line x1="32" y1="50" x2="42" y2="10"/>
+      <line x1="32" y1="50" x2="50" y2="14"/>
+    </g>
+  </symbol>
 
-        <div class="game-message" id="gameMsg"></div>
+  <symbol id="ic-sticks" viewBox="0 0 64 64">
+    <rect x="10" y="28" width="44" height="9" rx="4" fill="url(#gWood)" transform="rotate(-18 32 32)"/>
+    <rect x="10" y="28" width="44" height="9" rx="4" fill="url(#gWood)" transform="rotate(18 32 32)"/>
+    <circle cx="32" cy="32" r="5" fill="#3a2410"/>
+  </symbol>
 
-        <div class="hand-area">
-            <div class="hand-label" id="playerLabel">PLAYER</div>
-            <div class="player-hands-wrapper" id="playerCardsWrapper">
-                <!-- Hands dynamically injected here for split support -->
-            </div>
-        </div>
-    </main>
+  <symbol id="ic-brick" viewBox="0 0 64 64">
+    <rect x="10" y="14" width="44" height="36" rx="4" fill="url(#gBrick)"/>
+    <g stroke="#5a1f12" stroke-width="2">
+      <line x1="10" y1="26" x2="54" y2="26"/><line x1="10" y1="38" x2="54" y2="38"/>
+      <line x1="22" y1="14" x2="22" y2="26"/><line x1="42" y1="14" x2="42" y2="26"/>
+      <line x1="32" y1="26" x2="32" y2="38"/><line x1="16" y1="38" x2="16" y2="50"/><line x1="48" y1="38" x2="48" y2="50"/>
+    </g>
+  </symbol>
 
-    <div class="controls">
-        <div class="bet-box">
-            <span>$</span>
-            <input type="number" id="betInput" value="1000" step="100" min="1">
-        </div>
-        
-        <div class="action-row">
-            <div class="pre-game-btns" id="preGameBtns">
-                <button class="btn btn-green" onclick="deal()">DEAL</button>
-                <button class="btn btn-green" onclick="doubleAndDeal()">2X & DEAL</button>
-            </div>
-            
-            <div class="in-game-btns" id="inGameBtns">
-                <button class="btn btn-dark" id="btnHit" onclick="hit()">HIT</button>
-                <button class="btn btn-dark" id="btnStand" onclick="stand()">STAND</button>
-                <button class="btn btn-dark" id="btnDouble" onclick="doubleDown()">DOUBLE</button>
-                <button class="btn btn-dark" id="btnSplit" onclick="splitHand()">SPLIT</button>
-            </div>
-        </div>
+  <symbol id="ic-apple" viewBox="0 0 64 64">
+    <path d="M32 22c-9-9-22-4-22 8 0 12 14 22 22 26 8-4 22-14 22-26 0-12-13-17-22-8z" fill="url(#gApple)"/>
+    <rect x="30" y="10" width="4" height="10" rx="2" fill="#5a3312"/>
+    <path d="M34 14c6-4 12-2 12 4-6 2-10-1-12-4z" fill="#3d7a3a"/>
+  </symbol>
+
+  <symbol id="ic-acorn" viewBox="0 0 64 64">
+    <ellipse cx="32" cy="38" rx="16" ry="18" fill="url(#gAcorn)"/>
+    <path d="M16 26c0-8 8-14 16-14s16 6 16 14c-8 4-24 4-32 0z" fill="#5a3312"/>
+    <g stroke="#3a2410" stroke-width="1.5" opacity=".5"><line x1="14" y1="24" x2="50" y2="24"/><line x1="16" y1="20" x2="48" y2="20"/></g>
+    <rect x="29" y="6" width="6" height="8" rx="2" fill="#3a2410"/>
+  </symbol>
+
+  <symbol id="ic-pig1" viewBox="0 0 64 64">
+    <circle cx="32" cy="34" r="22" fill="url(#gPig)"/>
+    <path d="M14 20 L22 26 L14 30Z" fill="url(#gPigDark)"/><path d="M50 20 L42 26 L50 30Z" fill="url(#gPigDark)"/>
+    <ellipse cx="32" cy="40" rx="11" ry="8" fill="url(#gPigDark)"/>
+    <circle cx="27" cy="40" r="2.2" fill="#8a3050"/><circle cx="37" cy="40" r="2.2" fill="#8a3050"/>
+    <circle cx="23" cy="28" r="2.6" fill="#4a2233"/><circle cx="41" cy="28" r="2.6" fill="#4a2233"/>
+  </symbol>
+
+  <symbol id="ic-pig2" viewBox="0 0 64 64">
+    <circle cx="32" cy="34" r="22" fill="url(#gPig)"/>
+    <path d="M14 20 L22 26 L14 30Z" fill="url(#gPigDark)"/><path d="M50 20 L42 26 L50 30Z" fill="url(#gPigDark)"/>
+    <ellipse cx="32" cy="40" rx="11" ry="8" fill="url(#gPigDark)"/>
+    <circle cx="27" cy="40" r="2.2" fill="#8a3050"/><circle cx="37" cy="40" r="2.2" fill="#8a3050"/>
+    <circle cx="23" cy="28" r="2.6" fill="#4a2233"/><circle cx="41" cy="28" r="2.6" fill="#4a2233"/>
+    <path d="M32 52 L26 57 L32 60 L38 57Z" fill="#c0392b"/>
+  </symbol>
+
+  <symbol id="ic-pig3" viewBox="0 0 64 64">
+    <circle cx="32" cy="36" r="20" fill="url(#gPig)"/>
+    <path d="M14 22 L22 28 L14 32Z" fill="url(#gPigDark)"/><path d="M50 22 L42 28 L50 32Z" fill="url(#gPigDark)"/>
+    <ellipse cx="32" cy="41" rx="10" ry="7" fill="url(#gPigDark)"/>
+    <circle cx="27" cy="41" r="2" fill="#8a3050"/><circle cx="37" cy="41" r="2" fill="#8a3050"/>
+    <circle cx="24" cy="30" r="2.4" fill="#4a2233"/><circle cx="40" cy="30" r="2.4" fill="#4a2233"/>
+    <path d="M10 20 A22 14 0 0 1 54 20 L48 20 A16 10 0 0 0 16 20Z" fill="url(#gGold)"/>
+    <rect x="9" y="17" width="46" height="5" rx="2.5" fill="#c98a1f"/>
+  </symbol>
+
+  <symbol id="ic-wolf" viewBox="0 0 64 64">
+    <path d="M12 14 L24 26 L14 30Z" fill="url(#gWolf)"/><path d="M52 14 L40 26 L50 30Z" fill="url(#gWolf)"/>
+    <circle cx="32" cy="34" r="21" fill="url(#gWolf)"/>
+    <ellipse cx="32" cy="42" rx="11" ry="9" fill="#3a4150"/>
+    <path d="M22 44 L27 50 L32 44Z" fill="#fff"/><path d="M42 44 L37 50 L32 44Z" fill="#fff"/>
+    <circle cx="32" cy="40" r="2.5" fill="#1a1e26"/>
+    <path d="M20 27 L26 30 L21 33Z" fill="#e8e8e8"/><path d="M44 27 L38 30 L43 33Z" fill="#e8e8e8"/>
+  </symbol>
+
+  <symbol id="ic-moon" viewBox="0 0 64 64">
+    <circle cx="30" cy="32" r="20" fill="url(#gMoon)"/>
+    <circle cx="40" cy="26" r="17" fill="#12280d"/>
+    <circle cx="14" cy="14" r="2" fill="#fff3c2"/><circle cx="50" cy="46" r="1.6" fill="#fff3c2"/><circle cx="8" cy="40" r="1.4" fill="#fff3c2"/>
+  </symbol>
+
+  <symbol id="ic-hat" viewBox="0 0 64 64">
+    <ellipse cx="32" cy="46" rx="24" ry="6" fill="url(#gHat)"/>
+    <rect x="18" y="14" width="28" height="30" rx="3" fill="url(#gHat)"/>
+    <rect x="16" y="38" width="32" height="7" rx="2" fill="#c0392b"/>
+  </symbol>
+
+  <symbol id="ic-goldbag" viewBox="0 0 64 64">
+    <path d="M20 26 C18 40 20 54 32 56 C44 54 46 40 44 26 Z" fill="url(#gGold)"/>
+    <rect x="26" y="14" width="12" height="10" rx="4" fill="#7a4a1e"/>
+    <circle cx="32" cy="40" r="8" fill="#fff3c2" opacity=".85"/>
+    <text x="32" y="45" font-size="12" font-weight="900" text-anchor="middle" fill="#c98a1f">$</text>
+  </symbol>
+
+  <symbol id="ic-housestraw" viewBox="0 0 64 64">
+    <rect x="14" y="30" width="36" height="24" fill="#d9a86a"/>
+    <path d="M8 32 L32 10 L56 32 Z" fill="url(#gStraw)"/>
+    <rect x="28" y="38" width="8" height="16" fill="#7a4a1e"/>
+  </symbol>
+  <symbol id="ic-housestick" viewBox="0 0 64 64">
+    <rect x="14" y="30" width="36" height="24" fill="url(#gWood)"/>
+    <path d="M8 32 L32 10 L56 32 Z" fill="#7a4a1e"/>
+    <rect x="28" y="38" width="8" height="16" fill="#3a2410"/>
+    <g stroke="#3a2410" stroke-width="1.2" opacity=".5"><line x1="14" y1="38" x2="50" y2="38"/><line x1="14" y1="46" x2="50" y2="46"/></g>
+  </symbol>
+  <symbol id="ic-housebrick" viewBox="0 0 64 64">
+    <rect x="12" y="28" width="40" height="26" fill="url(#gBrick)"/>
+    <path d="M6 30 L32 8 L58 30 Z" fill="#5a1f12"/>
+    <rect x="27" y="38" width="10" height="16" fill="#3a2410"/>
+    <g stroke="#5a1f12" stroke-width="1.4" opacity=".7"><line x1="12" y1="38" x2="52" y2="38"/><line x1="12" y1="46" x2="52" y2="46"/></g>
+  </symbol>
+  <symbol id="ic-housemansion" viewBox="0 0 64 64">
+    <rect x="8" y="28" width="48" height="26" fill="url(#gGold)"/>
+    <path d="M4 30 L32 6 L60 30 Z" fill="#ffe08a"/>
+    <rect x="27" y="38" width="10" height="16" fill="#7a4a1e"/>
+    <rect x="4" y="20" width="6" height="14" fill="url(#gGold)"/><rect x="54" y="20" width="6" height="14" fill="url(#gGold)"/>
+    <path d="M3 20 L7 12 L11 20Z" fill="#ffe08a"/><path d="M53 20 L57 12 L61 20Z" fill="#ffe08a"/>
+  </symbol>
+</defs>
+</svg>
+
+<div class="wrap">
+
+  <div class="titlebar">
+    <h1><svg class="icon" viewBox="0 0 64 64"><use href="#ic-wolf"/></svg> Wolf's Fury <svg class="icon" viewBox="0 0 64 64"><use href="#ic-pig1"/></svg></h1>
+    <div class="sub">THREE LITTLE PIGS SLOTS</div>
+  </div>
+
+  <div class="hud">
+    <div class="hud-box" id="creditBox">
+      <div class="label">CREDITS · TAP TO ADD</div>
+      <div class="value" id="creditVal">500</div>
+      <div class="tapHint">+250</div>
     </div>
-
-    <!-- Deposit Modal -->
-    <div class="modal-overlay" id="depositModal">
-        <div class="modal">
-            <h2 style="margin-top:0;">Virtual Deposit</h2>
-            <p style="color: var(--text-muted); font-size: 14px;">Enter amount to add to your balance.</p>
-            <input type="number" id="depositAmount" value="5000">
-            <button class="btn btn-green" style="width: 100%; padding: 12px;" onclick="processDeposit()">DEPOSIT FUNDS</button>
-            <button class="btn btn-dark" style="width: 100%; padding: 12px; margin-top: 10px;" onclick="closeModal()">CANCEL</button>
-        </div>
+    <div class="hud-box">
+      <div class="label">LAST WIN</div>
+      <div class="value" id="winVal">0</div>
     </div>
+  </div>
 
-    <script>
-        let balance = 103000.00;
-        let deck = [];
-        let playerHands = []; // Array of arrays to support splitting
-        let handBets = [];    // Tracks bets for each hand
-        let currentHandIdx = 0;
-        let dealerHand = [];
-        let dealerHiddenCardDiv = null;
-        let baseBet = 0;
-        
-        const suits = ['♥', '♦', '♣', '♠'];
-        const values = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
+  <div class="houseMeter">
+    <svg class="stageIcon reached" id="stageIcon0" viewBox="0 0 64 64"><use href="#ic-housestraw"/></svg>
+    <div class="houseTrack"><div class="houseFill" id="houseFill"></div></div>
+    <svg class="stageIcon" id="stageIcon1" viewBox="0 0 64 64"><use href="#ic-housestick"/></svg>
+    <svg class="stageIcon" id="stageIcon2" viewBox="0 0 64 64"><use href="#ic-housebrick"/></svg>
+    <svg class="stageIcon" id="stageIcon3" viewBox="0 0 64 64"><use href="#ic-housemansion"/></svg>
+  </div>
+  <div class="houseLabel" id="houseLabel" style="text-align:center;margin:-4px 0 6px;">Build the pigs' house — land pigs to fill the meter!</div>
 
-        const uiBalance = document.getElementById('uiBalance');
-        const betInput = document.getElementById('betInput');
-        const dealerCardsContainer = document.getElementById('dealerCards');
-        const playerCardsWrapper = document.getElementById('playerCardsWrapper');
-        const dealerLabel = document.getElementById('dealerLabel');
-        const playerLabel = document.getElementById('playerLabel');
-        const gameMsg = document.getElementById('gameMsg');
-        
-        const preGameBtns = document.getElementById('preGameBtns');
-        const inGameBtns = document.getElementById('inGameBtns');
-        const btnDouble = document.getElementById('btnDouble');
-        const btnSplit = document.getElementById('btnSplit');
+  <div class="reelFrame">
+    <div id="huffOverlay"></div>
+    <div class="reels" id="reels"></div>
+  </div>
 
-        function formatMoney(num) { return '$' + num.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,'); }
-        function updateBalance() { uiBalance.innerText = formatMoney(balance); }
+  <div class="infoStrip" id="infoStrip">Spin to begin.</div>
+  <div class="freeSpinBanner" id="fsBanner">FREE SPINS: <span id="fsCount">0</span> left · Multiplier x<span id="fsMult">1</span></div>
 
-        function createDeck() {
-            deck = [];
-            for (let s of suits) for (let v of values) deck.push({ suit: s, value: v, weight: getWeight(v) });
-            deck.sort(() => Math.random() - 0.5);
+  <div class="controls">
+    <div class="betBox">
+      <div><div class="label">BET</div><div class="betVal" id="betVal">10</div></div>
+      <div style="display:flex;gap:6px;"><div class="betBtn" id="betDown">−</div><div class="betBtn" id="betUp">+</div></div>
+    </div>
+    <div id="spinBtn"><span class="icon">🌀</span>SPIN</div>
+  </div>
+
+  <div class="bottomRow">
+    <div class="miniBtn" id="payBtn">📜 Paytable</div>
+    <div class="miniBtn" id="buyBtn">💰 Buy Feature</div>
+    <div class="miniBtn" id="muteBtn">🔊 Sound</div>
+  </div>
+
+</div>
+
+<div class="modalBg" id="modalBg">
+  <div class="modal">
+    <h2>Paytable & Features</h2>
+    <div id="payList"></div>
+    <div class="closeModal" id="closeModal">Got it</div>
+  </div>
+</div>
+
+<div class="modalBg" id="buyModalBg">
+  <div class="modal">
+    <h2>Buy a Feature</h2>
+    <div class="buyCard">
+      <svg class="icon" viewBox="0 0 64 64"><use href="#ic-moon"/></svg>
+      <div class="info"><b>Buy Free Spins</b><div>Instantly trigger 8 Free Spins with a 2x multiplier.<br>Cost: <span id="fsCost"></span> credits</div></div>
+      <button id="buyFsBtn">Buy</button>
+    </div>
+    <div class="buyCard">
+      <svg class="icon" viewBox="0 0 64 64"><use href="#ic-hat"/></svg>
+      <div class="info"><b>Buy Hat Trick Bonus</b><div>Instantly trigger the Wolf's hat-picking bonus round.<br>Cost: <span id="hatCost"></span> credits</div></div>
+      <button id="buyHatBtn">Buy</button>
+    </div>
+    <div class="closeModal" id="closeBuyModal">Cancel</div>
+  </div>
+</div>
+
+<div id="bonusScreen">
+  <h2>Hat Trick Bonus</h2>
+  <p>Pick hats to reveal gold. Uncover the Wolf and the bonus ends!</p>
+  <div id="bonusPicksLeft">Picks left: 3</div>
+  <div class="hatGrid" id="hatGrid"></div>
+  <div id="bonusResult"></div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ================= AUDIO ================= */
+  const AudioCtx = window.AudioContext || window.webkitAudioContext;
+  let actx = null, muted = false;
+  function ensureAudio(){ if(!actx) actx = new AudioCtx(); if(actx.state==='suspended') actx.resume(); }
+  function tone(freq,dur,type,gain,delay,glideTo){
+    if(muted) return; ensureAudio();
+    const t0=actx.currentTime+(delay||0);
+    const osc=actx.createOscillator(), g=actx.createGain();
+    osc.type=type||'sine'; osc.frequency.setValueAtTime(freq,t0);
+    if(glideTo) osc.frequency.exponentialRampToValueAtTime(glideTo,t0+dur);
+    g.gain.setValueAtTime(0.0001,t0); g.gain.exponentialRampToValueAtTime(gain||0.2,t0+0.015);
+    g.gain.exponentialRampToValueAtTime(0.0001,t0+dur);
+    osc.connect(g).connect(actx.destination); osc.start(t0); osc.stop(t0+dur+0.02);
+  }
+  function noiseBurst(dur,gain,delay){
+    if(muted) return; ensureAudio();
+    const t0=actx.currentTime+(delay||0);
+    const bufferSize=actx.sampleRate*dur;
+    const buffer=actx.createBuffer(1,bufferSize,actx.sampleRate);
+    const data=buffer.getChannelData(0);
+    for(let i=0;i<bufferSize;i++) data[i]=(Math.random()*2-1)*(1-i/bufferSize);
+    const src=actx.createBufferSource(); src.buffer=buffer;
+    const g=actx.createGain(); g.gain.setValueAtTime(gain||0.15,t0); g.gain.exponentialRampToValueAtTime(0.0001,t0+dur);
+    const filter=actx.createBiquadFilter(); filter.type='lowpass'; filter.frequency.value=900;
+    src.connect(filter).connect(g).connect(actx.destination); src.start(t0);
+  }
+  const sfx={
+    spinStart(){ for(let i=0;i<3;i++) tone(180+i*40,.08,'square',.12,i*0.05); },
+    reelStop(){ tone(220,.09,'triangle',.18); },
+    coin(){ tone(1300,.08,'sine',.15); tone(1700,.09,'sine',.13,0.05); },
+    coinAdd(){ tone(900,.06,'sine',.18); tone(1200,.08,'sine',.16,.06); tone(1500,.1,'sine',.14,.12); },
+    smallWin(){ [660,880,1100].forEach((f,i)=>tone(f,.14,'sine',.16,i*.07)); },
+    bigWin(){ [523,659,784,1046,1318].forEach((f,i)=>tone(f,.22,'sawtooth',.13,i*.09)); },
+    huff(){ noiseBurst(.5,.22,0); tone(120,.5,'sawtooth',.12,0,60); },
+    houseBlow(){ noiseBurst(.35,.2,0); },
+    button(){ tone(400,.05,'square',.1); },
+    bonusTrigger(){ [440,554,659,880].forEach((f,i)=>tone(f,.2,'triangle',.15,i*.1)); },
+    freeSpinsAward(){ [523,659,784,1046].forEach((f,i)=>tone(f,.25,'sine',.15,i*.12)); },
+    levelUp(){ [660,880,1046,1318].forEach((f,i)=>tone(f,.16,'triangle',.18,i*.06)); },
+    mansionComplete(){ [523,659,784,1046,1318,1568].forEach((f,i)=>tone(f,.3,'sawtooth',.16,i*.08)); noiseBurst(.6,.1,.1); },
+    buyConfirm(){ tone(300,.08,'square',.15); tone(500,.1,'square',.12,.08); }
+  };
+
+  /* ================= SYMBOLS ================= */
+  const SYM = {
+    STRAW:  {svg:'ic-straw',  name:'Straw',  pays:[0,0,2,5,15]},
+    STICKS: {svg:'ic-sticks', name:'Sticks', pays:[0,0,3,8,20]},
+    BRICK:  {svg:'ic-brick',  name:'Brick',  pays:[0,0,5,12,30]},
+    APPLE:  {svg:'ic-apple',  name:'Apple',  pays:[0,0,4,10,25]},
+    ACORN:  {svg:'ic-acorn',  name:'Acorn',  pays:[0,0,4,10,25]},
+    PIG1:   {svg:'ic-pig1', name:'Pinky Pig',        pays:[0,0,8,25,60], isPig:true},
+    PIG2:   {svg:'ic-pig2', name:'Fiddler Pig',      pays:[0,0,10,30,75], isPig:true},
+    PIG3:   {svg:'ic-pig3', name:'Brick House Pig',  pays:[0,0,15,45,120], isPig:true},
+    WILD:   {svg:'ic-wolf', name:'Wolf Wild', wild:true, pays:[0,0,20,60,200]},
+    SCATTER:{svg:'ic-moon', name:'Full Moon Scatter', scatter:true, pays:[0,0,3,10,50]}
+  };
+  const REEL_WEIGHTS=[['STRAW',10],['STICKS',9],['BRICK',8],['APPLE',7],['ACORN',7],
+    ['PIG1',5],['PIG2',4],['PIG3',3],['WILD',2],['SCATTER',2]];
+  function weightedSymbol(){
+    const total=REEL_WEIGHTS.reduce((s,[,w])=>s+w,0);
+    let r=Math.random()*total;
+    for(const [key,w] of REEL_WEIGHTS){ if(r<w) return key; r-=w; }
+    return 'STRAW';
+  }
+  function iconSvg(key){ return `<svg class="icon" viewBox="0 0 64 64"><use href="#${SYM[key].svg}"></use></svg>`; }
+
+  const ROWS=3, COLS=5;
+  const PAYLINES=[
+    [1,1,1,1,1],[0,0,0,0,0],[2,2,2,2,2],[0,1,2,1,0],[2,1,0,1,2],
+    [1,0,0,0,1],[1,2,2,2,1],[0,0,1,2,2],[2,2,1,0,0],[1,2,1,0,1]
+  ];
+
+  /* ================= STATE ================= */
+  let credits=500, bet=10;
+  const BET_STEPS=[5,10,20,50,100,250];
+  let spinning=false, grid=[];
+  let freeSpinsLeft=0, freeSpinMult=1, inFreeSpins=false;
+  let houseStage=0, housePips=0;
+  const STAGE_THRESHOLD=8;
+
+  /* ================= DOM refs ================= */
+  const creditVal=document.getElementById('creditVal'), winVal=document.getElementById('winVal');
+  const reelsEl=document.getElementById('reels'), infoStrip=document.getElementById('infoStrip');
+  const spinBtn=document.getElementById('spinBtn'), betVal=document.getElementById('betVal');
+  const creditBox=document.getElementById('creditBox'), fsBanner=document.getElementById('fsBanner');
+  const fsCount=document.getElementById('fsCount'), fsMult=document.getElementById('fsMult');
+  const huffOverlay=document.getElementById('huffOverlay');
+  const houseFill=document.getElementById('houseFill'), houseLabel=document.getElementById('houseLabel');
+  const stageIcons=[0,1,2,3].map(i=>document.getElementById('stageIcon'+i));
+
+  /* ================= BUILD REEL DOM ================= */
+  const columns=[];
+  for(let c=0;c<COLS;c++){
+    const col=document.createElement('div'); col.className='reelColumn';
+    const strip=document.createElement('div'); strip.className='strip';
+    col.appendChild(strip); reelsEl.appendChild(col);
+    columns.push({col,strip,cells:[]});
+    const initial=[];
+    for(let r=0;r<ROWS;r++){
+      const key=weightedSymbol(); initial.push(key);
+      const cell=document.createElement('div'); cell.className='cell';
+      cell.innerHTML=iconSvg(key);
+      strip.appendChild(cell); columns[c].cells.push(cell);
+    }
+    grid[c]=initial;
+  }
+
+  /* ================= CREDIT TAP ================= */
+  creditBox.addEventListener('click', ()=>{
+    credits+=250; creditVal.textContent=credits; sfx.coinAdd();
+    const pop=document.createElement('div'); pop.className='coinPop'; pop.textContent='+250';
+    creditBox.appendChild(pop); setTimeout(()=>pop.remove(),900);
+  });
+
+  /* ================= BET CONTROLS ================= */
+  document.getElementById('betUp').addEventListener('click', ()=>{
+    sfx.button(); let i=BET_STEPS.indexOf(bet); if(i<BET_STEPS.length-1) bet=BET_STEPS[i+1]; betVal.textContent=bet; updateBuyCosts();
+  });
+  document.getElementById('betDown').addEventListener('click', ()=>{
+    sfx.button(); let i=BET_STEPS.indexOf(bet); if(i>0) bet=BET_STEPS[i-1]; betVal.textContent=bet; updateBuyCosts();
+  });
+
+  /* ================= PAYTABLE MODAL ================= */
+  const payList=document.getElementById('payList');
+  Object.values(SYM).forEach(s=>{
+    const row=document.createElement('div'); row.className='payRow';
+    let desc;
+    if(s.wild) desc=`<b>WILD</b> — substitutes for all symbols except the Moon. 5 in a row pays <b>${s.pays[4]}x</b> bet. 3+ Wolves trigger the <b>Hat Trick Bonus</b>.`;
+    else if(s.scatter) desc=`<b>SCATTER</b> — pays anywhere. 3+ Moons award <b>Free Spins</b> with a rising multiplier.`;
+    else desc=`3: <b>${s.pays[2]}x</b> &nbsp; 4: <b>${s.pays[3]}x</b> &nbsp; 5: <b>${s.pays[4]}x</b> bet` + (s.isPig?' · fills the House Meter':'');
+    row.innerHTML=`${iconSvg(Object.keys(SYM).find(k=>SYM[k]===s))}<div class="desc"><b>${s.name}</b><br>${desc}</div>`;
+    payList.appendChild(row);
+  });
+  const payRowHouse=document.createElement('div'); payRowHouse.className='payRow';
+  payRowHouse.innerHTML=`<svg class="icon" viewBox="0 0 64 64"><use href="#ic-housemansion"/></svg><div class="desc"><b>House Meter</b><br>Land Pig symbols to fill the meter. Straw → Sticks → Brick → Gold Mansion. Completing the mansion pays a bonus and resets the meter.</div>`;
+  payList.appendChild(payRowHouse);
+
+  document.getElementById('payBtn').addEventListener('click', ()=>{ sfx.button(); document.getElementById('modalBg').classList.add('show'); });
+  document.getElementById('closeModal').addEventListener('click', ()=>{ sfx.button(); document.getElementById('modalBg').classList.remove('show'); });
+
+  /* ================= BUY FEATURE ================= */
+  const buyModalBg=document.getElementById('buyModalBg');
+  const fsCostEl=document.getElementById('fsCost'), hatCostEl=document.getElementById('hatCost');
+  const buyFsBtn=document.getElementById('buyFsBtn'), buyHatBtn=document.getElementById('buyHatBtn');
+  function fsCost(){ return bet*100; }
+  function hatCost(){ return bet*60; }
+  function updateBuyCosts(){
+    fsCostEl.textContent=fsCost(); hatCostEl.textContent=hatCost();
+    buyFsBtn.disabled = credits<fsCost() || spinning;
+    buyHatBtn.disabled = credits<hatCost() || spinning;
+  }
+  document.getElementById('buyBtn').addEventListener('click', ()=>{
+    if(spinning) return;
+    sfx.button(); updateBuyCosts(); buyModalBg.classList.add('show');
+  });
+  document.getElementById('closeBuyModal').addEventListener('click', ()=>{ sfx.button(); buyModalBg.classList.remove('show'); });
+  buyFsBtn.addEventListener('click', ()=>{
+    if(credits<fsCost()) return;
+    credits-=fsCost(); creditVal.textContent=credits; sfx.buyConfirm();
+    buyModalBg.classList.remove('show');
+    awardFreeSpins(3); // treat like a 3-scatter trigger (8 spins)
+  });
+  buyHatBtn.addEventListener('click', ()=>{
+    if(credits<hatCost()) return;
+    credits-=hatCost(); creditVal.textContent=credits; sfx.buyConfirm();
+    buyModalBg.classList.remove('show');
+    triggerWolfBonus();
+  });
+
+  /* ================= MUTE ================= */
+  document.getElementById('muteBtn').addEventListener('click', function(){
+    muted=!muted; this.textContent = muted ? '🔇 Sound' : '🔊 Sound';
+  });
+
+  /* ================= HOUSE METER ================= */
+  function updateHouseMeterDisplay(){
+    const pct = Math.min(100,(housePips/STAGE_THRESHOLD)*100);
+    houseFill.style.width = pct+'%';
+    stageIcons.forEach((el,i)=> el.classList.toggle('reached', i<=houseStage));
+    const names=['Straw hut','Stick house','Brick house','Gold mansion!'];
+    houseLabel.textContent = houseStage<3
+      ? `Building: ${names[houseStage]} → next stage at ${STAGE_THRESHOLD} pig pips`
+      : `${names[3]} complete!`;
+  }
+  updateHouseMeterDisplay();
+
+  function goldBurst(originEl){
+    const rect = originEl.getBoundingClientRect();
+    for(let i=0;i<14;i++){
+      const p=document.createElement('div'); p.className='particle';
+      p.textContent = ['✦','●','✧'][i%3];
+      p.style.color = '#ffd76a';
+      p.style.left = (rect.left+rect.width/2)+'px';
+      p.style.top = (rect.top+rect.height/2)+'px';
+      p.style.fontSize = (10+Math.random()*8)+'px';
+      const ang = Math.random()*Math.PI*2, dist=40+Math.random()*60;
+      p.style.setProperty('--tx', `translate(${Math.cos(ang)*dist}px,${Math.sin(ang)*dist}px)`);
+      p.style.animation = 'goldBurst 800ms ease-out forwards';
+      document.body.appendChild(p);
+      setTimeout(()=>p.remove(),850);
+    }
+  }
+
+  function addHousePips(pips){
+    if(pips<=0) return;
+    housePips+=pips;
+    while(housePips>=STAGE_THRESHOLD && houseStage<3){
+      housePips-=STAGE_THRESHOLD; houseStage++;
+      sfx.levelUp(); goldBurst(stageIcons[houseStage]);
+      if(houseStage===3){
+        const bonusAmt = Math.round(bet*20);
+        credits+=bonusAmt; creditVal.textContent=credits; winVal.textContent=bonusAmt;
+        sfx.mansionComplete();
+        infoStrip.textContent = `GOLD MANSION COMPLETE! +${bonusAmt}`;
+        setTimeout(()=>{ houseStage=0; housePips=0; updateHouseMeterDisplay(); }, 1400);
+      }
+    }
+    updateHouseMeterDisplay();
+  }
+
+  /* ================= SPIN LOGIC ================= */
+  spinBtn.addEventListener('click', doSpin);
+
+  function doSpin(){
+    if(spinning) return;
+    if(!inFreeSpins){
+      if(credits<bet){ infoStrip.textContent="Not enough credits — tap CREDITS to add more!"; return; }
+      credits-=bet; creditVal.textContent=credits;
+    } else { freeSpinsLeft--; fsCount.textContent=freeSpinsLeft; }
+    winVal.textContent='0'; spinning=true; spinBtn.style.pointerEvents='none';
+    infoStrip.textContent = inFreeSpins ? 'Spinning free spin...' : 'Good luck...';
+    clearWinHighlights(); sfx.spinStart(); ensureAudio();
+
+    const newGrid=[];
+    for(let c=0;c<COLS;c++){ const colSyms=[]; for(let r=0;r<ROWS;r++) colSyms.push(weightedSymbol()); newGrid.push(colSyms); }
+
+    columns.forEach((colObj,c)=>{
+      colObj.col.classList.add('spinning');
+      const stopDelay=500+c*260;
+      setTimeout(()=>{
+        colObj.col.classList.remove('spinning');
+        colObj.strip.style.animation='none'; colObj.strip.style.transform='translateY(0)';
+        for(let r=0;r<ROWS;r++) colObj.cells[r].innerHTML=iconSvg(newGrid[c][r]);
+        grid[c]=newGrid[c]; sfx.reelStop();
+        if(c===COLS-1) setTimeout(()=>evaluateSpin(),150);
+      }, stopDelay);
+    });
+  }
+
+  function clearWinHighlights(){ columns.forEach(colObj=>colObj.cells.forEach(cell=>cell.classList.remove('win'))); }
+
+  function evaluateSpin(){
+    let totalWin=0; let winningCells=new Set();
+    const mult = inFreeSpins ? freeSpinMult : 1;
+
+    PAYLINES.forEach(line=>{
+      const symbolsInLine=line.map((row,c)=>grid[c][row]);
+      let base=symbolsInLine.find(s=>s!=='WILD'&&s!=='SCATTER');
+      if(!base) base=symbolsInLine[0];
+      if(base==='SCATTER') return;
+      let count=0;
+      for(let c=0;c<COLS;c++){ const s=symbolsInLine[c]; if(s===base||s==='WILD') count++; else break; }
+      if(count>=3 && SYM[base] && SYM[base].pays[count]>0){
+        const payAmt=SYM[base].pays[count]*(bet/10)*mult;
+        totalWin+=payAmt;
+        for(let c=0;c<count;c++) winningCells.add(c+'_'+line[c]);
+      }
+    });
+
+    let scatterCount=0; const scatterCells=[];
+    let pigCount=0;
+    for(let c=0;c<COLS;c++) for(let r=0;r<ROWS;r++){
+      const s=grid[c][r];
+      if(s==='SCATTER'){ scatterCount++; scatterCells.push(c+'_'+r); }
+      if(SYM[s].isPig) pigCount++;
+    }
+    if(scatterCount>=3){
+      const scatterWin=SYM.SCATTER.pays[Math.min(scatterCount,5)]*(bet/10)*mult;
+      totalWin+=scatterWin; scatterCells.forEach(k=>winningCells.add(k));
+    }
+
+    let wildCount=0;
+    for(let c=0;c<COLS;c++) for(let r=0;r<ROWS;r++) if(grid[c][r]==='WILD') wildCount++;
+
+    winningCells.forEach(key=>{ const [c,r]=key.split('_').map(Number); columns[c].cells[r].classList.add('win'); });
+
+    if(totalWin>0){
+      credits+=Math.round(totalWin); creditVal.textContent=credits; winVal.textContent=Math.round(totalWin);
+      if(totalWin>=bet*15){ sfx.bigWin(); infoStrip.textContent=`BIG WIN! +${Math.round(totalWin)}`; }
+      else { sfx.smallWin(); infoStrip.textContent=`You win ${Math.round(totalWin)}!`; }
+    } else {
+      infoStrip.textContent = inFreeSpins ? 'No win this spin.' : 'Spin again!';
+    }
+
+    addHousePips(pigCount);
+
+    if(scatterCount>=3 && !inFreeSpins) setTimeout(()=>awardFreeSpins(scatterCount),700);
+    else if(wildCount>=3) setTimeout(()=>triggerWolfBonus(),700);
+    else finishSpin();
+  }
+
+  function awardFreeSpins(scatterCount){
+    sfx.freeSpinsAward();
+    const spinsAwarded = scatterCount===3?8:(scatterCount===4?12:20);
+    freeSpinsLeft+=spinsAwarded; freeSpinMult=2; inFreeSpins=true;
+    fsBanner.classList.add('show'); fsCount.textContent=freeSpinsLeft; fsMult.textContent=freeSpinMult;
+    infoStrip.textContent=`${spinsAwarded} FREE SPINS AWARDED!`;
+    finishSpin();
+  }
+
+  function triggerWolfBonus(){
+    sfx.bonusTrigger(); infoStrip.textContent='The Wolf huffs and puffs...';
+    huffOverlay.classList.add('active'); sfx.huff();
+    setTimeout(()=>{ huffOverlay.classList.remove('active'); openBonusPick(); },750);
+  }
+
+  function finishSpin(){
+    spinning=false; spinBtn.style.pointerEvents='auto'; updateBuyCosts();
+    if(inFreeSpins && freeSpinsLeft<=0){ inFreeSpins=false; fsBanner.classList.remove('show'); infoStrip.textContent='Free spins complete!'; }
+    if(inFreeSpins && freeSpinsLeft>0) setTimeout(doSpin,900);
+  }
+
+  /* ================= HAT TRICK BONUS ================= */
+  const bonusScreen=document.getElementById('bonusScreen'), hatGrid=document.getElementById('hatGrid');
+  const bonusResult=document.getElementById('bonusResult'), bonusPicksLeft=document.getElementById('bonusPicksLeft');
+
+  function openBonusPick(){
+    bonusScreen.classList.add('show'); bonusResult.textContent=''; hatGrid.innerHTML='';
+    const prizeVals=[1,1.5,2,2.5,3,4,5,8];
+    const prizes=[...prizeVals,'WOLF'];
+    for(let i=prizes.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [prizes[i],prizes[j]]=[prizes[j],prizes[i]]; }
+    let totalBonus=0, picksLeft=3, ended=false;
+    bonusPicksLeft.textContent=`Picks left: ${picksLeft}`;
+
+    prizes.forEach(prize=>{
+      const card=document.createElement('div'); card.className='hatCard';
+      card.innerHTML='<svg class="icon" viewBox="0 0 64 64"><use href="#ic-hat"/></svg>';
+      card.addEventListener('click', function handler(){
+        if(ended||card.classList.contains('picked')) return;
+        card.classList.add('picked'); card.removeEventListener('click',handler);
+        if(prize==='WOLF'){
+          card.innerHTML='<svg class="icon" viewBox="0 0 64 64"><use href="#ic-wolf"/></svg>';
+          sfx.houseBlow();
+          bonusResult.textContent=`The Wolf was under there! Bonus total: ${Math.round(totalBonus*bet)}`;
+          ended=true; setTimeout(closeBonus.bind(null,totalBonus),1600);
+        } else {
+          card.innerHTML='<svg class="icon" viewBox="0 0 64 64"><use href="#ic-goldbag"/></svg>';
+          totalBonus+=prize; picksLeft--; bonusPicksLeft.textContent=`Picks left: ${picksLeft}`;
+          sfx.coin(); bonusResult.textContent=`+${Math.round(prize*bet)} credits!`;
+          if(picksLeft<=0){ ended=true; setTimeout(closeBonus.bind(null,totalBonus),1200); }
         }
+      });
+      hatGrid.appendChild(card);
+    });
+  }
 
-        function getWeight(v) {
-            if (['J', 'Q', 'K'].includes(v)) return 10;
-            if (v === 'A') return 11;
-            return parseInt(v);
-        }
+  function closeBonus(totalBonus){
+    bonusScreen.classList.remove('show');
+    const payout=Math.round(totalBonus*bet);
+    if(payout>0){ credits+=payout; creditVal.textContent=credits; winVal.textContent=payout; sfx.bigWin(); }
+    infoStrip.textContent = payout>0 ? `Hat Trick Bonus paid ${payout}!` : 'Bonus complete.';
+    finishSpin();
+  }
 
-        function calculateScore(hand) {
-            let score = 0, aces = 0;
-            for (let c of hand) {
-                score += c.weight;
-                if (c.value === 'A') aces++;
-            }
-            while (score > 21 && aces > 0) { score -= 10; aces--; }
-            return score;
-        }
+  updateBuyCosts();
 
-        function createCardDOM(card, hidden = false, animate = true) {
-            const div = document.createElement('div');
-            if (hidden) {
-                div.className = 'card hidden-card';
-                return div;
-            }
-            const isRed = (card.suit === '♥' || card.suit === '♦');
-            div.className = `card ${isRed ? 'red' : 'black'}`;
-            div.innerHTML = `
-                <div class="val">${card.value}</div>
-                <div class="suit">${card.suit}</div>
-                <div class="big-suit">${card.suit}</div>
-            `;
-            if (!animate) {
-                div.style.animation = 'none';
-                div.style.opacity = '1';
-                div.style.transform = 'none';
-            }
-            return div;
-        }
+  /* ================= BACKGROUND STARS ================= */
+  const canvas=document.getElementById('stars'), ctx=canvas.getContext('2d');
+  function resize(){ canvas.width=window.innerWidth; canvas.height=window.innerHeight; }
+  resize(); window.addEventListener('resize', resize);
+  const stars=Array.from({length:60}, ()=>({x:Math.random()*window.innerWidth,y:Math.random()*window.innerHeight,r:Math.random()*1.4+0.3,tw:Math.random()*Math.PI*2}));
+  function animateStars(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    stars.forEach(s=>{ s.tw+=0.02; const alpha=0.35+Math.sin(s.tw)*0.35;
+      ctx.fillStyle=`rgba(255,240,200,${Math.max(0,alpha)})`; ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2); ctx.fill(); });
+    requestAnimationFrame(animateStars);
+  }
+  animateStars();
 
-        function updatePlayerLabels() {
-            const scores = playerHands.map(h => calculateScore(h));
-            playerLabel.innerText = `PLAYER (${scores.join(' / ')})`;
-        }
-
-        function appendCardToPlayer(handIdx, cardObj, animate = true) {
-            playerHands[handIdx].push(cardObj);
-            const handContainer = document.getElementById(`p-hand-${handIdx}`);
-            handContainer.appendChild(createCardDOM(cardObj, false, animate));
-            updatePlayerLabels();
-        }
-
-        function appendCardToDealer(cardObj, isHidden = false) {
-            dealerHand.push(cardObj);
-            const cardDOM = createCardDOM(cardObj, isHidden);
-            dealerCardsContainer.appendChild(cardDOM);
-            if (isHidden) {
-                dealerHiddenCardDiv = cardDOM;
-            } else {
-                dealerLabel.innerText = `DEALER (${calculateScore([dealerHand[0]])})`;
-            }
-        }
-
-        function doubleAndDeal() {
-            let bet = parseFloat(betInput.value) || 0;
-            betInput.value = (bet * 2).toString();
-            deal();
-        }
-
-        async function deal() {
-            baseBet = parseFloat(betInput.value);
-            if (baseBet > balance || baseBet <= 0 || isNaN(baseBet)) {
-                showMessage("Invalid Bet!", "msg-lose");
-                return;
-            }
-
-            balance -= baseBet;
-            updateBalance();
-            
-            dealerCardsContainer.innerHTML = '';
-            playerCardsWrapper.innerHTML = '<div id="p-hand-0" class="cards-container active-hand"></div>';
-            playerHands = [[]];
-            handBets = [baseBet];
-            currentHandIdx = 0;
-            dealerHand = [];
-            gameMsg.style.opacity = '0';
-            
-            createDeck();
-            preGameBtns.style.display = 'none';
-            inGameBtns.style.display = 'flex';
-            betInput.disabled = true;
-
-            appendCardToPlayer(0, deck.pop());
-            await delay(200);
-            appendCardToDealer(deck.pop());
-            await delay(200);
-            appendCardToPlayer(0, deck.pop());
-            await delay(200);
-            appendCardToDealer(deck.pop(), true);
-
-            btnDouble.disabled = (balance < baseBet);
-            
-            // Check Split condition (matching weight/value)
-            if (playerHands[0][0].weight === playerHands[0][1].weight && balance >= baseBet) {
-                btnSplit.disabled = false;
-            } else {
-                btnSplit.disabled = true;
-            }
-
-            if (calculateScore(playerHands[0]) === 21) {
-                revealDealer();
-                if(calculateScore(dealerHand) === 21) resolveGame([{msg: "Push.", css: "msg-push", mult: 1}]);
-                else resolveGame([{msg: "Blackjack!", css: "msg-win", mult: 2.5}]);
-            }
-        }
-
-        function splitHand() {
-            btnSplit.disabled = true;
-            balance -= baseBet;
-            handBets.push(baseBet);
-            updateBalance();
-            
-            const splitCard = playerHands[0].pop();
-            playerHands.push([splitCard]);
-            
-            // Setup split UI
-            playerCardsWrapper.innerHTML = `
-                <div id="p-hand-0" class="cards-container active-hand"></div>
-                <div id="p-hand-1" class="cards-container"></div>
-            `;
-            
-            // Re-render existing cards instantly
-            const dom0 = createCardDOM(playerHands[0][0], false, false);
-            document.getElementById('p-hand-0').appendChild(dom0);
-            
-            const dom1 = createCardDOM(playerHands[1][0], false, false);
-            document.getElementById('p-hand-1').appendChild(dom1);
-            
-            // Deal the new cards to the split hands
-            setTimeout(() => appendCardToPlayer(0, deck.pop()), 300);
-            setTimeout(() => appendCardToPlayer(1, deck.pop()), 600);
-            
-            updatePlayerLabels();
-        }
-
-        function advanceHand() {
-            document.getElementById(`p-hand-${currentHandIdx}`).classList.remove('active-hand');
-            currentHandIdx++;
-            
-            if (currentHandIdx < playerHands.length) {
-                document.getElementById(`p-hand-${currentHandIdx}`).classList.add('active-hand');
-                btnDouble.disabled = (balance < handBets[currentHandIdx]);
-                btnSplit.disabled = true; 
-            } else {
-                playDealer();
-            }
-        }
-
-        function hit() {
-            btnDouble.disabled = true;
-            btnSplit.disabled = true;
-            appendCardToPlayer(currentHandIdx, deck.pop());
-            
-            if (calculateScore(playerHands[currentHandIdx]) > 21) advanceHand();
-        }
-
-        function stand() {
-            advanceHand();
-        }
-
-        function doubleDown() {
-            btnSplit.disabled = true;
-            balance -= handBets[currentHandIdx];
-            handBets[currentHandIdx] *= 2;
-            updateBalance();
-            
-            appendCardToPlayer(currentHandIdx, deck.pop());
-            advanceHand();
-        }
-
-        function revealDealer() {
-            if (dealerHiddenCardDiv) {
-                const hiddenObj = dealerHand[1];
-                const isRed = (hiddenObj.suit === '♥' || hiddenObj.suit === '♦');
-                dealerHiddenCardDiv.className = `card ${isRed ? 'red' : 'black'}`;
-                dealerHiddenCardDiv.innerHTML = `
-                    <div class="val">${hiddenObj.value}</div>
-                    <div class="suit">${hiddenObj.suit}</div>
-                    <div class="big-suit">${hiddenObj.suit}</div>
-                `;
-                dealerLabel.innerText = `DEALER (${calculateScore(dealerHand)})`;
-            }
-        }
-
-        async function playDealer() {
-            inGameBtns.style.display = 'none';
-            revealDealer();
-            await delay(500);
-
-            // If all hands busted, dealer doesn't need to draw
-            const allBusted = playerHands.every(h => calculateScore(h) > 21);
-            
-            if (!allBusted) {
-                while (calculateScore(dealerHand) < 17) {
-                    appendCardToDealer(deck.pop());
-                    dealerLabel.innerText = `DEALER (${calculateScore(dealerHand)})`;
-                    await delay(600);
-                }
-            }
-            checkWinners();
-        }
-
-        function checkWinners() {
-            const dScore = calculateScore(dealerHand);
-            let results = [];
-            
-            playerHands.forEach((hand, i) => {
-                const pScore = calculateScore(hand);
-                const isSplit = playerHands.length > 1;
-                const prefix = isSplit ? `H${i+1}: ` : '';
-
-                if (pScore > 21) results.push({ msg: `${prefix}Bust`, css: 'msg-lose', mult: 0 });
-                else if (dScore > 21) results.push({ msg: `${prefix}Win`, css: 'msg-win', mult: 2 });
-                else if (dScore > pScore) results.push({ msg: `${prefix}Lose`, css: 'msg-lose', mult: 0 });
-                else if (dScore < pScore) results.push({ msg: `${prefix}Win`, css: 'msg-win', mult: 2 });
-                else results.push({ msg: `${prefix}Push`, css: 'msg-push', mult: 1 });
-            });
-            
-            resolveGame(results);
-        }
-
-        function resolveGame(results) {
-            let totalWinnings = 0;
-            let displayMsgs = [];
-            let overallCss = 'msg-push';
-
-            results.forEach((res, i) => {
-                totalWinnings += handBets[i] * res.mult;
-                displayMsgs.push(res.msg);
-            });
-
-            if (totalWinnings > handBets.reduce((a,b)=>a+b,0)) overallCss = 'msg-win';
-            else if (totalWinnings === 0) overallCss = 'msg-lose';
-
-            balance += totalWinnings;
-            updateBalance();
-            showMessage(displayMsgs.join(' | '), overallCss);
-            
-            setTimeout(() => {
-                inGameBtns.style.display = 'none';
-                preGameBtns.style.display = 'flex';
-                betInput.disabled = false;
-            }, 800);
-        }
-
-        function showMessage(msg, cssClass) {
-            gameMsg.className = `game-message ${cssClass}`;
-            gameMsg.innerText = msg;
-            gameMsg.style.opacity = '1';
-        }
-
-        function delay(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
-        function openModal() { document.getElementById('depositModal').classList.add('active'); }
-        function closeModal() { document.getElementById('depositModal').classList.remove('active'); }
-        function processDeposit() {
-            const amt = parseFloat(document.getElementById('depositAmount').value);
-            if (!isNaN(amt) && amt > 0) {
-                balance += amt;
-                updateBalance();
-                closeModal();
-            }
-        }
-    </script>
+})();
+</script>
 </body>
 </html>
