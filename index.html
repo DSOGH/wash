@@ -3,229 +3,700 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Better-Than-Buttermilk Pancakes</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
-    <!-- FontAwesome for Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+    <title>21CLUB</title>
     <style>
-        body {
-            font-family: 'Lato', sans-serif;
-            background-color: #f3f4f6;
-            -webkit-print-color-adjust: exact;
-        }
-        h1, h2, h3 {
-            font-family: 'Playfair Display', serif;
-        }
-        .recipe-card {
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-        }
-        
-        /* Print specific styles */
-        @media print {
-            body {
-                background-color: white;
-            }
-            .no-print {
-                display: none !important;
-            }
-            .recipe-card {
-                box-shadow: none;
-                border: none;
-                width: 100%;
-                max-width: 100%;
-                margin: 0;
-                padding: 0;
-            }
-            /* Hide the top decoration bar on print to save ink/clean look */
-            .top-deco {
-                height: 2px;
-            }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+
+        :root {
+            --bg-main: #141f27;
+            --bg-panel: #1b2733;
+            --green: #14e041;
+            --green-hover: #17fa49;
+            --red: #ff4d4d;
+            --blue: #3b82f6;
+            --text-light: #ffffff;
+            --text-muted: #8b9bb4;
         }
 
-        .check-box-wrapper input:checked + div {
-            text-decoration: line-through;
-            color: #9ca3af;
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-light);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        /* Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background-color: var(--bg-panel);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            z-index: 10;
+        }
+
+        .logo { 
+            font-size: 20px; 
+            font-weight: 800; 
+            display: flex; 
+            align-items: center; 
+            gap: 5px;
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        /* Coach Toggle */
+        .coach-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 34px;
+            height: 20px;
+        }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #2a3a4a;
+            transition: .4s;
+            border-radius: 20px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 14px;
+            width: 14px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider { background-color: var(--blue); }
+        input:checked + .slider:before { transform: translateX(14px); }
+        .coach-active-text { color: var(--blue); }
+
+        .bank-box {
+            display: flex;
+            align-items: center;
+            background: var(--bg-main);
+            border-radius: 6px;
+            padding: 4px 4px 4px 15px;
+        }
+
+        .balance { 
+            color: var(--green); 
+            font-weight: 700; 
+            font-size: 16px; 
+            margin-right: 15px;
+        }
+
+        .deposit-btn {
+            background-color: var(--green);
+            color: #000;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .deposit-btn:hover { background-color: var(--green-hover); }
+
+        /* Game Area */
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            padding: 20px 0;
+        }
+
+        .hand-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 180px;
+        }
+
+        .hand-label {
+            color: var(--text-muted);
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+        }
+
+        .player-hands-wrapper {
+            display: flex;
+            gap: 40px;
+            justify-content: center;
+        }
+
+        .cards-container {
+            display: flex;
+            justify-content: center;
+            padding-left: 30px;
+            position: relative;
+        }
+
+        .active-hand::after {
+            content: '';
+            position: absolute;
+            bottom: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 4px;
+            background-color: var(--green);
+            border-radius: 2px;
+            box-shadow: 0 0 8px var(--green);
+        }
+
+        /* Card Styling */
+        .card {
+            width: 85px;
+            height: 120px;
+            background-color: #fff;
+            border-radius: 6px;
+            margin-left: -35px;
+            box-shadow: -4px 0 10px rgba(0,0,0,0.3);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            padding: 8px;
+            box-sizing: border-box;
+            opacity: 0;
+            transform: translateX(30px) translateY(-20px);
+            animation: dealIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            -webkit-box-reflect: below 2px linear-gradient(transparent 60%, rgba(255,255,255,0.2));
+        }
+
+        @keyframes dealIn {
+            to { opacity: 1; transform: translateX(0) translateY(0); }
+        }
+
+        .card.red { color: #e73c3c; }
+        .card.black { color: #1a1a1a; }
+        
+        .card .val { font-size: 22px; font-weight: 800; line-height: 1; }
+        .card .suit { font-size: 18px; margin-top: -2px; }
+        .card .big-suit { position: absolute; bottom: 10px; right: 10px; font-size: 36px; opacity: 0.15; }
+
+        .card.hidden-card {
+            background: linear-gradient(135deg, #1b2733 25%, #233242 25%, #233242 50%, #1b2733 50%, #1b2733 75%, #233242 75%, #233242 100%);
+            background-size: 20px 20px;
+            border: 2px solid #2a3a4a;
+        }
+
+        .messaging-area {
+            height: 60px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 10px 0;
+            z-index: 5;
+        }
+
+        .game-message {
+            font-size: 22px;
+            font-weight: 800;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        /* Hint Box */
+        .hint-box {
+            margin-top: 5px;
+            background: rgba(59, 130, 246, 0.15);
+            border: 1px solid rgba(59, 130, 246, 0.4);
+            color: #93c5fd;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .hint-box.visible { opacity: 1; }
+
+        .msg-win { color: var(--green); }
+        .msg-lose { color: var(--red); }
+        .msg-push { color: #fff; }
+
+        /* Controls Area */
+        .controls {
+            background-color: var(--bg-panel);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            border-top: 1px solid #2a3a4a;
+        }
+
+        .bet-box {
+            display: flex;
+            align-items: center;
+            background: var(--bg-main);
+            border-radius: 6px;
+            width: 250px;
+            padding: 0 15px;
+            height: 45px;
+        }
+
+        .bet-box span { color: var(--green); font-weight: 800; font-size: 16px;}
+        .bet-box input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-size: 18px;
+            font-weight: 700;
+            text-align: center;
+            outline: none;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .action-row {
+            display: flex;
+            gap: 8px;
+            width: 100%;
+            max-width: 500px;
+            justify-content: center;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 14px 0;
+            border: none;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 13px;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            transition: 0.2s;
+            text-transform: uppercase;
+        }
+        .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        
+        .btn-green { background-color: var(--green); color: #000; }
+        .btn-green:hover:not(:disabled) { background-color: var(--green-hover); }
+        
+        .btn-dark { background-color: #273746; color: #fff; }
+        .btn-dark:hover:not(:disabled) { background-color: #34495e; }
+
+        .pre-game-btns, .in-game-btns {
+            display: flex;
+            width: 100%;
+            gap: 8px;
+        }
+        .in-game-btns { display: none; }
+
+        /* Deposit Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+        .modal {
+            background: var(--bg-panel);
+            padding: 30px;
+            border-radius: 12px;
+            width: 320px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+        }
+        .modal input {
+            width: 80%; padding: 12px; margin: 20px 0; border-radius: 6px; border: none;
+            background: var(--bg-main); color: #fff; font-size: 18px; text-align: center; font-weight: bold;
         }
     </style>
 </head>
-<body class="min-h-screen py-8 px-4 flex flex-col items-center justify-start">
+<body>
 
-    <!-- Controls -->
-    <div class="no-print mb-6 w-full max-w-3xl flex justify-end">
-        <button onclick="window.print()" class="bg-gray-800 hover:bg-black text-white text-sm font-bold py-2 px-4 rounded-lg shadow transition flex items-center gap-2">
-            <i class="fas fa-print"></i> Print
-        </button>
-    </div>
-
-    <!-- Main Recipe Sheet -->
-    <main class="recipe-card bg-white w-full max-w-3xl rounded-3xl overflow-hidden relative">
-        <!-- Top Decoration -->
-        <div class="top-deco h-4 bg-amber-500 w-full"></div>
-        
-        <div class="p-6 md:p-12">
-            <!-- Header -->
-            <header class="text-center border-b-2 border-amber-100 pb-8 mb-8">
-                <div class="flex justify-center mb-2 text-amber-500 gap-1 text-sm">
-                    <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+    <header>
+        <div class="logo">♠️ 21CLUB</div>
+        <div class="header-controls">
+            <!-- Help/Coach Toggle -->
+            <label class="coach-toggle">
+                <span id="coachText">Coach: OFF</span>
+                <div class="switch">
+                    <input type="checkbox" id="coachToggle" onchange="toggleCoach()">
+                    <span class="slider"></span>
                 </div>
-                <h1 class="text-3xl md:text-5xl font-bold text-gray-800 mb-4">"Better-Than-Buttermilk" Pancakes</h1>
-                <p class="text-gray-500 italic text-lg mb-6">The secret to fluffy, buttery pancakes without buttermilk.</p>
-                
-                <div class="flex justify-center gap-4 md:gap-12 text-gray-600 text-sm font-semibold uppercase tracking-wider">
-                    <div class="flex flex-col items-center">
-                        <i class="far fa-clock text-amber-600 text-xl mb-1"></i>
-                        <span>Prep: 10m</span>
-                    </div>
-                    <div class="flex flex-col items-center">
-                        <i class="fas fa-fire-burner text-amber-600 text-xl mb-1"></i>
-                        <span>Cook: 15m</span>
-                    </div>
-                    <div class="flex flex-col items-center">
-                        <i class="fas fa-utensils text-amber-600 text-xl mb-1"></i>
-                        <span>Yields: 8-10</span>
-                    </div>
-                </div>
-            </header>
-
-            <!-- Ingredients Section -->
-            <div class="grid md:grid-cols-2 gap-8 mb-10">
-                <!-- Column 1: The Basics -->
-                <div class="bg-amber-50 rounded-2xl p-6">
-                    <h2 class="text-2xl text-amber-800 mb-4 flex items-center gap-2">
-                        <i class="fas fa-blender text-lg"></i> The "Buttermilk" Hack
-                    </h2>
-                    <div class="space-y-3">
-                        <label class="check-box-wrapper flex items-start cursor-pointer">
-                            <input type="checkbox" class="mt-1 mr-3 accent-amber-600 h-4 w-4">
-                            <div class="text-gray-700"><strong>1 ½ cups</strong> Whole Milk (or 2%)</div>
-                        </label>
-                        <label class="check-box-wrapper flex items-start cursor-pointer">
-                            <input type="checkbox" class="mt-1 mr-3 accent-amber-600 h-4 w-4">
-                            <div class="text-gray-700"><strong>1 ½ tbsp</strong> White Vinegar <br><span class="text-xs text-amber-700 italic">Mix these first & let sit 5 mins</span></div>
-                        </label>
-                    </div>
-
-                    <h2 class="text-2xl text-amber-800 mt-6 mb-4 flex items-center gap-2">
-                        <i class="fas fa-tint text-lg"></i> Wet Ingredients
-                    </h2>
-                    <div class="space-y-3">
-                        <label class="check-box-wrapper flex items-start cursor-pointer">
-                            <input type="checkbox" class="mt-1 mr-3 accent-amber-600 h-4 w-4">
-                            <div class="text-gray-700"><strong>¼ cup</strong> Melted Butter <span class="text-xs text-gray-500">(slightly cooled)</span></div>
-                        </label>
-                        <label class="check-box-wrapper flex items-start cursor-pointer">
-                            <input type="checkbox" class="mt-1 mr-3 accent-amber-600 h-4 w-4">
-                            <div class="text-gray-700"><strong>2</strong> Large Eggs</div>
-                        </label>
-                        <label class="check-box-wrapper flex items-start cursor-pointer">
-                            <input type="checkbox" class="mt-1 mr-3 accent-amber-600 h-4 w-4">
-                            <div class="text-gray-700"><strong>1 tsp</strong> Vanilla Extract</div>
-                        </label>
-                    </div>
-                </div>
-
-                <!-- Column 2: Dry & Add-ins -->
-                <div>
-                    <h2 class="text-2xl text-gray-800 mb-4 flex items-center gap-2">
-                        <i class="fas fa-wheat text-lg text-gray-400"></i> Dry Ingredients
-                    </h2>
-                    <div class="space-y-3 mb-6">
-                        <label class="check-box-wrapper flex items-start cursor-pointer">
-                            <input type="checkbox" class="mt-1 mr-3 accent-amber-600 h-4 w-4">
-                            <div class="text-gray-700"><strong>2 cups</strong> All-Purpose Flour</div>
-                        </label>
-                        <label class="check-box-wrapper flex items-start cursor-pointer">
-                            <input type="checkbox" class="mt-1 mr-3 accent-amber-600 h-4 w-4">
-                            <div class="text-gray-700"><strong>¼ cup</strong> Granulated Sugar</div>
-                        </label>
-                        <label class="check-box-wrapper flex items-start cursor-pointer">
-                            <input type="checkbox" class="mt-1 mr-3 accent-amber-600 h-4 w-4">
-                            <div class="text-gray-700"><strong>4 tsp</strong> Baking Powder <span class="text-xs font-bold text-amber-600">CRITICAL</span></div>
-                        </label>
-                        <label class="check-box-wrapper flex items-start cursor-pointer">
-                            <input type="checkbox" class="mt-1 mr-3 accent-amber-600 h-4 w-4">
-                            <div class="text-gray-700"><strong>¼ tsp</strong> Baking Soda</div>
-                        </label>
-                        <label class="check-box-wrapper flex items-start cursor-pointer">
-                            <input type="checkbox" class="mt-1 mr-3 accent-amber-600 h-4 w-4">
-                            <div class="text-gray-700"><strong>½ tsp</strong> Salt</div>
-                        </label>
-                    </div>
-                    
-                    <div class="bg-amber-100 rounded-xl p-4 border border-amber-200">
-                        <h3 class="font-bold text-amber-900 mb-2">Optional</h3>
-                        <label class="check-box-wrapper flex items-start cursor-pointer">
-                            <input type="checkbox" class="mt-1 mr-3 accent-amber-600 h-4 w-4">
-                            <div class="text-gray-800"><strong>1 cup</strong> Chocolate Chips</div>
-                        </label>
-                    </div>
-                </div>
+            </label>
+            
+            <div class="bank-box">
+                <div class="balance" id="uiBalance">$103,000.00</div>
+                <button class="deposit-btn" onclick="openModal()">+ Deposit</button>
             </div>
-
-            <!-- Instructions -->
-            <div>
-                <h2 class="text-3xl font-bold text-gray-800 mb-6 border-b pb-2">Instructions</h2>
-                
-                <div class="space-y-6">
-                    <div class="flex gap-4">
-                        <div class="flex-shrink-0 w-8 h-8 rounded-full bg-amber-600 text-white flex items-center justify-center font-bold">1</div>
-                        <div>
-                            <h3 class="font-bold text-lg text-gray-800">Make the "Sour Milk"</h3>
-                            <p class="text-gray-600 leading-relaxed">Combine milk and vinegar in a cup. Let it sit for 5–10 minutes until it looks curdled. <span class="text-amber-600 italic">Do not skip this—the acid creates the fluff!</span></p>
-                        </div>
-                    </div>
-
-                    <div class="flex gap-4">
-                        <div class="flex-shrink-0 w-8 h-8 rounded-full bg-amber-600 text-white flex items-center justify-center font-bold">2</div>
-                        <div>
-                            <h3 class="font-bold text-lg text-gray-800">Whisk Dry Mix</h3>
-                            <p class="text-gray-600 leading-relaxed">In a large bowl, whisk flour, sugar, baking powder, baking soda, and salt. Ensure there are no lumps.</p>
-                        </div>
-                    </div>
-
-                    <div class="flex gap-4">
-                        <div class="flex-shrink-0 w-8 h-8 rounded-full bg-amber-600 text-white flex items-center justify-center font-bold">3</div>
-                        <div>
-                            <h3 class="font-bold text-lg text-gray-800">Combine Wet & Dry</h3>
-                            <p class="text-gray-600 leading-relaxed">Whisk eggs and vanilla in a separate bowl, then add the sour milk and melted butter. Pour this into the dry ingredients.</p>
-                        </div>
-                    </div>
-
-                    <div class="flex gap-4">
-                        <div class="flex-shrink-0 w-8 h-8 rounded-full bg-amber-600 text-white flex items-center justify-center font-bold">4</div>
-                        <div>
-                            <h3 class="font-bold text-lg text-gray-800">The Gentle Fold (Secret Step)</h3>
-                            <p class="text-gray-600 leading-relaxed">Use a spatula to gently fold just until combined. <strong class="text-red-500">STOP when you still see white flour streaks.</strong> Lumps are good! Over-mixing = rubbery pancakes.</p>
-                        </div>
-                    </div>
-
-                    <div class="flex gap-4">
-                        <div class="flex-shrink-0 w-8 h-8 rounded-full bg-amber-600 text-white flex items-center justify-center font-bold">5</div>
-                        <div>
-                            <h3 class="font-bold text-lg text-gray-800">Rest & Cook</h3>
-                            <p class="text-gray-600 leading-relaxed">Let batter sit for 5 minutes. Heat a buttered pan over medium heat. Pour batter, then <span class="bg-yellow-100 px-1 font-semibold">drop chocolate chips on top by hand</span>. Flip when bubbles appear (2-3 mins). Cook until golden.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Footer Notes -->
-            <div class="mt-10 bg-gray-50 rounded-xl p-6 border-l-4 border-amber-400">
-                <h3 class="font-bold text-gray-800 mb-2">💡 Chef's Note</h3>
-                <p class="text-gray-600 text-sm">
-                    If the pancakes are browning too fast before fluffing up, lower the heat slightly. Leftovers freeze perfectly—just pop them in the toaster!
-                </p>
-            </div>
-
         </div>
-        
-        <!-- Bottom Decoration -->
-        <div class="top-deco h-2 bg-amber-500 w-full mt-auto"></div>
+    </header>
+
+    <main>
+        <div class="hand-area">
+            <div class="hand-label" id="dealerLabel">DEALER</div>
+            <div class="cards-container" id="dealerCards"></div>
+        </div>
+
+        <div class="messaging-area">
+            <div class="game-message" id="gameMsg"></div>
+            <!-- Dynamic Instruction Hint Box -->
+            <div class="hint-box" id="hintBox">💡 Hint: Stand</div>
+        </div>
+
+        <div class="hand-area">
+            <div class="hand-label" id="playerLabel">PLAYER</div>
+            <div class="player-hands-wrapper" id="playerCardsWrapper"></div>
+        </div>
     </main>
 
+    <div class="controls">
+        <div class="bet-box">
+            <span>$</span>
+            <input type="number" id="betInput" value="1000" step="100" min="1">
+        </div>
+        
+        <div class="action-row">
+            <div class="pre-game-btns" id="preGameBtns">
+                <button class="btn btn-green" onclick="deal()">DEAL</button>
+                <button class="btn btn-green" onclick="doubleAndDeal()">2X & DEAL</button>
+            </div>
+            
+            <div class="in-game-btns" id="inGameBtns">
+                <button class="btn btn-dark" id="btnHit" onclick="hit()">HIT</button>
+                <button class="btn btn-dark" id="btnStand" onclick="stand()">STAND</button>
+                <button class="btn btn-dark" id="btnDouble" onclick="doubleDown()">DOUBLE</button>
+                <button class="btn btn-dark" id="btnSplit" onclick="splitHand()">SPLIT</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Deposit Modal -->
+    <div class="modal-overlay" id="depositModal">
+        <div class="modal">
+            <h2 style="margin-top:0;">Virtual Deposit</h2>
+            <p style="color: var(--text-muted); font-size: 14px;">Enter amount to add to your balance.</p>
+            <input type="number" id="depositAmount" value="5000">
+            <button class="btn btn-green" style="width: 100%; padding: 12px;" onclick="processDeposit()">DEPOSIT FUNDS</button>
+            <button class="btn btn-dark" style="width: 100%; padding: 12px; margin-top: 10px;" onclick="closeModal()">CANCEL</button>
+        </div>
+    </div>
+
+    <script>
+        let balance = 103000.00;
+        let deck = [];
+        let playerHands = []; 
+        let handBets = [];    
+        let currentHandIdx = 0;
+        let dealerHand = [];
+        let dealerHiddenCardDiv = null;
+        let baseBet = 0;
+        let coachMode = false;
+        
+        const suits = ['♥', '♦', '♣', '♠'];
+        const values = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
+
+        const uiBalance = document.getElementById('uiBalance');
+        const betInput = document.getElementById('betInput');
+        const dealerCardsContainer = document.getElementById('dealerCards');
+        const playerCardsWrapper = document.getElementById('playerCardsWrapper');
+        const dealerLabel = document.getElementById('dealerLabel');
+        const playerLabel = document.getElementById('playerLabel');
+        const gameMsg = document.getElementById('gameMsg');
+        const hintBox = document.getElementById('hintBox');
+        
+        const preGameBtns = document.getElementById('preGameBtns');
+        const inGameBtns = document.getElementById('inGameBtns');
+        const btnDouble = document.getElementById('btnDouble');
+        const btnSplit = document.getElementById('btnSplit');
+
+        function formatMoney(num) { return '$' + num.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,'); }
+        function updateBalance() { uiBalance.innerText = formatMoney(balance); }
+
+        function toggleCoach() {
+            coachMode = document.getElementById('coachToggle').checked;
+            const text = document.getElementById('coachText');
+            if (coachMode) {
+                text.innerText = "Coach: ON";
+                text.classList.add('coach-active-text');
+                updateCoachHint();
+            } else {
+                text.innerText = "Coach: OFF";
+                text.classList.remove('coach-active-text');
+                hintBox.classList.remove('visible');
+            }
+        }
+
+        // Basic Strategy Logic
+        function getBestMove(pHand, dCard) {
+            if (!pHand || pHand.length === 0 || !dCard) return "";
+            
+            const dVal = dCard.weight; // Dealer up card 2-11
+            const score = calculateScore(pHand);
+            
+            // 1. Check Pairs
+            if (pHand.length === 2 && pHand[0].weight === pHand[1].weight) {
+                const pair = pHand[0].weight; // 2-11
+                if (pair === 11 || pair === 8) return "Split";
+                if (pair === 10) return "Stand";
+                if (pair === 9) return [7, 10, 11].includes(dVal) ? "Stand" : "Split";
+                if (pair === 7) return dVal < 8 ? "Split" : "Hit";
+                if (pair === 6) return dVal < 7 ? "Split" : "Hit";
+                if (pair === 5) return dVal < 10 ? "Double" : "Hit";
+                if (pair === 4) return [5, 6].includes(dVal) ? "Split" : "Hit";
+                if ([2, 3].includes(pair)) return dVal < 8 ? "Split" : "Hit";
+            }
+
+            // 2. Check Soft Hands (contains Ace counted as 11)
+            let hasSoftAce = pHand.some(c => c.value === 'A') && 
+                            (pHand.reduce((sum, c) => sum + (c.value === 'A' ? 1 : c.weight), 0) + 10 === score);
+            
+            if (hasSoftAce) {
+                if (score >= 19) return "Stand";
+                if (score === 18) {
+                    if ([2,3,4,5,6].includes(dVal)) return "Double (or Stand)";
+                    if ([7,8].includes(dVal)) return "Stand";
+                    return "Hit";
+                }
+                if (score === 17 && [3,4,5,6].includes(dVal)) return "Double (or Hit)";
+                if (score <= 17) return "Hit";
+            }
+
+            // 3. Check Hard Hands
+            if (score >= 17) return "Stand";
+            if (score >= 13 && score <= 16) return (dVal >= 2 && dVal <= 6) ? "Stand" : "Hit";
+            if (score === 12) return (dVal >= 4 && dVal <= 6) ? "Stand" : "Hit";
+            if (score === 11) return "Double";
+            if (score === 10) return dVal <= 9 ? "Double" : "Hit";
+            if (score === 9) return (dVal >= 3 && dVal <= 6) ? "Double" : "Hit";
+            return "Hit";
+        }
+
+        function updateCoachHint() {
+            if (!coachMode || inGameBtns.style.display === 'none' || dealerHand.length === 0 || !playerHands[currentHandIdx]) {
+                hintBox.classList.remove('visible');
+                return;
+            }
+            
+            const pHand = playerHands[currentHandIdx];
+            const dUpCard = dealerHand[0];
+            const suggestion = getBestMove(pHand, dUpCard);
+            
+            if (suggestion) {
+                hintBox.innerText = `💡 Coach says: ${suggestion}`;
+                hintBox.classList.add('visible');
+            } else {
+                hintBox.classList.remove('visible');
+            }
+        }
+
+        function createDeck() {
+            deck = [];
+            for (let s of suits) for (let v of values) deck.push({ suit: s, value: v, weight: getWeight(v) });
+            deck.sort(() => Math.random() - 0.5);
+        }
+
+        function getWeight(v) {
+            if (['J', 'Q', 'K'].includes(v)) return 10;
+            if (v === 'A') return 11;
+            return parseInt(v);
+        }
+
+        function calculateScore(hand) {
+            let score = 0, aces = 0;
+            for (let c of hand) { score += c.weight; if (c.value === 'A') aces++; }
+            while (score > 21 && aces > 0) { score -= 10; aces--; }
+            return score;
+        }
+
+        function createCardDOM(card, hidden = false, animate = true) {
+            const div = document.createElement('div');
+            if (hidden) { div.className = 'card hidden-card'; return div; }
+            const isRed = (card.suit === '♥' || card.suit === '♦');
+            div.className = `card ${isRed ? 'red' : 'black'}`;
+            div.innerHTML = `<div class="val">${card.value}</div><div class="suit">${card.suit}</div><div class="big-suit">${card.suit}</div>`;
+            if (!animate) { div.style.animation = 'none'; div.style.opacity = '1'; div.style.transform = 'none'; }
+            return div;
+        }
+
+        function updatePlayerLabels() {
+            const scores = playerHands.map(h => calculateScore(h));
+            playerLabel.innerText = `PLAYER (${scores.join(' / ')})`;
+        }
+
+        function appendCardToPlayer(handIdx, cardObj, animate = true) {
+            playerHands[handIdx].push(cardObj);
+            const handContainer = document.getElementById(`p-hand-${handIdx}`);
+            handContainer.appendChild(createCardDOM(cardObj, false, animate));
+            updatePlayerLabels();
+        }
+
+        function appendCardToDealer(cardObj, isHidden = false) {
+            dealerHand.push(cardObj);
+            const cardDOM = createCardDOM(cardObj, isHidden);
+            dealerCardsContainer.appendChild(cardDOM);
+            if (isHidden) dealerHiddenCardDiv = cardDOM;
+            else dealerLabel.innerText = `DEALER (${calculateScore([dealerHand[0]])})`;
+        }
+
+        function doubleAndDeal() {
+            let bet = parseFloat(betInput.value) || 0;
+            betInput.value = (bet * 2).toString();
+            deal();
+        }
+
+        async function deal() {
+            baseBet = parseFloat(betInput.value);
+            if (baseBet > balance || baseBet <= 0 || isNaN(baseBet)) { showMessage("Invalid Bet!", "msg-lose"); return; }
+
+            balance -= baseBet; updateBalance();
+            dealerCardsContainer.innerHTML = '';
+            playerCardsWrapper.innerHTML = '<div id="p-hand-0" class="cards-container active-hand"></div>';
+            playerHands = [[]]; handBets = [baseBet]; currentHandIdx = 0; dealerHand = [];
+            gameMsg.style.opacity = '0'; hintBox.classList.remove('visible');
+            
+            createDeck();
+            preGameBtns.style.display = 'none'; inGameBtns.style.display = 'flex'; betInput.disabled = true;
+
+            appendCardToPlayer(0, deck.pop()); await delay(200);
+            appendCardToDealer(deck.pop()); await delay(200);
+            appendCardToPlayer(0, deck.pop()); await delay(200);
+            appendCardToDealer(deck.pop(), true);
+
+            btnDouble.disabled = (balance < baseBet);
+            btnSplit.disabled = (playerHands[0][0].weight === playerHands[0][1].weight && balance >= baseBet) ? false : true;
+
+            updateCoachHint();
+
+            if (calculateScore(playerHands[0]) === 21) {
+                revealDealer();
+                if(calculateScore(dealerHand) === 21) resolveGame([{msg: "Push.", css: "msg-push", mult: 1}]);
+                else resolveGame([{msg: "Blackjack!", css: "msg-win", mult: 2.5}]);
+            }
+        }
+
+        function splitHand() {
+            btnSplit.disabled = true; balance -= baseBet; handBets.push(baseBet); updateBalance();
+            const splitCard = playerHands[0].pop(); playerHands.push([splitCard]);
+            
+            playerCardsWrapper.innerHTML = `<div id="p-hand-0" class="cards-container active-hand"></div><div id="p-hand-1" class="cards-container"></div>`;
+            document.getElementById('p-hand-0').appendChild(createCardDOM(playerHands[0][0], false, false));
+            document.getElementById('p-hand-1').appendChild(createCardDOM(playerHands[1][0], false, false));
+            
+            setTimeout(() => { appendCardToPlayer(0, deck.pop()); updateCoachHint(); }, 300);
+            setTimeout(() => appendCardToPlayer(1, deck.pop()), 600);
+        }
+
+        function advanceHand() {
+            document.getElementById(`p-hand-${currentHandIdx}`).classList.remove('active-hand');
+            currentHandIdx++;
+            if (currentHandIdx < playerHands.length) {
+                document.getElementById(`p-hand-${currentHandIdx}`).classList.add('active-hand');
+                btnDouble.disabled = (balance < handBets[currentHandIdx]);
+                btnSplit.disabled = true; 
+                updateCoachHint();
+            } else { playDealer(); }
+        }
+
+        function hit() {
+            btnDouble.disabled = true; btnSplit.disabled = true;
+            appendCardToPlayer(currentHandIdx, deck.pop());
+            updateCoachHint();
+            if (calculateScore(playerHands[currentHandIdx]) > 21) advanceHand();
+        }
+
+        function stand() { advanceHand(); }
+
+        function doubleDown() {
+            btnSplit.disabled = true; balance -= handBets[currentHandIdx]; handBets[currentHandIdx] *= 2; updateBalance();
+            appendCardToPlayer(currentHandIdx, deck.pop()); advanceHand();
+        }
+
+        function revealDealer() {
+            if (dealerHiddenCardDiv) {
+                const hiddenObj = dealerHand[1]; const isRed = (hiddenObj.suit === '♥' || hiddenObj.suit === '♦');
+                dealerHiddenCardDiv.className = `card ${isRed ? 'red' : 'black'}`;
+                dealerHiddenCardDiv.innerHTML = `<div class="val">${hiddenObj.value}</div><div class="suit">${hiddenObj.suit}</div><div class="big-suit">${hiddenObj.suit}</div>`;
+                dealerLabel.innerText = `DEALER (${calculateScore(dealerHand)})`;
+            }
+        }
+
+        async function playDealer() {
+            inGameBtns.style.display = 'none'; hintBox.classList.remove('visible'); revealDealer(); await delay(500);
+            const allBusted = playerHands.every(h => calculateScore(h) > 21);
+            if (!allBusted) {
+                while (calculateScore(dealerHand) < 17) {
+                    appendCardToDealer(deck.pop()); await delay(600);
+                }
+            }
+            checkWinners();
+        }
+
+        function checkWinners() {
+            const dScore = calculateScore(dealerHand); let results = [];
+            playerHands.forEach((hand, i) => {
+                const pScore = calculateScore(hand); const isSplit = playerHands.length > 1; const prefix = isSplit ? `H${i+1}: ` : '';
+                if (pScore > 21) results.push({ msg: `${prefix}Bust`, css: 'msg-lose', mult: 0 });
+                else if (dScore > 21) results.push({ msg: `${prefix}Win`, css: 'msg-win', mult: 2 });
+                else if (dScore > pScore) results.push({ msg: `${prefix}Lose`, css: 'msg-lose', mult: 0 });
+                else if (dScore < pScore) results.push({ msg: `${prefix}Win`, css: 'msg-win', mult: 2 });
+                else results.push({ msg: `${prefix}Push`, css: 'msg-push', mult: 1 });
+            });
+            resolveGame(results);
+        }
+
+        function resolveGame(results) {
+            let totalWin = 0; let msgs = []; let css = 'msg-push';
+            results.forEach((res, i) => { totalWin += handBets[i] * res.mult; msgs.push(res.msg); });
+            if (totalWin > handBets.reduce((a,b)=>a+b,0)) css = 'msg-win'; else if (totalWin === 0) css = 'msg-lose';
+            balance += totalWin; updateBalance(); showMessage(msgs.join(' | '), css);
+            setTimeout(() => { inGameBtns.style.display = 'none'; preGameBtns.style.display = 'flex'; betInput.disabled = false; }, 800);
+        }
+
+        function showMessage(msg, cssClass) { gameMsg.className = `game-message ${cssClass}`; gameMsg.innerText = msg; gameMsg.style.opacity = '1'; }
+        function delay(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
+        function openModal() { document.getElementById('depositModal').classList.add('active'); }
+        function closeModal() { document.getElementById('depositModal').classList.remove('active'); }
+        function processDeposit() {
+            const amt = parseFloat(document.getElementById('depositAmount').value);
+            if (!isNaN(amt) && amt > 0) { balance += amt; updateBalance(); closeModal(); }
+        }
+    </script>
 </body>
 </html>
