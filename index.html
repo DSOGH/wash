@@ -40,6 +40,8 @@
             background-color: var(--bg-panel);
             box-shadow: 0 4px 10px rgba(0,0,0,0.2);
             z-index: 10;
+            flex-wrap: wrap; /* Allows stacking on very small screens */
+            gap: 10px;
         }
 
         .logo { 
@@ -53,6 +55,7 @@
         .header-controls {
             display: flex;
             align-items: center;
+            flex-wrap: wrap;
             gap: 15px;
         }
 
@@ -61,7 +64,7 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            font-size: 12px;
+            font-size: 13px;
             font-weight: 700;
             color: var(--text-muted);
             cursor: pointer;
@@ -69,8 +72,8 @@
         .switch {
             position: relative;
             display: inline-block;
-            width: 34px;
-            height: 20px;
+            width: 38px;
+            height: 22px;
         }
         .switch input { opacity: 0; width: 0; height: 0; }
         .slider {
@@ -84,8 +87,8 @@
         .slider:before {
             position: absolute;
             content: "";
-            height: 14px;
-            width: 14px;
+            height: 16px;
+            width: 16px;
             left: 3px;
             bottom: 3px;
             background-color: white;
@@ -93,7 +96,7 @@
             border-radius: 50%;
         }
         input:checked + .slider { background-color: var(--blue); }
-        input:checked + .slider:before { transform: translateX(14px); }
+        input:checked + .slider:before { transform: translateX(16px); }
         .coach-active-text { color: var(--blue); }
 
         .bank-box {
@@ -160,7 +163,7 @@
         .cards-container {
             display: flex;
             justify-content: center;
-            padding-left: 30px;
+            padding-left: 20px; /* Adjusted overlap padding */
             position: relative;
         }
 
@@ -179,12 +182,12 @@
 
         /* Card Styling */
         .card {
-            width: 85px;
-            height: 120px;
+            width: 80px;
+            height: 115px;
             background-color: #fff;
-            border-radius: 6px;
-            margin-left: -35px;
-            box-shadow: -4px 0 10px rgba(0,0,0,0.3);
+            border-radius: 8px;
+            margin-left: -25px; /* Clean overlap */
+            box-shadow: -4px 4px 12px rgba(0,0,0,0.4); /* Replaced reflection with clean shadow */
             position: relative;
             display: flex;
             flex-direction: column;
@@ -193,7 +196,6 @@
             opacity: 0;
             transform: translateX(30px) translateY(-20px);
             animation: dealIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-            -webkit-box-reflect: below 2px linear-gradient(transparent 60%, rgba(255,255,255,0.2));
         }
 
         @keyframes dealIn {
@@ -203,9 +205,10 @@
         .card.red { color: #e73c3c; }
         .card.black { color: #1a1a1a; }
         
-        .card .val { font-size: 22px; font-weight: 800; line-height: 1; }
+        /* Adjusted the value container to fit '10' nicely */
+        .card .val { font-size: 22px; font-weight: 800; line-height: 1; letter-spacing: -1px;}
         .card .suit { font-size: 18px; margin-top: -2px; }
-        .card .big-suit { position: absolute; bottom: 10px; right: 10px; font-size: 36px; opacity: 0.15; }
+        .card .big-suit { position: absolute; bottom: 8px; right: 8px; font-size: 32px; opacity: 0.15; }
 
         .card.hidden-card {
             background: linear-gradient(135deg, #1b2733 25%, #233242 25%, #233242 50%, #1b2733 50%, #1b2733 75%, #233242 75%, #233242 100%);
@@ -214,37 +217,42 @@
         }
 
         .messaging-area {
-            height: 60px;
+            min-height: 70px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            margin: 10px 0;
+            margin: 15px 0;
             z-index: 5;
+            width: 90%;
+            text-align: center;
         }
 
         .game-message {
-            font-size: 22px;
+            font-size: 24px;
             font-weight: 800;
             text-shadow: 0 2px 10px rgba(0,0,0,0.5);
             opacity: 0;
             transition: opacity 0.3s;
         }
 
-        /* Hint Box */
+        /* Improved Hint Box with Explanations */
         .hint-box {
-            margin-top: 5px;
+            margin-top: 8px;
             background: rgba(59, 130, 246, 0.15);
             border: 1px solid rgba(59, 130, 246, 0.4);
             color: #93c5fd;
-            padding: 4px 12px;
-            border-radius: 4px;
-            font-size: 12px;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 13px;
             font-weight: 600;
+            line-height: 1.4;
             opacity: 0;
             transition: opacity 0.3s;
+            max-width: 400px;
         }
         .hint-box.visible { opacity: 1; }
+        .hint-action { font-weight: 800; color: #fff; text-transform: uppercase; }
 
         .msg-win { color: var(--green); }
         .msg-lose { color: var(--red); }
@@ -259,6 +267,7 @@
             align-items: center;
             gap: 15px;
             border-top: 1px solid #2a3a4a;
+            padding-bottom: 30px;
         }
 
         .bet-box {
@@ -377,7 +386,7 @@
         <div class="messaging-area">
             <div class="game-message" id="gameMsg"></div>
             <!-- Dynamic Instruction Hint Box -->
-            <div class="hint-box" id="hintBox">💡 Hint: Stand</div>
+            <div class="hint-box" id="hintBox"></div>
         </div>
 
         <div class="hand-area">
@@ -463,49 +472,54 @@
             }
         }
 
-        // Basic Strategy Logic
-        function getBestMove(pHand, dCard) {
-            if (!pHand || pHand.length === 0 || !dCard) return "";
+        // Expanded Basic Strategy with Explanations
+        function getCoachAdvice(pHand, dCard) {
+            if (!pHand || pHand.length === 0 || !dCard) return null;
             
-            const dVal = dCard.weight; // Dealer up card 2-11
+            const dVal = dCard.weight; 
             const score = calculateScore(pHand);
             
             // 1. Check Pairs
             if (pHand.length === 2 && pHand[0].weight === pHand[1].weight) {
-                const pair = pHand[0].weight; // 2-11
-                if (pair === 11 || pair === 8) return "Split";
-                if (pair === 10) return "Stand";
-                if (pair === 9) return [7, 10, 11].includes(dVal) ? "Stand" : "Split";
-                if (pair === 7) return dVal < 8 ? "Split" : "Hit";
-                if (pair === 6) return dVal < 7 ? "Split" : "Hit";
-                if (pair === 5) return dVal < 10 ? "Double" : "Hit";
-                if (pair === 4) return [5, 6].includes(dVal) ? "Split" : "Hit";
-                if ([2, 3].includes(pair)) return dVal < 8 ? "Split" : "Hit";
+                const pair = pHand[0].weight;
+                if (pair === 11 || pair === 8) return { act: "Split", msg: "Always split Aces and 8s for the best odds." };
+                if (pair === 10) return { act: "Stand", msg: "20 is a very strong hand. Never split 10s." };
+                if (pair === 9) return [7, 10, 11].includes(dVal) ? { act: "Stand", msg: "Dealer is strong, 18 is safer to stand on." } : { act: "Split", msg: "9s are strong, split them against weaker dealer cards." };
+                if (pair === 7) return dVal < 8 ? { act: "Split", msg: "Dealer is weak, split your 7s to improve." } : { act: "Hit", msg: "Dealer is strong, just hit your 14." };
+                if (pair === 6) return dVal < 7 ? { act: "Split", msg: "Split 6s against a weak dealer." } : { act: "Hit", msg: "Don't split 6s against a strong card. Just hit." };
+                if (pair === 5) return dVal < 10 ? { act: "Double", msg: "Treat two 5s as a hard 10. Double down!" } : { act: "Hit", msg: "Treat as a 10, but dealer is strong. Just hit." };
+                if (pair === 4) return [5, 6].includes(dVal) ? { act: "Split", msg: "Only split 4s if the dealer shows a 5 or 6." } : { act: "Hit", msg: "Don't split 4s. Hit." };
+                if ([2, 3].includes(pair)) return dVal < 8 ? { act: "Split", msg: `Split your ${pair}s against a weak dealer.` } : { act: "Hit", msg: "Dealer is strong, just hit." };
             }
 
-            // 2. Check Soft Hands (contains Ace counted as 11)
-            let hasSoftAce = pHand.some(c => c.value === 'A') && 
-                            (pHand.reduce((sum, c) => sum + (c.value === 'A' ? 1 : c.weight), 0) + 10 === score);
-            
+            // 2. Check Soft Hands (contains an Ace counted as 11)
+            let hasSoftAce = pHand.some(c => c.value === 'A') && (pHand.reduce((sum, c) => sum + (c.value === 'A' ? 1 : c.weight), 0) + 10 === score);
             if (hasSoftAce) {
-                if (score >= 19) return "Stand";
+                if (score >= 19) return { act: "Stand", msg: `Soft ${score} is a highly winning hand. Stand.` };
                 if (score === 18) {
-                    if ([2,3,4,5,6].includes(dVal)) return "Double (or Stand)";
-                    if ([7,8].includes(dVal)) return "Stand";
-                    return "Hit";
+                    if ([2,3,4,5,6].includes(dVal)) return { act: "Double", msg: "Capitalize on dealer's weak card with your Soft 18." };
+                    if ([7,8].includes(dVal)) return { act: "Stand", msg: "Soft 18 is good enough against a 7 or 8." };
+                    return { act: "Hit", msg: "Dealer is strong, try to improve your 18 without risking a bust." };
                 }
-                if (score === 17 && [3,4,5,6].includes(dVal)) return "Double (or Hit)";
-                if (score <= 17) return "Hit";
+                if (score === 17 && [3,4,5,6].includes(dVal)) return { act: "Double", msg: "Double down while the dealer is weak." };
+                if (score <= 17) return { act: "Hit", msg: `Hit your Soft ${score}, you literally cannot bust!` };
             }
 
             // 3. Check Hard Hands
-            if (score >= 17) return "Stand";
-            if (score >= 13 && score <= 16) return (dVal >= 2 && dVal <= 6) ? "Stand" : "Hit";
-            if (score === 12) return (dVal >= 4 && dVal <= 6) ? "Stand" : "Hit";
-            if (score === 11) return "Double";
-            if (score === 10) return dVal <= 9 ? "Double" : "Hit";
-            if (score === 9) return (dVal >= 3 && dVal <= 6) ? "Double" : "Hit";
-            return "Hit";
+            if (score >= 17) return { act: "Stand", msg: `Hard ${score} is strong. Hitting is mathematically too risky.` };
+            if (score >= 13 && score <= 16) {
+                if (dVal >= 2 && dVal <= 6) return { act: "Stand", msg: `Dealer shows a weak ${dCard.value}. Don't risk it, let them bust.` };
+                return { act: "Hit", msg: `Dealer shows a strong ${dCard.value}. You must risk hitting.` };
+            }
+            if (score === 12) {
+                if (dVal >= 4 && dVal <= 6) return { act: "Stand", msg: `Dealer is weak, avoid busting your 12.` };
+                return { act: "Hit", msg: `Hit your 12 against the dealer's ${dCard.value}.` };
+            }
+            if (score === 11) return { act: "Double", msg: "You have 11! Double down for a massive chance at 21." };
+            if (score === 10) return dVal <= 9 ? { act: "Double", msg: "Your 10 is strong, double against a weak card." } : { act: "Hit", msg: "You have 10, but dealer is strong. Just hit." };
+            if (score === 9) return (dVal >= 3 && dVal <= 6) ? { act: "Double", msg: "Double your 9 against a weak dealer card." } : { act: "Hit", msg: "Hit your 9 to get more points." };
+            
+            return { act: "Hit", msg: `Your hand is low (${score}). Hit to improve.` };
         }
 
         function updateCoachHint() {
@@ -516,10 +530,10 @@
             
             const pHand = playerHands[currentHandIdx];
             const dUpCard = dealerHand[0];
-            const suggestion = getBestMove(pHand, dUpCard);
+            const advice = getCoachAdvice(pHand, dUpCard);
             
-            if (suggestion) {
-                hintBox.innerText = `💡 Coach says: ${suggestion}`;
+            if (advice) {
+                hintBox.innerHTML = `💡 <span class="hint-action">${advice.act}:</span> ${advice.msg}`;
                 hintBox.classList.add('visible');
             } else {
                 hintBox.classList.remove('visible');
@@ -571,8 +585,12 @@
             dealerHand.push(cardObj);
             const cardDOM = createCardDOM(cardObj, isHidden);
             dealerCardsContainer.appendChild(cardDOM);
-            if (isHidden) dealerHiddenCardDiv = cardDOM;
-            else dealerLabel.innerText = `DEALER (${calculateScore([dealerHand[0]])})`;
+            if (isHidden) {
+                dealerHiddenCardDiv = cardDOM;
+            } else {
+                // FIXED BUG: Show score of currently visible cards during game
+                dealerLabel.innerText = `DEALER (${calculateScore(dealerHand)})`;
+            }
         }
 
         function doubleAndDeal() {
@@ -595,9 +613,21 @@
             preGameBtns.style.display = 'none'; inGameBtns.style.display = 'flex'; betInput.disabled = true;
 
             appendCardToPlayer(0, deck.pop()); await delay(200);
-            appendCardToDealer(deck.pop()); await delay(200);
+            
+            // Deal dealer's upcard
+            const dUpCard = deck.pop();
+            dealerHand.push(dUpCard);
+            dealerCardsContainer.appendChild(createCardDOM(dUpCard));
+            dealerLabel.innerText = `DEALER (${calculateScore([dUpCard])})`; // Only show first card's score
+            await delay(200);
+            
             appendCardToPlayer(0, deck.pop()); await delay(200);
-            appendCardToDealer(deck.pop(), true);
+            
+            // Deal dealer's hidden card
+            const dHidden = deck.pop();
+            dealerHand.push(dHidden);
+            dealerHiddenCardDiv = createCardDOM(dHidden, true);
+            dealerCardsContainer.appendChild(dealerHiddenCardDiv);
 
             btnDouble.disabled = (balance < baseBet);
             btnSplit.disabled = (playerHands[0][0].weight === playerHands[0][1].weight && balance >= baseBet) ? false : true;
@@ -653,16 +683,21 @@
                 const hiddenObj = dealerHand[1]; const isRed = (hiddenObj.suit === '♥' || hiddenObj.suit === '♦');
                 dealerHiddenCardDiv.className = `card ${isRed ? 'red' : 'black'}`;
                 dealerHiddenCardDiv.innerHTML = `<div class="val">${hiddenObj.value}</div><div class="suit">${hiddenObj.suit}</div><div class="big-suit">${hiddenObj.suit}</div>`;
+                // FIXED BUG: Update the dealer score label instantly upon flipping the card
                 dealerLabel.innerText = `DEALER (${calculateScore(dealerHand)})`;
             }
         }
 
         async function playDealer() {
-            inGameBtns.style.display = 'none'; hintBox.classList.remove('visible'); revealDealer(); await delay(500);
+            inGameBtns.style.display = 'none'; hintBox.classList.remove('visible'); 
+            revealDealer(); 
+            await delay(500);
+            
             const allBusted = playerHands.every(h => calculateScore(h) > 21);
             if (!allBusted) {
                 while (calculateScore(dealerHand) < 17) {
-                    appendCardToDealer(deck.pop()); await delay(600);
+                    appendCardToDealer(deck.pop()); 
+                    await delay(600);
                 }
             }
             checkWinners();
