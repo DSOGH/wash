@@ -3,735 +3,288 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KAW 21</title>
+    <title>2021 M340i xDrive Tuning Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
-
-        :root {
-            --bg-main: #141f27;
-            --bg-panel: #1b2733;
-            --green: #14e041;
-            --green-hover: #17fa49;
-            --red: #ff4d4d;
-            --blue: #3b82f6;
-            --text-light: #ffffff;
-            --text-muted: #8b9bb4;
-        }
-
-        body, html {
-            margin: 0;
-            padding: 0;
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+        body {
             font-family: 'Inter', sans-serif;
-            background-color: var(--bg-main);
-            color: var(--text-light);
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            user-select: none;
+            background-color: #111827;
+            color: #F3F4F6;
         }
-
-        /* Header */
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 20px;
-            background-color: var(--bg-panel);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-            z-index: 10;
-            flex-wrap: wrap; /* Allows stacking on very small screens */
-            gap: 10px;
-        }
-
-        .logo { 
-            font-size: 20px; 
-            font-weight: 800; 
-            display: flex; 
-            align-items: center; 
-            gap: 5px;
-        }
-
-        .header-controls {
-            display: flex;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-
-        /* Coach Toggle */
-        .coach-toggle {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 13px;
-            font-weight: 700;
-            color: var(--text-muted);
-            cursor: pointer;
-        }
-        .switch {
-            position: relative;
-            display: inline-block;
-            width: 38px;
-            height: 22px;
-        }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background-color: #2a3a4a;
-            transition: .4s;
-            border-radius: 20px;
-        }
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 16px;
-            width: 16px;
-            left: 3px;
-            bottom: 3px;
-            background-color: white;
-            transition: .4s;
-            border-radius: 50%;
-        }
-        input:checked + .slider { background-color: var(--blue); }
-        input:checked + .slider:before { transform: translateX(16px); }
-        .coach-active-text { color: var(--blue); }
-
-        .bank-box {
-            display: flex;
-            align-items: center;
-            background: var(--bg-main);
-            border-radius: 6px;
-            padding: 4px 4px 4px 15px;
-        }
-
-        .balance { 
-            color: var(--green); 
-            font-weight: 700; 
-            font-size: 16px; 
-            margin-right: 15px;
-        }
-
-        .deposit-btn {
-            background-color: var(--green);
-            color: #000;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 4px;
-            font-weight: 700;
-            font-size: 13px;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .deposit-btn:hover { background-color: var(--green-hover); }
-
-        /* Game Area */
-        main {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-            padding: 20px 0;
-        }
-
-        .hand-area {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            height: 180px;
-        }
-
-        .hand-label {
-            color: var(--text-muted);
-            font-size: 12px;
-            font-weight: 600;
-            letter-spacing: 1px;
-            margin-bottom: 15px;
-            text-transform: uppercase;
-        }
-
-        .player-hands-wrapper {
-            display: flex;
-            gap: 40px;
-            justify-content: center;
-        }
-
-        .cards-container {
-            display: flex;
-            justify-content: center;
-            padding-left: 20px; /* Adjusted overlap padding */
-            position: relative;
-        }
-
-        .active-hand::after {
-            content: '';
-            position: absolute;
-            bottom: -20px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 40px;
+        .m-stripe {
             height: 4px;
-            background-color: var(--green);
-            border-radius: 2px;
-            box-shadow: 0 0 8px var(--green);
+            background: linear-gradient(90deg, #008CB5 33%, #001C58 33%, #001C58 66%, #E21B4D 66%);
         }
-
-        /* Card Styling */
-        .card {
-            width: 80px;
-            height: 115px;
-            background-color: #fff;
-            border-radius: 8px;
-            margin-left: -25px; /* Clean overlap */
-            box-shadow: -4px 4px 12px rgba(0,0,0,0.4); /* Replaced reflection with clean shadow */
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            padding: 8px;
-            box-sizing: border-box;
-            opacity: 0;
-            transform: translateX(30px) translateY(-20px);
-            animation: dealIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        .btn-selected {
+            background-color: #2563EB;
+            border-color: #3B82F6;
+            color: white;
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
         }
-
-        @keyframes dealIn {
-            to { opacity: 1; transform: translateX(0) translateY(0); }
+        .btn-unselected {
+            background-color: #374151;
+            border-color: #4B5563;
+            color: #D1D5DB;
         }
-
-        .card.red { color: #e73c3c; }
-        .card.black { color: #1a1a1a; }
-        
-        /* Adjusted the value container to fit '10' nicely */
-        .card .val { font-size: 22px; font-weight: 800; line-height: 1; letter-spacing: -1px;}
-        .card .suit { font-size: 18px; margin-top: -2px; }
-        .card .big-suit { position: absolute; bottom: 8px; right: 8px; font-size: 32px; opacity: 0.15; }
-
-        .card.hidden-card {
-            background: linear-gradient(135deg, #1b2733 25%, #233242 25%, #233242 50%, #1b2733 50%, #1b2733 75%, #233242 75%, #233242 100%);
-            background-size: 20px 20px;
-            border: 2px solid #2a3a4a;
-        }
-
-        .messaging-area {
-            min-height: 70px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            margin: 15px 0;
-            z-index: 5;
-            width: 90%;
-            text-align: center;
-        }
-
-        .game-message {
-            font-size: 24px;
-            font-weight: 800;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-
-        /* Improved Hint Box with Explanations */
-        .hint-box {
-            margin-top: 8px;
-            background: rgba(59, 130, 246, 0.15);
-            border: 1px solid rgba(59, 130, 246, 0.4);
-            color: #93c5fd;
-            padding: 8px 16px;
-            border-radius: 6px;
-            font-size: 13px;
-            font-weight: 600;
-            line-height: 1.4;
-            opacity: 0;
-            transition: opacity 0.3s;
-            max-width: 400px;
-        }
-        .hint-box.visible { opacity: 1; }
-        .hint-action { font-weight: 800; color: #fff; text-transform: uppercase; }
-
-        .msg-win { color: var(--green); }
-        .msg-lose { color: var(--red); }
-        .msg-push { color: #fff; }
-
-        /* Controls Area */
-        .controls {
-            background-color: var(--bg-panel);
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 15px;
-            border-top: 1px solid #2a3a4a;
-            padding-bottom: 30px;
-        }
-
-        .bet-box {
-            display: flex;
-            align-items: center;
-            background: var(--bg-main);
-            border-radius: 6px;
-            width: 250px;
-            padding: 0 15px;
-            height: 45px;
-        }
-
-        .bet-box span { color: var(--green); font-weight: 800; font-size: 16px;}
-        .bet-box input {
-            flex: 1;
-            background: transparent;
-            border: none;
-            color: #fff;
-            font-size: 18px;
-            font-weight: 700;
-            text-align: center;
-            outline: none;
-            font-family: 'Inter', sans-serif;
-        }
-
-        .action-row {
-            display: flex;
-            gap: 8px;
-            width: 100%;
-            max-width: 500px;
-            justify-content: center;
-        }
-
-        .btn {
-            flex: 1;
-            padding: 14px 0;
-            border: none;
-            border-radius: 6px;
-            font-weight: 700;
-            font-size: 13px;
-            letter-spacing: 0.5px;
-            cursor: pointer;
-            transition: 0.2s;
-            text-transform: uppercase;
-        }
-        .btn:disabled { opacity: 0.4; cursor: not-allowed; }
-        
-        .btn-green { background-color: var(--green); color: #000; }
-        .btn-green:hover:not(:disabled) { background-color: var(--green-hover); }
-        
-        .btn-dark { background-color: #273746; color: #fff; }
-        .btn-dark:hover:not(:disabled) { background-color: #34495e; }
-
-        .pre-game-btns, .in-game-btns {
-            display: flex;
-            width: 100%;
-            gap: 8px;
-        }
-        .in-game-btns { display: none; }
-
-        /* Deposit Modal */
-        .modal-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s;
-        }
-        .modal-overlay.active { opacity: 1; pointer-events: auto; }
-        .modal {
-            background: var(--bg-panel);
-            padding: 30px;
-            border-radius: 12px;
-            width: 320px;
-            text-align: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
-        }
-        .modal input {
-            width: 80%; padding: 12px; margin: 20px 0; border-radius: 6px; border: none;
-            background: var(--bg-main); color: #fff; font-size: 18px; text-align: center; font-weight: bold;
+        .btn-unselected:hover {
+            background-color: #4B5563;
         }
     </style>
 </head>
-<body>
+<body class="min-h-screen flex items-center justify-center p-4 sm:p-8">
 
-    <header>
-        <div class="logo">♠️ KAW 21</div>
-        <div class="header-controls">
-            <!-- Help/Coach Toggle -->
-            <label class="coach-toggle">
-                <span id="coachText">Coach: OFF</span>
-                <div class="switch">
-                    <input type="checkbox" id="coachToggle" onchange="toggleCoach()">
-                    <span class="slider"></span>
-                </div>
-            </label>
-            
-            <div class="bank-box">
-                <div class="balance" id="uiBalance">$103,000.00</div>
-                <button class="deposit-btn" onclick="openModal()">+ Deposit</button>
-            </div>
-        </div>
-    </header>
-
-    <main>
-        <div class="hand-area">
-            <div class="hand-label" id="dealerLabel">DEALER</div>
-            <div class="cards-container" id="dealerCards"></div>
-        </div>
-
-        <div class="messaging-area">
-            <div class="game-message" id="gameMsg"></div>
-            <!-- Dynamic Instruction Hint Box -->
-            <div class="hint-box" id="hintBox"></div>
-        </div>
-
-        <div class="hand-area">
-            <div class="hand-label" id="playerLabel">PLAYER</div>
-            <div class="player-hands-wrapper" id="playerCardsWrapper"></div>
-        </div>
-    </main>
-
-    <div class="controls">
-        <div class="bet-box">
-            <span>$</span>
-            <input type="number" id="betInput" value="1000" step="100" min="1">
-        </div>
+    <div class="max-w-5xl w-full bg-gray-800 rounded-2xl shadow-2xl overflow-hidden border border-gray-700">
+        <!-- M-Performance Header Stripe -->
+        <div class="m-stripe w-full"></div>
         
-        <div class="action-row">
-            <div class="pre-game-btns" id="preGameBtns">
-                <button class="btn btn-green" onclick="deal()">DEAL</button>
-                <button class="btn btn-green" onclick="doubleAndDeal()">2X & DEAL</button>
-            </div>
-            
-            <div class="in-game-btns" id="inGameBtns">
-                <button class="btn btn-dark" id="btnHit" onclick="hit()">HIT</button>
-                <button class="btn btn-dark" id="btnStand" onclick="stand()">STAND</button>
-                <button class="btn btn-dark" id="btnDouble" onclick="doubleDown()">DOUBLE</button>
-                <button class="btn btn-dark" id="btnSplit" onclick="splitHand()">SPLIT</button>
-            </div>
-        </div>
-    </div>
+        <div class="p-6 sm:p-10">
+            <h1 class="text-3xl font-extrabold text-white mb-2 tracking-tight">B58TU Tuning Configurator</h1>
+            <p class="text-gray-400 mb-8">2021 BMW M340i xDrive (Mild Hybrid) • Dynamic Power Estimator</p>
 
-    <!-- Deposit Modal -->
-    <div class="modal-overlay" id="depositModal">
-        <div class="modal">
-            <h2 style="margin-top:0;">Virtual Deposit</h2>
-            <p style="color: var(--text-muted); font-size: 14px;">Enter amount to add to your balance.</p>
-            <input type="number" id="depositAmount" value="5000">
-            <button class="btn btn-green" style="width: 100%; padding: 12px;" onclick="processDeposit()">DEPOSIT FUNDS</button>
-            <button class="btn btn-dark" style="width: 100%; padding: 12px; margin-top: 10px;" onclick="closeModal()">CANCEL</button>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                
+                <!-- Controls Column -->
+                <div class="space-y-8">
+                    
+                    <!-- Stage Selection -->
+                    <div>
+                        <h2 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">1. Select Tune Stage</h2>
+                        <div class="grid grid-cols-3 gap-3">
+                            <button id="btn-stock" class="config-btn btn-selected py-3 rounded-lg border font-semibold transition-all" onclick="updateConfig('stage', 'Stock')">Stock</button>
+                            <button id="btn-stage1" class="config-btn btn-unselected py-3 rounded-lg border font-semibold transition-all" onclick="updateConfig('stage', 'Stage 1')">Stage 1</button>
+                            <button id="btn-stage2" class="config-btn btn-unselected py-3 rounded-lg border font-semibold transition-all" onclick="updateConfig('stage', 'Stage 2')">Stage 2</button>
+                        </div>
+                    </div>
+
+                    <!-- Fuel Selection -->
+                    <div>
+                        <h2 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">2. Select Fuel Type</h2>
+                        <div class="grid grid-cols-3 gap-3">
+                            <button id="btn-93" class="config-btn btn-selected py-3 rounded-lg border font-semibold transition-all" onclick="updateConfig('fuel', '93 Oct')">93 Octane</button>
+                            <button id="btn-e30" class="config-btn btn-unselected py-3 rounded-lg border font-semibold transition-all" onclick="updateConfig('fuel', 'E30')">E30 Blend</button>
+                            <button id="btn-e50" class="config-btn btn-unselected py-3 rounded-lg border font-semibold transition-all" onclick="updateConfig('fuel', 'E50')">E50 Blend</button>
+                        </div>
+                    </div>
+
+                    <!-- Transmission Selection -->
+                    <div>
+                        <h2 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">3. Transmission Tune</h2>
+                        <label class="flex items-center space-x-3 cursor-pointer bg-gray-700 p-4 rounded-lg border border-gray-600 hover:bg-gray-600 transition-all">
+                            <input type="checkbox" id="xhp-toggle" class="form-checkbox h-5 w-5 text-blue-600 rounded focus:ring-blue-500 bg-gray-800 border-gray-500" onchange="updateConfig('xhp', this.checked)">
+                            <span class="text-white font-semibold">Enable xHP Stage 2/3</span>
+                        </label>
+                    </div>
+
+                </div>
+
+                <!-- Chart & Output Column -->
+                <div class="bg-gray-900 p-6 rounded-xl border border-gray-700 flex flex-col justify-between">
+                    
+                    <!-- Canvas Container for Chart -->
+                    <div class="relative h-64 w-full mb-6">
+                        <canvas id="powerChart"></canvas>
+                    </div>
+
+                    <!-- Requirements Box -->
+                    <div class="bg-gray-800 rounded-lg p-5 border-l-4 border-blue-500">
+                        <h3 class="text-lg font-bold text-white mb-2">Hardware & Flash Requirements</h3>
+                        <ul id="requirements-list" class="list-disc list-inside text-sm text-gray-300 space-y-2">
+                            <!-- Injected via JS -->
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
-        let balance = 103000.00;
-        let deck = [];
-        let playerHands = []; 
-        let handBets = [];    
-        let currentHandIdx = 0;
-        let dealerHand = [];
-        let dealerHiddenCardDiv = null;
-        let baseBet = 0;
-        let coachMode = false;
-        
-        const suits = ['♥', '♦', '♣', '♠'];
-        const values = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
+        // State
+        let config = {
+            stage: 'Stock',
+            fuel: '93 Oct',
+            xhp: false
+        };
 
-        const uiBalance = document.getElementById('uiBalance');
-        const betInput = document.getElementById('betInput');
-        const dealerCardsContainer = document.getElementById('dealerCards');
-        const playerCardsWrapper = document.getElementById('playerCardsWrapper');
-        const dealerLabel = document.getElementById('dealerLabel');
-        const playerLabel = document.getElementById('playerLabel');
-        const gameMsg = document.getElementById('gameMsg');
-        const hintBox = document.getElementById('hintBox');
-        
-        const preGameBtns = document.getElementById('preGameBtns');
-        const inGameBtns = document.getElementById('inGameBtns');
-        const btnDouble = document.getElementById('btnDouble');
-        const btnSplit = document.getElementById('btnSplit');
-
-        function formatMoney(num) { return '$' + num.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,'); }
-        function updateBalance() { uiBalance.innerText = formatMoney(balance); }
-
-        function toggleCoach() {
-            coachMode = document.getElementById('coachToggle').checked;
-            const text = document.getElementById('coachText');
-            if (coachMode) {
-                text.innerText = "Coach: ON";
-                text.classList.add('coach-active-text');
-                updateCoachHint();
-            } else {
-                text.innerText = "Coach: OFF";
-                text.classList.remove('coach-active-text');
-                hintBox.classList.remove('visible');
+        // Data Dictionary (Crank estimates for visualization)
+        const powerData = {
+            'Stock': {
+                '93 Oct': { hp: 382, tq: 369 },
+                'E30': { hp: 382, tq: 369 }, // Can't run E30 on stock map safely
+                'E50': { hp: 382, tq: 369 }  // Can't run E50 on stock map safely
+            },
+            'Stage 1': {
+                '93 Oct': { hp: 440, tq: 440 },
+                'E30': { hp: 470, tq: 470 },
+                'E50': { hp: 485, tq: 490 } // Borderline for TU pump, needs custom tune
+            },
+            'Stage 2': {
+                '93 Oct': { hp: 470, tq: 480 },
+                'E30': { hp: 500, tq: 520 },
+                'E50': { hp: 530, tq: 550 } // Maxing out stock TU pump
             }
-        }
+        };
 
-        // Expanded Basic Strategy with Explanations
-        function getCoachAdvice(pHand, dCard) {
-            if (!pHand || pHand.length === 0 || !dCard) return null;
-            
-            const dVal = dCard.weight; 
-            const score = calculateScore(pHand);
-            
-            // 1. Check Pairs
-            if (pHand.length === 2 && pHand[0].weight === pHand[1].weight) {
-                const pair = pHand[0].weight;
-                if (pair === 11 || pair === 8) return { act: "Split", msg: "Always split Aces and 8s for the best odds." };
-                if (pair === 10) return { act: "Stand", msg: "20 is a very strong hand. Never split 10s." };
-                if (pair === 9) return [7, 10, 11].includes(dVal) ? { act: "Stand", msg: "Dealer is strong, 18 is safer to stand on." } : { act: "Split", msg: "9s are strong, split them against weaker dealer cards." };
-                if (pair === 7) return dVal < 8 ? { act: "Split", msg: "Dealer is weak, split your 7s to improve." } : { act: "Hit", msg: "Dealer is strong, just hit your 14." };
-                if (pair === 6) return dVal < 7 ? { act: "Split", msg: "Split 6s against a weak dealer." } : { act: "Hit", msg: "Don't split 6s against a strong card. Just hit." };
-                if (pair === 5) return dVal < 10 ? { act: "Double", msg: "Treat two 5s as a hard 10. Double down!" } : { act: "Hit", msg: "Treat as a 10, but dealer is strong. Just hit." };
-                if (pair === 4) return [5, 6].includes(dVal) ? { act: "Split", msg: "Only split 4s if the dealer shows a 5 or 6." } : { act: "Hit", msg: "Don't split 4s. Hit." };
-                if ([2, 3].includes(pair)) return dVal < 8 ? { act: "Split", msg: `Split your ${pair}s against a weak dealer.` } : { act: "Hit", msg: "Dealer is strong, just hit." };
-            }
-
-            // 2. Check Soft Hands (contains an Ace counted as 11)
-            let hasSoftAce = pHand.some(c => c.value === 'A') && (pHand.reduce((sum, c) => sum + (c.value === 'A' ? 1 : c.weight), 0) + 10 === score);
-            if (hasSoftAce) {
-                if (score >= 19) return { act: "Stand", msg: `Soft ${score} is a highly winning hand. Stand.` };
-                if (score === 18) {
-                    if ([2,3,4,5,6].includes(dVal)) return { act: "Double", msg: "Capitalize on dealer's weak card with your Soft 18." };
-                    if ([7,8].includes(dVal)) return { act: "Stand", msg: "Soft 18 is good enough against a 7 or 8." };
-                    return { act: "Hit", msg: "Dealer is strong, try to improve your 18 without risking a bust." };
-                }
-                if (score === 17 && [3,4,5,6].includes(dVal)) return { act: "Double", msg: "Double down while the dealer is weak." };
-                if (score <= 17) return { act: "Hit", msg: `Hit your Soft ${score}, you literally cannot bust!` };
-            }
-
-            // 3. Check Hard Hands
-            if (score >= 17) return { act: "Stand", msg: `Hard ${score} is strong. Hitting is mathematically too risky.` };
-            if (score >= 13 && score <= 16) {
-                if (dVal >= 2 && dVal <= 6) return { act: "Stand", msg: `Dealer shows a weak ${dCard.value}. Don't risk it, let them bust.` };
-                return { act: "Hit", msg: `Dealer shows a strong ${dCard.value}. You must risk hitting.` };
-            }
-            if (score === 12) {
-                if (dVal >= 4 && dVal <= 6) return { act: "Stand", msg: `Dealer is weak, avoid busting your 12.` };
-                return { act: "Hit", msg: `Hit your 12 against the dealer's ${dCard.value}.` };
-            }
-            if (score === 11) return { act: "Double", msg: "You have 11! Double down for a massive chance at 21." };
-            if (score === 10) return dVal <= 9 ? { act: "Double", msg: "Your 10 is strong, double against a weak card." } : { act: "Hit", msg: "You have 10, but dealer is strong. Just hit." };
-            if (score === 9) return (dVal >= 3 && dVal <= 6) ? { act: "Double", msg: "Double your 9 against a weak dealer card." } : { act: "Hit", msg: "Hit your 9 to get more points." };
-            
-            return { act: "Hit", msg: `Your hand is low (${score}). Hit to improve.` };
-        }
-
-        function updateCoachHint() {
-            if (!coachMode || inGameBtns.style.display === 'none' || dealerHand.length === 0 || !playerHands[currentHandIdx]) {
-                hintBox.classList.remove('visible');
-                return;
-            }
-            
-            const pHand = playerHands[currentHandIdx];
-            const dUpCard = dealerHand[0];
-            const advice = getCoachAdvice(pHand, dUpCard);
-            
-            if (advice) {
-                hintBox.innerHTML = `💡 <span class="hint-action">${advice.act}:</span> ${advice.msg}`;
-                hintBox.classList.add('visible');
-            } else {
-                hintBox.classList.remove('visible');
-            }
-        }
-
-        function createDeck() {
-            deck = [];
-            for (let s of suits) for (let v of values) deck.push({ suit: s, value: v, weight: getWeight(v) });
-            deck.sort(() => Math.random() - 0.5);
-        }
-
-        function getWeight(v) {
-            if (['J', 'Q', 'K'].includes(v)) return 10;
-            if (v === 'A') return 11;
-            return parseInt(v);
-        }
-
-        function calculateScore(hand) {
-            let score = 0, aces = 0;
-            for (let c of hand) { score += c.weight; if (c.value === 'A') aces++; }
-            while (score > 21 && aces > 0) { score -= 10; aces--; }
-            return score;
-        }
-
-        function createCardDOM(card, hidden = false, animate = true) {
-            const div = document.createElement('div');
-            if (hidden) { div.className = 'card hidden-card'; return div; }
-            const isRed = (card.suit === '♥' || card.suit === '♦');
-            div.className = `card ${isRed ? 'red' : 'black'}`;
-            div.innerHTML = `<div class="val">${card.value}</div><div class="suit">${card.suit}</div><div class="big-suit">${card.suit}</div>`;
-            if (!animate) { div.style.animation = 'none'; div.style.opacity = '1'; div.style.transform = 'none'; }
-            return div;
-        }
-
-        function updatePlayerLabels() {
-            const scores = playerHands.map(h => calculateScore(h));
-            playerLabel.innerText = `PLAYER (${scores.join(' / ')})`;
-        }
-
-        function appendCardToPlayer(handIdx, cardObj, animate = true) {
-            playerHands[handIdx].push(cardObj);
-            const handContainer = document.getElementById(`p-hand-${handIdx}`);
-            handContainer.appendChild(createCardDOM(cardObj, false, animate));
-            updatePlayerLabels();
-        }
-
-        function appendCardToDealer(cardObj, isHidden = false) {
-            dealerHand.push(cardObj);
-            const cardDOM = createCardDOM(cardObj, isHidden);
-            dealerCardsContainer.appendChild(cardDOM);
-            if (isHidden) {
-                dealerHiddenCardDiv = cardDOM;
-            } else {
-                // FIXED BUG: Show score of currently visible cards during game
-                dealerLabel.innerText = `DEALER (${calculateScore(dealerHand)})`;
-            }
-        }
-
-        function doubleAndDeal() {
-            let bet = parseFloat(betInput.value) || 0;
-            betInput.value = (bet * 2).toString();
-            deal();
-        }
-
-        async function deal() {
-            baseBet = parseFloat(betInput.value);
-            if (baseBet > balance || baseBet <= 0 || isNaN(baseBet)) { showMessage("Invalid Bet!", "msg-lose"); return; }
-
-            balance -= baseBet; updateBalance();
-            dealerCardsContainer.innerHTML = '';
-            playerCardsWrapper.innerHTML = '<div id="p-hand-0" class="cards-container active-hand"></div>';
-            playerHands = [[]]; handBets = [baseBet]; currentHandIdx = 0; dealerHand = [];
-            gameMsg.style.opacity = '0'; hintBox.classList.remove('visible');
-            
-            createDeck();
-            preGameBtns.style.display = 'none'; inGameBtns.style.display = 'flex'; betInput.disabled = true;
-
-            appendCardToPlayer(0, deck.pop()); await delay(200);
-            
-            // Deal dealer's upcard
-            const dUpCard = deck.pop();
-            dealerHand.push(dUpCard);
-            dealerCardsContainer.appendChild(createCardDOM(dUpCard));
-            dealerLabel.innerText = `DEALER (${calculateScore([dUpCard])})`; // Only show first card's score
-            await delay(200);
-            
-            appendCardToPlayer(0, deck.pop()); await delay(200);
-            
-            // Deal dealer's hidden card
-            const dHidden = deck.pop();
-            dealerHand.push(dHidden);
-            dealerHiddenCardDiv = createCardDOM(dHidden, true);
-            dealerCardsContainer.appendChild(dealerHiddenCardDiv);
-
-            btnDouble.disabled = (balance < baseBet);
-            btnSplit.disabled = (playerHands[0][0].weight === playerHands[0][1].weight && balance >= baseBet) ? false : true;
-
-            updateCoachHint();
-
-            if (calculateScore(playerHands[0]) === 21) {
-                revealDealer();
-                if(calculateScore(dealerHand) === 21) resolveGame([{msg: "Push.", css: "msg-push", mult: 1}]);
-                else resolveGame([{msg: "Blackjack!", css: "msg-win", mult: 2.5}]);
-            }
-        }
-
-        function splitHand() {
-            btnSplit.disabled = true; balance -= baseBet; handBets.push(baseBet); updateBalance();
-            const splitCard = playerHands[0].pop(); playerHands.push([splitCard]);
-            
-            playerCardsWrapper.innerHTML = `<div id="p-hand-0" class="cards-container active-hand"></div><div id="p-hand-1" class="cards-container"></div>`;
-            document.getElementById('p-hand-0').appendChild(createCardDOM(playerHands[0][0], false, false));
-            document.getElementById('p-hand-1').appendChild(createCardDOM(playerHands[1][0], false, false));
-            
-            setTimeout(() => { appendCardToPlayer(0, deck.pop()); updateCoachHint(); }, 300);
-            setTimeout(() => appendCardToPlayer(1, deck.pop()), 600);
-        }
-
-        function advanceHand() {
-            document.getElementById(`p-hand-${currentHandIdx}`).classList.remove('active-hand');
-            currentHandIdx++;
-            if (currentHandIdx < playerHands.length) {
-                document.getElementById(`p-hand-${currentHandIdx}`).classList.add('active-hand');
-                btnDouble.disabled = (balance < handBets[currentHandIdx]);
-                btnSplit.disabled = true; 
-                updateCoachHint();
-            } else { playDealer(); }
-        }
-
-        function hit() {
-            btnDouble.disabled = true; btnSplit.disabled = true;
-            appendCardToPlayer(currentHandIdx, deck.pop());
-            updateCoachHint();
-            if (calculateScore(playerHands[currentHandIdx]) > 21) advanceHand();
-        }
-
-        function stand() { advanceHand(); }
-
-        function doubleDown() {
-            btnSplit.disabled = true; balance -= handBets[currentHandIdx]; handBets[currentHandIdx] *= 2; updateBalance();
-            appendCardToPlayer(currentHandIdx, deck.pop()); advanceHand();
-        }
-
-        function revealDealer() {
-            if (dealerHiddenCardDiv) {
-                const hiddenObj = dealerHand[1]; const isRed = (hiddenObj.suit === '♥' || hiddenObj.suit === '♦');
-                dealerHiddenCardDiv.className = `card ${isRed ? 'red' : 'black'}`;
-                dealerHiddenCardDiv.innerHTML = `<div class="val">${hiddenObj.value}</div><div class="suit">${hiddenObj.suit}</div><div class="big-suit">${hiddenObj.suit}</div>`;
-                // FIXED BUG: Update the dealer score label instantly upon flipping the card
-                dealerLabel.innerText = `DEALER (${calculateScore(dealerHand)})`;
-            }
-        }
-
-        async function playDealer() {
-            inGameBtns.style.display = 'none'; hintBox.classList.remove('visible'); 
-            revealDealer(); 
-            await delay(500);
-            
-            const allBusted = playerHands.every(h => calculateScore(h) > 21);
-            if (!allBusted) {
-                while (calculateScore(dealerHand) < 17) {
-                    appendCardToDealer(deck.pop()); 
-                    await delay(600);
+        // Chart Initialization
+        const ctx = document.getElementById('powerChart').getContext('2d');
+        const powerChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Horsepower (HP)', 'Torque (ft-lbs)'],
+                datasets: [{
+                    label: 'Power Output',
+                    data: [382, 369],
+                    backgroundColor: [
+                        'rgba(37, 99, 235, 0.8)', // Blue for HP
+                        'rgba(226, 27, 77, 0.8)'  // Red for TQ
+                    ],
+                    borderColor: [
+                        'rgba(37, 99, 235, 1)',
+                        'rgba(226, 27, 77, 1)'
+                    ],
+                    borderWidth: 1,
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        min: 300,
+                        max: 600,
+                        grid: {
+                            color: '#374151'
+                        },
+                        ticks: {
+                            color: '#9CA3AF'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            color: '#D1D5DB',
+                            font: { size: 14, weight: 'bold' }
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        backgroundColor: '#1F2937',
+                        titleFont: { size: 14 },
+                        bodyFont: { size: 16, weight: 'bold' },
+                        padding: 12,
+                        displayColors: false
+                    }
+                },
+                animation: {
+                    duration: 800,
+                    easing: 'easeOutQuart'
                 }
             }
-            checkWinners();
+        });
+
+        // Main Update Function
+        function updateConfig(type, value) {
+            if (type !== 'xhp') {
+                config[type] = value;
+                
+                // Update UI Buttons
+                const prefix = type === 'stage' ? 'stage' : 'fuel';
+                let btnIdBase = '';
+                if(type === 'stage') {
+                    if(value === 'Stock') btnIdBase = 'btn-stock';
+                    if(value === 'Stage 1') btnIdBase = 'btn-stage1';
+                    if(value === 'Stage 2') btnIdBase = 'btn-stage2';
+                } else {
+                    if(value === '93 Oct') btnIdBase = 'btn-93';
+                    if(value === 'E30') btnIdBase = 'btn-e30';
+                    if(value === 'E50') btnIdBase = 'btn-e50';
+                }
+
+                // Reset siblings
+                const groupPrefix = type === 'stage' ? 'btn-st' : 'btn-';
+                document.querySelectorAll(`[id^="btn-"]`).forEach(btn => {
+                    if((type === 'stage' && (btn.id.includes('stock') || btn.id.includes('stage'))) || 
+                       (type === 'fuel' && (btn.id.includes('93') || btn.id.includes('e30') || btn.id.includes('e50')))) {
+                        btn.classList.remove('btn-selected');
+                        btn.classList.add('btn-unselected');
+                    }
+                });
+
+                // Set active
+                const activeBtn = document.getElementById(btnIdBase);
+                activeBtn.classList.remove('btn-unselected');
+                activeBtn.classList.add('btn-selected');
+
+            } else {
+                config.xhp = value;
+            }
+
+            refreshDashboard();
         }
 
-        function checkWinners() {
-            const dScore = calculateScore(dealerHand); let results = [];
-            playerHands.forEach((hand, i) => {
-                const pScore = calculateScore(hand); const isSplit = playerHands.length > 1; const prefix = isSplit ? `H${i+1}: ` : '';
-                if (pScore > 21) results.push({ msg: `${prefix}Bust`, css: 'msg-lose', mult: 0 });
-                else if (dScore > 21) results.push({ msg: `${prefix}Win`, css: 'msg-win', mult: 2 });
-                else if (dScore > pScore) results.push({ msg: `${prefix}Lose`, css: 'msg-lose', mult: 0 });
-                else if (dScore < pScore) results.push({ msg: `${prefix}Win`, css: 'msg-win', mult: 2 });
-                else results.push({ msg: `${prefix}Push`, css: 'msg-push', mult: 1 });
-            });
-            resolveGame(results);
+        // Refresh Data and UI
+        function refreshDashboard() {
+            // Get data based on config
+            let hp = powerData[config.stage][config.fuel].hp;
+            let tq = powerData[config.stage][config.fuel].tq;
+
+            // Minor adjustments if xHP is enabled (doesn't add peak HP, but helps hold torque)
+            if (config.xhp && config.stage !== 'Stock') {
+                tq += 15; // Visual representation of removed torque limiters
+            }
+
+            // Update Chart
+            powerChart.data.datasets[0].data = [hp, tq];
+            powerChart.update();
+
+            // Update Requirements List
+            const reqList = document.getElementById('requirements-list');
+            reqList.innerHTML = '';
+
+            // 1. FEMTO Unlock (Mandatory for 2021+)
+            if (config.stage !== 'Stock') {
+                reqList.innerHTML += `<li><span class="font-bold text-red-400">FEMTO Bench Unlock:</span> Mandatory for your 2021 model (Bosch DME is locked).</li>`;
+                reqList.innerHTML += `<li><span class="font-bold text-blue-400">MHD / BM3 License:</span> Required to flash the engine control unit.</li>`;
+            } else {
+                reqList.innerHTML += `<li>Factory hardware and locked DME. Fully warrantied.</li>`;
+                if(config.fuel !== '93 Oct') {
+                     reqList.innerHTML += `<li><span class="text-yellow-400">Note:</span> Do not run E30/E50 without an engine tune!</li>`;
+                }
+            }
+
+            // 2. Downpipe (Stage 2)
+            if (config.stage === 'Stage 2') {
+                reqList.innerHTML += `<li><span class="font-bold text-blue-400">Upgraded Downpipe:</span> High-flow catted or catless required to manage backpressure.</li>`;
+            }
+
+            // 3. Fuel Setup
+            if (config.fuel === 'E30' && config.stage !== 'Stock') {
+                reqList.innerHTML += `<li><span class="font-bold text-purple-400">Ethanol Toolkit:</span> E85 test kit and mixing calculator to ensure accurate E30 blend.</li>`;
+            } else if (config.fuel === 'E50' && config.stage !== 'Stock') {
+                reqList.innerHTML += `<li><span class="font-bold text-purple-400">Custom Tune / Fueling:</span> Pushing the limits of the stock Gen 2 TU HPFP. A custom tune via MHD+ is highly recommended.</li>`;
+            }
+
+            // 4. xHP
+            if (config.xhp) {
+                reqList.innerHTML += `<li><span class="font-bold text-green-400">xHP Flashtool:</span> Removes 6th gear torque limiters, increases line pressure, and speeds up ZF8 shifts.</li>`;
+            } else if (config.stage === 'Stage 2' || config.fuel === 'E50') {
+                reqList.innerHTML += `<li><span class="text-yellow-400">Warning:</span> Stock transmission mapping will cap torque output and may slip clutches at this power level. xHP recommended.</li>`;
+            }
         }
 
-        function resolveGame(results) {
-            let totalWin = 0; let msgs = []; let css = 'msg-push';
-            results.forEach((res, i) => { totalWin += handBets[i] * res.mult; msgs.push(res.msg); });
-            if (totalWin > handBets.reduce((a,b)=>a+b,0)) css = 'msg-win'; else if (totalWin === 0) css = 'msg-lose';
-            balance += totalWin; updateBalance(); showMessage(msgs.join(' | '), css);
-            setTimeout(() => { inGameBtns.style.display = 'none'; preGameBtns.style.display = 'flex'; betInput.disabled = false; }, 800);
-        }
+        // Initial Load
+        refreshDashboard();
 
-        function showMessage(msg, cssClass) { gameMsg.className = `game-message ${cssClass}`; gameMsg.innerText = msg; gameMsg.style.opacity = '1'; }
-        function delay(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
-        function openModal() { document.getElementById('depositModal').classList.add('active'); }
-        function closeModal() { document.getElementById('depositModal').classList.remove('active'); }
-        function processDeposit() {
-            const amt = parseFloat(document.getElementById('depositAmount').value);
-            if (!isNaN(amt) && amt > 0) { balance += amt; updateBalance(); closeModal(); }
-        }
     </script>
 </body>
 </html>
